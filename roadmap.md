@@ -1,9 +1,10 @@
 # RENJP
-- [ ] Check existing errors and verify public tools.
-- [ ] Add editable internal profile with featured link, tiles, background, music and snow.
-- [ ] Add homepage shipping calculator shortcut.
-- [ ] Improve QC photo downloads and tracking ETA for China–Poland parcels.
-- [ ] Persist auxiliary/profile media and document storage/data in source files.
+- [x] Check existing errors and verify public pages and regression tests.
+- [x] Add editable internal profile with featured link, tiles, background, music and snow; verify admin save/readback and image/audio uploads.
+- [x] Add homepage shipping calculator shortcut.
+- [x] Improve QC fallback and downloads; use real tracking events and provider ETA only.
+- [ ] Connect official 17TRACK/Parcels tracking and verify a real China–Poland parcel (requires provider account/API access and real tracking number).
+- [x] Persist auxiliary/profile media and document storage/data in source files.
 - [x] Replace homepage promotion artwork with matching colors and a right-side −25% tag; preserve copy and remove background-logo uploads.
 - [x] Configure administrator login/password securely and verify sign-in.
 - [x] Add screenshot categories and match category emojis in the catalogue and management panel.
@@ -16,7 +17,7 @@
 - [x] Create Cloud schema, secure panel authentication, private photo storage and archive endpoint.
 - [x] Implement streaming AI background removal; gateway returns completed image.
 - [x] Verify filters, calculator, mobile width and unsigned-access rejection.
-- [ ] Import existing records, user IDs/emails and photo bytes (waiting for owner exports).
+- [x] Import available records and photo bytes; source user-account ownership remains a separate verification below.
 - [x] Verify admin settings writes and signed-in image upload/display.
 - [ ] Verify seller invitations and original account ownership (waiting for source user data).
 - [ ] Verify live QC/tracking and external agent integrations (waiting for real test links/numbers and any source integration setup).
