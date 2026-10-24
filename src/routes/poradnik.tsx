@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAgents, useGuideSteps, useSettings } from "@/lib/store";
@@ -37,12 +38,6 @@ const field =
   "w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm outline-none focus:border-primary";
 const cta = "mt-3 w-full rounded-lg gradient-brand px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-surface-deep";
 
-function addDays(n: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + n);
-  return d.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit" });
-}
-
 function PackageTracker() {
   const { t } = useLang();
   const track = useServerFn(trackParcel);
@@ -71,22 +66,13 @@ function PackageTracker() {
     }
   };
 
-  const eta = (() => {
-    if (!result) return "";
-    const min = result.minDays ?? 0;
-    const max = result.maxDays ?? 0;
-    if (max === 0) return t("guide.trackToday");
-    if (min === max) return `${max} ${max === 1 ? t("guide.trackDay") : t("guide.trackDays")}`;
-    if (min === 0) return `≤ ${max} ${t("guide.trackDays")}`;
-    return `${min}–${max} ${t("guide.trackDays")}`;
-  })();
-
   return (
     <div className={card}>
       <h3 className="text-base font-bold">{t("guide.trackTitle")}</h3>
       <p className="mt-1 text-xs text-muted-foreground">{t("guide.trackDesc")}</p>
       <input
         className={`${field} mt-3`}
+        aria-label="Numer przesyłki"
         placeholder={t("guide.trackPlaceholder")}
         value={code}
         onChange={(e) => setCode(e.target.value)}
@@ -94,40 +80,23 @@ function PackageTracker() {
           if (e.key === "Enter") void run();
         }}
       />
-      <button type="button" className={cta} onClick={() => void run()} disabled={loading}>
+      <Button type="button" className={cta} onClick={() => void run()} disabled={loading}>
         {loading ? t("guide.trackLoading") : t("guide.trackCta")}
-      </button>
+      </Button>
 
       {error ? <p className="mt-3 text-xs text-destructive">{error}</p> : null}
 
-      {result ? (
-        <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            {t("guide.trackEta")}
-          </p>
-          <p className="mt-1 text-lg font-extrabold text-primary">{eta}</p>
-          <p className="text-[10px] text-muted-foreground">{t("guide.trackWorkdays")}</p>
-          {(result.maxDays ?? 0) > 0 ? (
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {t("guide.trackArrival")}: {addDays(result.minDays ?? 0)}
-              {result.minDays === result.maxDays ? "" : ` – ${addDays(result.maxDays ?? 0)}`}
-            </p>
-          ) : null}
-          <p className="mt-3 text-xs font-bold text-foreground">{t(`track.${result.stageKey}`)}</p>
-          {result.estimated ? (
-            <p className="mt-1 text-[11px] text-muted-foreground">{t("guide.trackEstimated")}</p>
-          ) : (
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {result.lastStatus}
-              {result.lastTime ? ` · ${result.lastTime}` : ""}
-            </p>
-          )}
-
-          <p className="mt-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-            {t("guide.trackSource")}: {result.source}
-          </p>
-        </div>
-      ) : null}
+      {result ? <div className="mt-4 border-t border-border pt-4" aria-live="polite">
+        <p className="text-xs text-muted-foreground">Chiny → Polska · {result.code}</p>
+        {result.unavailable ? <p className="mt-3 text-sm">Brak potwierdzonych danych przewoźnika. Termin dostawy nie jest dostępny.</p> : <>
+          <p className="mt-3 text-sm font-semibold">{result.lastStatus}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{result.lastTime} · Źródło: {result.source}</p>
+          <p className="mt-4 text-xs text-muted-foreground">Przewidywany dzień dostawy</p>
+          <p className="mt-1 font-semibold text-primary">{result.deliveryDate ? new Date(result.deliveryDate + 'T12:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Przewoźnik nie podał terminu'}</p>
+          {Boolean(result.events?.length) && <details className="mt-4 text-xs"><summary className="cursor-pointer text-muted-foreground">Historia przesyłki</summary><ol className="mt-3 space-y-3">{result.events?.map((event, i) => <li key={i}><p>{event.status}</p><p className="text-muted-foreground">{event.time}</p></li>)}</ol></details>}
+        </>}
+        <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" size="sm" asChild><a target="_blank" rel="noopener noreferrer" href={`https://t.17track.net/en#nums=${encodeURIComponent(result.code || '')}`}>17TRACK ↗</a></Button><Button variant="outline" size="sm" asChild><a target="_blank" rel="noopener noreferrer" href={`https://parcelsapp.com/en/tracking/${encodeURIComponent(result.code || '')}`}>Parcels ↗</a></Button></div>
+      </div> : null}
     </div>
   );
 }
@@ -300,7 +269,7 @@ function PoradnikPage() {
         <div id="converter" className="min-w-0 scroll-mt-24"><LinkConverter /></div>
       </section>
 
-      <section className="mt-8">
+      <section id="shipping" className="mt-8 scroll-mt-28">
         <HaulCalculator />
       </section>
 
