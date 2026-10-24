@@ -18,7 +18,7 @@ describe("USD sheet import rules", () => {
     const result = selectionToProduct(["title","USD","photos","link"], ["Buty","25","https://example.com/banner.jpg https://example.com/shoe.jpg","https://detail.1688.com/offer/1077113811328.html"], {row:0,title:"Buty",category:"Buty",usdCell:1,usdText:"25",image:"https://example.com/shoe.jpg",linkCell:3,warning:""});
     expect(result.product?.image_url).toBe("https://example.com/shoe.jpg");
     expect(result.product?.images).toEqual([]);
-    expect(result.product?.agent_links.ESGobuy).toBe("https://www.esgobuy.com/productdetail?type=3&id=1077113811328&affcode=XNZ02HX8BH");
+    expect(result.product?.agent_links['ESGobuy']).toBe("https://www.esgobuy.com/productdetail?type=3&id=1077113811328&affcode=XNZ02HX8BH");
   });
   it("never accepts an invented picture or missing USD", () => {
     expect(selectionToProduct(["EUR"],["23"],{row:0,title:"Buty",category:"Buty",usdCell:0,usdText:"23",image:"https://example.com/invented.jpg",linkCell:null,warning:""}).product).toBeNull();
