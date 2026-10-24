@@ -1,6 +1,7 @@
 # RENJP
-- [ ] Enrich every catalogue product with available warehouse and FinderQC photos, preserving existing originals; report unavailable sources/products.
-- [ ] Fetch four QC sets per search page and show up to twenty photos, preserving lazy loading; verify real results and tests.
+- [x] Check all 440 catalogue products and archive 42 new warehouse QC photos across 9 products without erasing originals; catalogue now has 1460 QC photos on 334 products.
+- [ ] Complete QC for remaining 106 products (16 lack recognizable source links; warehouse has no further photos; FinderQC returns HTTP 403 and requires authorized access).
+- [x] Request four FinderQC sets per search page and show up to twenty photos with lazy thumbnails; 14 QC tests pass; real search shows six available warehouse photos with explicit FinderQC-unavailable notice and no runtime errors.
 - [x] Add signed-admin AI sheet analysis with visual product-photo selection, original-cell validation, USD-based conversion, progress and review preview; 17 tests pass and real AI selects $25 → 100 PLN.
 - [ ] Verify AI import preview/save/readback with a real sheet and signed-admin session (Google connection declined; no available admin session or credentials; embedded sheet images need Google access).
 - [x] Replace LoveGoBuy product and referral links with ESGobuy, preserving other agents; Taobao type=1 confirmed from ESGobuy source; existing catalogue has no old agent links and public page has no old destinations.
