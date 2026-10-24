@@ -25,7 +25,7 @@ export const finderQcByLink = createServerFn({ method: "POST" })
     const images = qcPageImages(warehouse, found?.images ?? []);
     if (!images.length && finder.status === 'rejected') throw new Error('Źródło QC jest chwilowo niedostępne.');
     // Transient search does not archive every image before returning. Downloads persist original bytes on demand.
-    return { ok: Boolean(images.length || found?.ok), title: found?.title || '', images, totalPhotos: Math.max(images.length, found?.totalPhotos || 0), hasMore: found?.hasMore || false, source: found?.source || (warehouse.length ? 'USFans · magazyn QC' : '') };
+    return { ok: Boolean(images.length || found?.ok), title: found?.title || '', images, totalPhotos: Math.max(images.length, found?.totalPhotos || 0), hasMore: found?.hasMore || false, source: found?.source || (warehouse.length ? 'USFans · magazyn QC' : ''), warning: finder.status === 'rejected' ? 'FinderQC jest obecnie niedostępne — pokazano dostępne zdjęcia magazynowe.' : '' };
 
   });
 

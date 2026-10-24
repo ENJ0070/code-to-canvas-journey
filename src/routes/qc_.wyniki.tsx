@@ -28,6 +28,7 @@ function QcResults() {
     <div className="mb-8 border-b border-border pb-6"><h1 className="text-2xl font-semibold">Zdjęcia QC</h1>{source && <p className="mt-2 text-xs text-muted-foreground">{source.platform.toUpperCase()} · {source.id}</p>}<div className="mt-5"><QcSearchForm key={url} initialValue={url}/></div></div>
     {!source ? <p className="text-sm text-muted-foreground">Wklej link, aby znaleźć zdjęcia QC.</p> : first.isPending ? <QcLoading/> : first.isError ? <div role="alert" className="space-y-4 py-8"><p className="text-sm text-destructive">Źródło QC jest chwilowo niedostępne. Nie udało się wczytać zdjęć.</p><Button variant="outline" onClick={() => void first.refetch()}><RefreshCw size={16}/>Spróbuj ponownie</Button></div> : first.data ? <>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><p className="text-sm font-medium">{first.data.title || 'Kontrola jakości z magazynu'}</p><p className="text-xs text-muted-foreground">{first.data.images.length} zdjęć{first.data.source.startsWith('USFans') ? ' · USFans' : ''}</p></div>
+      {first.data.warning && <p role="status" className="mb-4 text-xs text-muted-foreground">{first.data.warning}</p>}
       <QcPhotos key={url} loadPage={page => run({ data: { url, page, pageSize: QC_SETS_PER_PAGE } })} initialImages={first.data.images} initialPage={1} initialHasMore={first.data.hasMore} showMore cols="grid-cols-2 sm:grid-cols-3"/>
     </> : null}
   </main>;

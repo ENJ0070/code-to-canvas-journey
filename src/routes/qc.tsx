@@ -62,6 +62,7 @@ function QcPage() {
             key={productId}
             loadPage={loadProductPage}
             autoLoad
+            showMore
             emptyText={t("qc.notFound")}
           />
         </section>
