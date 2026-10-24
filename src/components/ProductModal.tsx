@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from 'react-dom';
 import { Link } from "@tanstack/react-router";
 
 import { PriceTags, QualityBadges, VerifiedBadge } from "@/components/PriceTags";
@@ -52,7 +53,8 @@ export function ProductModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  return (
+  if (typeof document === 'undefined') return null;
+  return createPortal(
     <div
       className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-surface-deep/80 p-4 backdrop-blur-sm"
       onClick={onClose}
@@ -205,6 +207,6 @@ export function ProductModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>, document.body
   );
 }
