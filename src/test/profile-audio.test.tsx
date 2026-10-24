@@ -44,4 +44,14 @@ describe('Profile music controls', () => {
     fireEvent.keyDown(slider, { key: 'ArrowRight' });
     expect(audio.volume).toBe(.7);
   });
+
+  it('keeps the profile accessible when autoplay is denied and starts on interaction', async () => {
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
+    vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockRejectedValueOnce(new Error('NotAllowedError')).mockResolvedValue();
+    render(<ProfileView config={{ ...defaultProfile, music: '/track.mp3' }} />);
+    await waitFor(() => expect(play).toHaveBeenCalledTimes(1));
+    fireEvent.pointerDown(window);
+    await waitFor(() => expect(play).toHaveBeenCalledTimes(2));
+  });
 });
