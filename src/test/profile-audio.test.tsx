@@ -4,10 +4,11 @@ import { ProfileView } from '@/components/profile/ProfileView';
 import { defaultProfile } from '@/lib/profile';
 
 describe('Profile music controls', () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
   function setup() {
     vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
+    vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
     const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
     const { container } = render(<ProfileView config={{ ...defaultProfile, music: '/track.mp3', musicStart: 12 }} />);
