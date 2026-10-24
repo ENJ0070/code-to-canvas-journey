@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { latestTrackingEvent, trackingStage, providerDeliveryDate } from './tracking';
-export type TrackResult = { ok: boolean; error?: string; code?: string; source?: string; stageKey?: string; lastStatus?: string; lastTime?: string; deliveryDate?: string; events?: { status: string; time: string }[]; unavailable?: boolean; destination?: string; };
+export type TrackResult = { ok: boolean; error?: string; code?: string; source?: string; stageKey?: string | undefined; lastStatus?: string; lastTime?: string; deliveryDate?: string | undefined; events?: { status: string; time: string }[]; unavailable?: boolean; destination?: string; };
 
 /** Only actual carrier events are shown. A number prefix is not evidence of an ETA. */
 export const trackParcel = createServerFn({ method: 'POST' })
