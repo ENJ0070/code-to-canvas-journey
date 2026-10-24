@@ -8,21 +8,20 @@ export const lookupQc = createServerFn({ method: "POST" })
     return { url };
   })
   .handler(async ({ data }) => {
-    const { fetchAgentDetails } = await import("@/lib/agentApi");
-    const details = await fetchAgentDetails(data.url).catch(() => null);
+    const { fetchWarehouseQc } = await import('@/lib/warehouse-qc.server');
+    const warehouse = await fetchWarehouseQc(data.url).catch(() => []);
     const { fetchFinderQcByUrl } = await import('@/lib/finderqc.server');
-    const finder = details?.qcImages.length ? null : await fetchFinderQcByUrl(data.url, 1, 4);
-    const { archiveProductImages } = await import('@/lib/image-storage.server');
-    const saved = await archiveProductImages({ qc_images: details?.qcImages.length ? details.qcImages : finder?.images ?? [] });
-    if (!details && !saved.qc_images.length) return { ok: false as const, error: "not-found" };
+    const finder = warehouse.length ? null : await fetchFinderQcByUrl(data.url, 1, 4);
+    const qcImages = warehouse.length ? warehouse : finder?.images ?? [];
+    if (!qcImages.length) return { ok: false as const, error: "not-found" };
     return {
       ok: true as const,
-      title: details?.title || finder?.title || '',
-      priceCny: details?.priceCny || 0,
-      images: details?.images || [],
-      colorImages: details?.colorImages || [],
-      qcImages: saved.qc_images,
-      sizes: details?.sizes || [],
+      title: finder?.title || '',
+      priceCny: 0,
+      images: [] as string[],
+      colorImages: [] as string[],
+      qcImages,
+      sizes: [] as string[],
     };
   });
 
