@@ -30,13 +30,14 @@ export function QcGrid({
     <>
       <div className={`grid gap-2 ${cols}`}>
         {images.map((u, i) => (
-          <button
+          <Button variant="ghost"
             key={`${u}-${i}`}
+            aria-label={`Otwórz zdjęcie QC ${i + 1}`}
             onClick={() => setOpen(i)}
-            className="aspect-square overflow-hidden rounded-xl border border-border transition-colors hover:border-primary"
+            className="h-auto aspect-square overflow-hidden rounded-lg border border-border p-0 transition-colors hover:border-primary [content-visibility:auto] [contain-intrinsic-size:240px]"
           >
-            <StableImage src={u} alt={`QC ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
-          </button>
+            <StableImage src={u} alt={`QC ${i + 1}`} loading="lazy" width={480} height={480} className="h-full w-full object-cover" />
+          </Button>
         ))}
       </div>
       {open !== null ? (

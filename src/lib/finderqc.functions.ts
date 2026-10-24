@@ -14,18 +14,17 @@ export const finderQcByLink = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { fetchFinderQcByUrl } = await import("@/lib/finderqc.server");
 
-    const { fetchUsfansDetails } = await import('@/lib/agentApi');
-    const { archiveProductImages } = await import('@/lib/image-storage.server');
+    const { fetchWarehouseQc } = await import('@/lib/warehouse-qc.server');
     const [agent, finder] = await Promise.allSettled([
-      data.page === 1 ? fetchUsfansDetails(data.url) : Promise.resolve(null),
+      data.page === 1 ? fetchWarehouseQc(data.url) : Promise.resolve([]),
       fetchFinderQcByUrl(data.url, data.page, data.pageSize),
     ]);
-    const details = agent.status === 'fulfilled' ? agent.value : null;
+    const warehouse = agent.status === 'fulfilled' ? agent.value : [];
     const found = finder.status === 'fulfilled' ? finder.value : null;
-    const images = Array.from(new Set([...(details?.qcImages ?? []), ...(found?.images ?? [])]));
+    const images = Array.from(new Set([...warehouse, ...(found?.images ?? [])]));
     if (!images.length && finder.status === 'rejected') throw new Error('Źródło QC jest chwilowo niedostępne.');
-    const saved = await archiveProductImages({ qc_images: images });
-    return { ok: Boolean(details || found?.ok), title: details?.title || found?.title || '', images: saved.qc_images, totalPhotos: Math.max(images.length, found?.totalPhotos || 0), hasMore: found?.hasMore || false, source: found?.source || '' };
+    // Transient search does not archive every image before returning. Downloads persist original bytes on demand.
+    return { ok: Boolean(images.length || found?.ok), title: found?.title || '', images, totalPhotos: Math.max(images.length, found?.totalPhotos || 0), hasMore: found?.hasMore || false, source: found?.source || (warehouse.length ? 'USFans · magazyn QC' : '') };
 
   });
 
