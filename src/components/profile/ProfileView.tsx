@@ -101,7 +101,7 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   }
   async function toggleMusic() {
     const el = audio.current;
-    if (!el || el.paused) { if (volumeRef.current === 0) changeVolume(previousVolume.current); await startMusic(); return; }
+    if (!el || (el.paused && !playing)) { if (volumeRef.current === 0) changeVolume(previousVolume.current); await startMusic(); return; }
     changeVolume(volumeRef.current === 0 ? previousVolume.current : 0);
   }
   async function share() {
