@@ -283,8 +283,9 @@
 .profile-cursor { display:none; position:fixed; top:0; left:0; z-index:100; pointer-events:none; }
 .profile-cursor span { display:block; width:10px; height:10px; border-radius:50%; background:var(--profile-cursor); box-shadow:var(--profile-cursor-shadow); transform:translate(-50%,-50%); }
 @media (hover:hover) and (pointer:fine) { .profile-pointer-active, .profile-pointer-active * { cursor:none !important; } .profile-pointer-active .profile-cursor { display:block; } }
-.profile-stage .profile-entry { position:fixed; inset:0; width:100%; height:100dvh; z-index:50; border-radius:0; background:var(--profile-overlay); color:var(--foreground); backdrop-filter:blur(18px); font-size:18px; font-weight:500; }
-.profile-stage .profile-entry:hover { background:var(--profile-overlay); }
+.profile-location { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:12px; color:var(--muted-foreground); font-size:12px; }
+.profile-location svg { flex-shrink:0; }
+.profile-location span { overflow-wrap:anywhere; min-width:0; }
 .profile-identity { text-align:center; margin-bottom:32px; }
 .profile-avatar { width:96px; height:96px; margin:0 auto 20px; border-radius:50%; object-fit:cover; border:2px solid var(--border); box-shadow:var(--glow-strong); animation:profile-avatar-tilt 4s ease-in-out infinite; }
 @keyframes profile-avatar-tilt { 0%,100% { transform:rotate(0deg); } 25% { transform:rotate(-20deg); } 75% { transform:rotate(20deg); } }

@@ -10,7 +10,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { useSettings, useRefresh } from '@/lib/store';
 import { getPanelToken } from '@/lib/panelToken';
 import { parseProfile, profileSchema, PROFILE_KEY, type ProfileConfig } from '@/lib/profile';
-import { saveProfile, uploadProfileAudio } from '@/lib/profile.functions';
+import { saveProfile, uploadProfileAudio, uploadProfileVideo } from '@/lib/profile.functions';
 import { ProfileView } from './ProfileView';
 
 export function ProfileEditor() {
@@ -19,10 +19,12 @@ export function ProfileEditor() {
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [audioBusy, setAudioBusy] = useState(false);
+  const [videoBusy, setVideoBusy] = useState(false);
   const [error, setError] = useState('');
   const refresh = useRefresh();
   const save = useServerFn(saveProfile);
   const uploadAudio = useServerFn(uploadProfileAudio);
+  const uploadVideo = useServerFn(uploadProfileVideo);
   useEffect(() => { if (!dirty && settings) setDraft(parseProfile(settings[PROFILE_KEY])); }, [settings, dirty]);
   function update<K extends keyof ProfileConfig>(key: K, value: ProfileConfig[K]) { setDirty(true); setDraft(d => ({ ...d, [key]: value })); }
   function move(index: number, direction: number) { const links = [...draft.links]; const target = index + direction; const current = links[index]; const other = links[target]; if (!current || !other) return; links[index] = other; links[target] = current; update('links', links); }
@@ -38,9 +40,11 @@ export function ProfileEditor() {
     <div className="grid items-start gap-8 lg:grid-cols-2"><div className="space-y-6">
       <label className="block space-y-2 text-sm">Nazwa<Input aria-label="Nazwa profilu" value={draft.name} maxLength={80} onChange={e => update('name', e.target.value)}/></label>
       <label className="block space-y-2 text-sm">Bio<Textarea aria-label="Bio" value={draft.bio} maxLength={500} onChange={e => update('bio', e.target.value)}/></label>
+      <label className="block space-y-2 text-sm">Lokalizacja<Input aria-label="Lokalizacja profilu" value={draft.location} maxLength={100} onChange={e => update('location', e.target.value)}/></label>
       <div className="space-y-2"><h3 className="text-sm">Małe ikonki pod bio</h3>{([['discord', 'Discord'], ['tiktok', 'TikTok'], ['website', 'Strona']] as const).map(([key, label]) => <label key={key} className="block space-y-1 text-xs">{label}<Input aria-label={`Adres: ${label}`} value={draft.socials[key]} onChange={e => update('socials', { ...draft.socials, [key]: e.target.value })} placeholder={key === 'website' ? '/ lub https://…' : 'https://…'}/></label>)}<p className="text-xs text-muted-foreground">Ikonka pojawia się tylko wtedy, gdy wpiszesz adres.</p></div>
       <div><h3 className="mb-2 text-sm">Zdjęcie profilowe</h3><ImageUploader folder="profile/avatar" multiple={false} urls={draft.avatar ? [draft.avatar] : []} onChange={u => update('avatar', u[0] || '')}/></div>
       <div><h3 className="mb-2 text-sm">Tło</h3><ImageUploader folder="profile/background" multiple={false} urls={draft.background ? [draft.background] : []} onChange={u => update('background', u[0] || '')}/></div>
+      <div className="space-y-2"><label className="block text-sm">Film w tle (MP4 / WebM, do 10 MB)<Input aria-label="Wgraj film w tle" type="file" accept="video/mp4,video/webm,.mp4,.webm" disabled={videoBusy} className="mt-2" onChange={async e => { const file = e.target.files?.[0]; e.target.value = ''; if (!file) return; if (file.size > 10000000) { setError('Film może mieć maksymalnie 10 MB.'); return; } setVideoBusy(true); setError(''); try { const form = new FormData(); form.set('token', getPanelToken()); form.set('file', file); const result = await uploadVideo({ data: form }); update('backgroundVideo', result.url); } catch (error) { setError(error instanceof Error ? error.message : 'Nie udało się przesłać filmu.'); } finally { setVideoBusy(false); } }}/></label>{videoBusy && <p className="text-xs text-muted-foreground">Przesyłanie filmu…</p>}{draft.backgroundVideo && <div className="flex items-center gap-2"><video controls muted playsInline src={draft.backgroundVideo} className="aspect-video w-full min-w-0 flex-1 rounded-md"/><Button variant="ghost" size="icon" title="Usuń film w tle" aria-label="Usuń film w tle" onClick={() => update('backgroundVideo', '')}><Trash2/></Button></div>}</div>
       <div className="space-y-2"><label className="block text-sm">Muzyka<input aria-label="Wgraj muzykę" type="file" accept="audio/mpeg,audio/wav,audio/ogg,.mp3,.wav,.ogg" disabled={audioBusy} className="mt-2 block w-full text-xs" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 10000000) { setError('Muzyka może mieć maksymalnie 10 MB.'); return; } setAudioBusy(true); setError(''); try { const bytes = new Uint8Array(await file.arrayBuffer()); let binary = ''; for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); const mime = file.type || (file.name.endsWith('.ogg') ? 'audio/ogg' : file.name.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg'); const res = await uploadAudio({ data: { token: getPanelToken(), base64: btoa(binary), contentType: mime as 'audio/mpeg' | 'audio/wav' | 'audio/ogg' } }); update('music', res.url); } catch (e) { setError(e instanceof Error ? e.message : 'Nie udało się przesłać muzyki.'); } finally { setAudioBusy(false); } }}/></label>{audioBusy && <p className="text-xs text-muted-foreground">Przesyłanie muzyki…</p>}{draft.music && <div className="flex items-center gap-2"><audio controls src={draft.music} className="min-w-0 flex-1"/><Button variant="ghost" size="icon" aria-label="Usuń muzykę" onClick={() => update('music', '')}><Trash2/></Button></div>}</div>
       {draft.music && <label className="block space-y-2 text-sm">Muzyka gra od sekundy<Input aria-label="Start muzyki w sekundach" type="number" min={0} max={3600} value={draft.musicStart} onChange={e => update('musicStart', Math.max(0, Math.min(3600, Number(e.target.value) || 0)))}/></label>}
       <label className="block space-y-2 text-sm">Dekoracja<select className="block w-full rounded-md border border-input bg-secondary px-3 py-2" value={draft.decoration} onChange={e => update('decoration', e.target.value as 'none' | 'snow')}><option value="none">Brak</option><option value="snow">Spadający śnieg</option></select></label>

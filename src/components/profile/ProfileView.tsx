@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Volume2, VolumeX, Share2, ScanSearch, Link2 } from 'lucide-react';
+import { ArrowUpRight, Volume2, VolumeX, Share2, ScanSearch, Link2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import type { ProfileConfig } from '@/lib/profile';
@@ -14,10 +14,11 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   const [volume, setVolume] = useState(70);
   const volumeRef = useRef(70);
   const previousVolume = useRef(70);
+  const [videoFailed, setVideoFailed] = useState(false);
   const [shared, setShared] = useState(false);
   const [audioError, setAudioError] = useState('');
   const started = useRef(false);
-  const [gate, setGate] = useState(false);
+  useEffect(() => setVideoFailed(false), [config.backgroundVideo]);
   useEffect(() => {
     if (preview) return;
     const root = stage.current;
@@ -65,8 +66,8 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     if (preview || !config.music || !el) return;
     let done = false;
     started.current = false;
-    const start = async () => { if (done) return; seekStart(el); try { el.volume = volumeRef.current / 100; el.muted = volumeRef.current === 0; await el.play(); done = true; setPlaying(true); setGate(false); cleanup(); } catch { setGate(true); } };
-    const events = ['keydown'] as const;
+    const start = async () => { if (done) return; seekStart(el); try { el.volume = volumeRef.current / 100; el.muted = volumeRef.current === 0; await el.play(); done = true; setPlaying(true); cleanup(); } catch { /* Browser requires a gesture; keep the profile visible. */ } };
+    const events = ['pointerdown', 'keydown'] as const;
     const cleanup = () => events.forEach(ev => window.removeEventListener(ev, start));
     events.forEach(ev => window.addEventListener(ev, start, { passive: true }));
     void start();
@@ -84,7 +85,7 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     const el = audio.current;
     if (!el) return;
     seekStart(el);
-    try { el.volume = volumeRef.current / 100; el.muted = volumeRef.current === 0; await el.play(); setPlaying(true); setGate(false); setAudioError(''); } catch { setAudioError('Nie udało się odtworzyć muzyki.'); setGate(true); }
+    try { el.volume = volumeRef.current / 100; el.muted = volumeRef.current === 0; await el.play(); setPlaying(true); setAudioError(''); } catch { setAudioError('Nie udało się odtworzyć muzyki.'); }
   }
   async function toggleMusic() {
     if (!playing) { if (volume === 0) changeVolume(previousVolume.current); await startMusic(); return; }
@@ -96,15 +97,15 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   return <div ref={stage} className={`profile-stage ${preview ? 'profile-preview' : ''}`}>
     {!preview && <div ref={cursor} className="profile-cursor" aria-hidden="true"><span/></div>}
     {config.background && <img src={config.background} alt="" className="profile-backdrop" />}
+    {config.backgroundVideo && !videoFailed && <video key={config.backgroundVideo} src={config.backgroundVideo} poster={config.background || undefined} autoPlay loop muted playsInline preload="metadata" className="profile-backdrop" aria-hidden="true" onError={() => setVideoFailed(true)} />}
     <div className="profile-shade" />
-    {gate && !playing && <Button type="button" variant="ghost" onClick={() => void startMusic()} className="profile-entry">kliknij, aby wejść</Button>}
     {config.decoration === 'snow' && <div className="profile-snow" aria-hidden="true">{Array.from({ length: 30 }, (_, i) => <span key={i} style={{ left: `${(i * 37 + 3) % 100}%`, animationDelay: `${-i * .73}s`, animationDuration: `${9 + i % 8}s` }}>✦</span>)}</div>}
     {!preview && <><div className="profile-controls">{config.music && <div className="profile-volume"><Button variant="ghost" size="icon" title={playing && volume > 0 ? 'Wycisz muzykę' : 'Włącz muzykę'} aria-label={playing && volume > 0 ? 'Wycisz muzykę' : 'Włącz muzykę'} onClick={() => void toggleMusic()}>{playing && volume > 0 ? <Volume2 size={18}/> : <VolumeX size={18}/>}</Button><Slider aria-label="Głośność muzyki" value={[volume]} min={0} max={100} step={1} onValueChange={values => { const value = values[0]; if (value !== undefined) changeVolume(value); }} /><output aria-live="off">{volume}%</output></div>}</div><div className="profile-share"><Button variant="outline" size="icon" title={shared ? 'Skopiowano link' : 'Kopiuj link do profilu'} aria-label="Kopiuj link do profilu" onClick={() => void share()}><Share2 size={17}/></Button></div></>}
-    {config.music && <audio ref={audio} src={config.music} loop preload="metadata" onLoadedMetadata={() => { if (audio.current) seekStart(audio.current); }} onError={() => { setGate(false); setAudioError('Nie udało się odtworzyć muzyki.'); }} />}
+    {config.music && <audio ref={audio} src={config.music} loop preload="metadata" onLoadedMetadata={() => { if (audio.current) seekStart(audio.current); }} onError={() => setAudioError('Nie udało się odtworzyć muzyki.')} />}
     <div className="profile-column" data-no-translate>
       <header className="profile-identity">
         {config.avatar ? <img src={config.avatar} className="profile-avatar" alt={`Zdjęcie ${config.name}`}/> : <div className="profile-avatar profile-monogram">{config.name.slice(0, 2).toUpperCase()}</div>}
-        <h1>{config.name}</h1><p>{config.bio}</p><ProfileSocials socials={config.socials}/>
+        <h1>{config.name}</h1><p>{config.bio}</p>{config.location && <div className="profile-location" title="Lokalizacja"><MapPin size={14} aria-hidden="true"/><span>{config.location}</span></div>}<ProfileSocials socials={config.socials}/>
       </header>
       {audioError && <p role="alert" className="text-center text-xs text-destructive">{audioError}</p>}
       <div className="profile-links">{config.links.map((link, i) => <a key={link.id} href={link.url} target={link.url.startsWith('/') ? undefined : '_blank'} rel="noopener noreferrer" className={i === 0 ? 'profile-featured' : 'profile-link'}>
