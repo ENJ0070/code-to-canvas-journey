@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { finderQcByLink, finderQcByProduct } from "@/lib/finderqc.functions";
+import { finderQcByProduct } from "@/lib/finderqc.functions";
 import { useProducts, type Product } from "@/lib/store";
 import { useLang } from "@/lib/i18n";
 import { QcGrid } from "@/components/QcViewer";
 import { QcPhotos } from "@/components/QcPhotos";
+import { QcSearchForm } from "@/components/QcSearchForm";
 
 export const Route = createFileRoute("/qc")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -34,17 +35,8 @@ export const Route = createFileRoute("/qc")({
 function QcPage() {
   const { t } = useLang();
   const { data: products } = useProducts();
-  const runLink = useServerFn(finderQcByLink);
   const runProduct = useServerFn(finderQcByProduct);
   const { product: productId } = Route.useSearch();
-  const [url, setUrl] = useState("");
-  const [query, setQuery] = useState("");
-  const [error, setError] = useState("");
-
-  const loadLinkPage = useCallback(
-    (page: number) => runLink({ data: { url: query, page, pageSize: 4 } }),
-    [runLink, query],
-  );
   const loadProductPage = useCallback(
     (page: number) => runProduct({ data: { productId: productId ?? "", page, pageSize: 3 } }),
     [runProduct, productId],
@@ -55,43 +47,12 @@ function QcPage() {
     [products],
   );
 
-  function search() {
-    const value = url.trim();
-    if (!/^https?:\/\//i.test(value)) {
-      setError(t("qc.badLink"));
-      setQuery("");
-      return;
-    }
-    setError("");
-    setQuery(value);
-  }
-
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
       <h1 className="mb-1 text-2xl font-extrabold sm:text-3xl">{t("qc.title")}</h1>
       <p className="mb-6 text-sm text-muted-foreground">{t("qc.desc")}</p>
 
-      <div className="mb-8 flex flex-col gap-2 rounded-2xl border border-border bg-surface p-4 sm:flex-row">
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && search()}
-          placeholder={t("qc.placeholder")}
-          className="w-full rounded-lg border border-border bg-surface-deep px-3 py-2.5 text-sm outline-none focus:border-primary"
-        />
-        <button
-          onClick={search}
-          className="rounded-lg gradient-brand px-6 py-2.5 text-xs font-extrabold uppercase tracking-wide text-surface-deep disabled:opacity-60"
-        >
-          {t("qc.search")}
-        </button>
-      </div>
-
-      {error ? (
-        <p className="mb-6 rounded-xl border border-border bg-surface p-4 text-sm text-muted-foreground">
-          {error}
-        </p>
-      ) : null}
+      <div className="mb-8 border-b border-border pb-6"><QcSearchForm/></div>
 
       {productId ? (
         <section className="mb-10 rounded-2xl border border-border bg-surface p-4">
@@ -102,13 +63,6 @@ function QcPage() {
             autoLoad
             emptyText={t("qc.notFound")}
           />
-        </section>
-      ) : null}
-
-      {query ? (
-        <section className="mb-10">
-          <h2 className="mb-3 text-lg font-bold">{t("qc.result")}</h2>
-          <QcPhotos key={query} loadPage={loadLinkPage} autoLoad emptyText={t("qc.notFound")} />
         </section>
       ) : null}
 
