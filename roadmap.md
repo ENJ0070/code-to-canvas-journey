@@ -1,4 +1,5 @@
 # RENJP
+- [ ] Set uploaded space video as profile background and refine cursor-linked motion; verify desktop/mobile playback and motion.
 - [x] Add requested visual verification badge beside profile name; verified on live profile.
 - [x] Remove profile entry gate, add editable video background and Shenzhen, China location; verified public profile, mocked WebM playback on desktop/mobile and 20 tests.
 - [ ] Verify signed-admin background video upload/save/readback (available administrator credentials were rejected; requires a working panel session).
