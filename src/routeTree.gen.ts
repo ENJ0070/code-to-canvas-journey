@@ -26,6 +26,7 @@ import { Route as ApiRemoveBackgroundRouteImport } from './routes/api/remove-bac
 import { Route as QcWynikiRouteImport } from './routes/qc_.wyniki'
 import { Route as SklepSlugRouteImport } from './routes/sklep.$slug'
 import { Route as ApiPublicProductImageRouteImport } from './routes/api/public/product-image'
+import { Route as ApiPublicQcImageRouteImport } from './routes/api/public/qc-image'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -112,6 +113,11 @@ const ApiPublicProductImageRoute = ApiPublicProductImageRouteImport.update({
   path: '/api/public/product-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicQcImageRoute = ApiPublicQcImageRouteImport.update({
+  id: '/api/public/qc-image',
+  path: '/api/public/qc-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/qc/wyniki': typeof QcWynikiRoute
   '/sklep/$slug': typeof SklepSlugRoute
   '/api/public/product-image': typeof ApiPublicProductImageRoute
+  '/api/public/qc-image': typeof ApiPublicQcImageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/qc/wyniki': typeof QcWynikiRoute
   '/sklep/$slug': typeof SklepSlugRoute
   '/api/public/product-image': typeof ApiPublicProductImageRoute
+  '/api/public/qc-image': typeof ApiPublicQcImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/qc_/wyniki': typeof QcWynikiRoute
   '/sklep/$slug': typeof SklepSlugRoute
   '/api/public/product-image': typeof ApiPublicProductImageRoute
+  '/api/public/qc-image': typeof ApiPublicQcImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/qc/wyniki'
     | '/sklep/$slug'
     | '/api/public/product-image'
+    | '/api/public/qc-image'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/qc/wyniki'
     | '/sklep/$slug'
     | '/api/public/product-image'
+    | '/api/public/qc-image'
   id:
     | '__root__'
     | '/'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/qc_/wyniki'
     | '/sklep/$slug'
     | '/api/public/product-image'
+    | '/api/public/qc-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   QcWynikiRoute: typeof QcWynikiRoute
   SklepSlugRoute: typeof SklepSlugRoute
   ApiPublicProductImageRoute: typeof ApiPublicProductImageRoute
+  ApiPublicQcImageRoute: typeof ApiPublicQcImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicProductImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/qc-image': {
+      id: '/api/public/qc-image'
+      path: '/api/public/qc-image'
+      fullPath: '/api/public/qc-image'
+      preLoaderRoute: typeof ApiPublicQcImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   QcWynikiRoute: QcWynikiRoute,
   SklepSlugRoute: SklepSlugRoute,
   ApiPublicProductImageRoute: ApiPublicProductImageRoute,
+  ApiPublicQcImageRoute: ApiPublicQcImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
