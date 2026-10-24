@@ -28,13 +28,17 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let x = 0, y = 0, targetX = 0, targetY = 0;
-    const animate = () => {
-      x += (targetX - x) * .09;
-      y += (targetY - y) * .09;
+    let previousTime = 0;
+    const animate = (time: number) => {
+      const elapsed = previousTime ? Math.min(time - previousTime, 64) : 16.67;
+      previousTime = time;
+      const easing = 1 - Math.exp(-elapsed / 120);
+      x += (targetX - x) * easing;
+      y += (targetY - y) * easing;
       root.style.setProperty('--profile-x', `${x}`);
       root.style.setProperty('--profile-y', `${y}`);
       if (Math.abs(targetX - x) + Math.abs(targetY - y) > .001) frame = requestAnimationFrame(animate);
-      else frame = 0;
+      else { frame = 0; previousTime = 0; }
     };
     const move = (event: PointerEvent) => {
       if (!finePointer.matches || event.pointerType === 'touch') return;
@@ -50,13 +54,13 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
       targetX = 0; targetY = 0;
       if (!frame) frame = requestAnimationFrame(animate);
     };
-    root.addEventListener('pointermove', move);
-    root.addEventListener('pointerleave', reset);
+    window.addEventListener('pointermove', move, { passive: true });
+    document.documentElement.addEventListener('pointerleave', reset);
     window.addEventListener('blur', reset);
     return () => {
       cancelAnimationFrame(frame);
-      root.removeEventListener('pointermove', move);
-      root.removeEventListener('pointerleave', reset);
+      window.removeEventListener('pointermove', move);
+      document.documentElement.removeEventListener('pointerleave', reset);
       window.removeEventListener('blur', reset);
     };
   }, [preview]);
