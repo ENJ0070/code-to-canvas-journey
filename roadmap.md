@@ -1,4 +1,9 @@
 # RENJP
+- [ ] Check existing errors and verify public tools.
+- [ ] Add editable internal profile with featured link, tiles, background, music and snow.
+- [ ] Add homepage shipping calculator shortcut.
+- [ ] Improve QC photo downloads and tracking ETA for China–Poland parcels.
+- [ ] Persist auxiliary/profile media and document storage/data in source files.
 - [x] Replace homepage promotion artwork with matching colors and a right-side −25% tag; preserve copy and remove background-logo uploads.
 - [x] Configure administrator login/password securely and verify sign-in.
 - [x] Add screenshot categories and match category emojis in the catalogue and management panel.
