@@ -17,6 +17,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as LinkiRouteImport } from './routes/linki'
 import { Route as OutfityRouteImport } from './routes/outfity'
 import { Route as PoradnikRouteImport } from './routes/poradnik'
+import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PromocjeRouteImport } from './routes/promocje'
 import { Route as QcRouteImport } from './routes/qc'
 import { Route as SellerRouteImport } from './routes/seller'
@@ -65,6 +66,11 @@ const PoradnikRoute = PoradnikRouteImport.update({
   path: '/poradnik',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PromocjeRoute = PromocjeRouteImport.update({
   id: '/promocje',
   path: '/promocje',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/linki': typeof LinkiRoute
   '/outfity': typeof OutfityRoute
   '/poradnik': typeof PoradnikRoute
+  '/profil': typeof ProfilRoute
   '/promocje': typeof PromocjeRoute
   '/qc': typeof QcRoute
   '/seller': typeof SellerRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/linki': typeof LinkiRoute
   '/outfity': typeof OutfityRoute
   '/poradnik': typeof PoradnikRoute
+  '/profil': typeof ProfilRoute
   '/promocje': typeof PromocjeRoute
   '/qc': typeof QcRoute
   '/seller': typeof SellerRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/linki': typeof LinkiRoute
   '/outfity': typeof OutfityRoute
   '/poradnik': typeof PoradnikRoute
+  '/profil': typeof ProfilRoute
   '/promocje': typeof PromocjeRoute
   '/qc': typeof QcRoute
   '/seller': typeof SellerRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/linki'
     | '/outfity'
     | '/poradnik'
+    | '/profil'
     | '/promocje'
     | '/qc'
     | '/seller'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/linki'
     | '/outfity'
     | '/poradnik'
+    | '/profil'
     | '/promocje'
     | '/qc'
     | '/seller'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/linki'
     | '/outfity'
     | '/poradnik'
+    | '/profil'
     | '/promocje'
     | '/qc'
     | '/seller'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   LinkiRoute: typeof LinkiRoute
   OutfityRoute: typeof OutfityRoute
   PoradnikRoute: typeof PoradnikRoute
+  ProfilRoute: typeof ProfilRoute
   PromocjeRoute: typeof PromocjeRoute
   QcRoute: typeof QcRoute
   SellerRoute: typeof SellerRoute
@@ -283,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PoradnikRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/promocje': {
       id: '/promocje'
       path: '/promocje'
@@ -344,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   LinkiRoute: LinkiRoute,
   OutfityRoute: OutfityRoute,
   PoradnikRoute: PoradnikRoute,
+  ProfilRoute: ProfilRoute,
   PromocjeRoute: PromocjeRoute,
   QcRoute: QcRoute,
   SellerRoute: SellerRoute,

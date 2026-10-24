@@ -1,4 +1,5 @@
 import { changeAdminCredentials } from "@/lib/secure.functions";
+import { ProfileEditor } from '@/components/profile/ProfileEditor';
 import { categoryEmoji } from "@/lib/categoryEmoji";
 import { supabase } from "@/integrations/supabase/client";
 import { getPanelSession } from "@/lib/secure.functions";
@@ -80,6 +81,7 @@ function AdminPage() {
   const [err, setErr] = useState("");
   const [tab, setTab] = useState<
     | "branding"
+    | "profile"
     | "promos"
     | "agents"
 
@@ -176,6 +178,7 @@ function AdminPage() {
 
   const tabs = [
     ["branding", "Branding", "🎨"],
+    ["profile", "Profil", "👤"],
     ["promos", "Promocje", "🔥"],
     ["agents", "Agenci", "🤝"],
     ["categories", "Kategorie", "🗂️"],
@@ -238,6 +241,7 @@ function AdminPage() {
       </div>
 
       {tab === "branding" && <BrandingTab />}
+      {tab === "profile" && <ProfileEditor />}
       {tab === "branding" && <PromoAlertTab />}
       {tab === "promos" && <PromosTab />}
       {tab === "agents" && <AgentsTab />}
