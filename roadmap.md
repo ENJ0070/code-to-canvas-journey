@@ -1,6 +1,7 @@
 # RENJP
-- [ ] Add signed-admin AI sheet import with visual product-photo selection and USD-based currency conversion; verify a real import preview.
-- [ ] Replace LoveGoBuy product and referral links with ESGobuy, preserving other agents; confirm Taobao mapping and test existing catalogue.
+- [x] Add signed-admin AI sheet analysis with visual product-photo selection, original-cell validation, USD-based conversion, progress and review preview; 17 tests pass and real AI selects $25 → 100 PLN.
+- [ ] Verify AI import preview/save/readback with a real sheet and signed-admin session (Google connection declined; no available admin session or credentials; embedded sheet images need Google access).
+- [x] Replace LoveGoBuy product and referral links with ESGobuy, preserving other agents; Taobao type=1 confirmed from ESGobuy source; existing catalogue has no old agent links and public page has no old destinations.
 - [x] Fix profile music: one click starts playback (mute button no longer re-mutes); full export (code, database, all 1953 storage files) delivered as ZIP parts.
 - [x] Set uploaded space video as profile background and refine cursor-linked motion; verified real playback on desktop/mobile, pointer tilt, no horizontal overflow and reduced motion; 20 profile tests passed.
 - [x] Add requested visual verification badge beside profile name; verified on live profile.
