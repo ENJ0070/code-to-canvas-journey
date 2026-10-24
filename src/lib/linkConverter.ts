@@ -31,14 +31,14 @@ export function parseSourceLink(raw: string): ParsedLink | null {
   }
 
   // 1688: detail.1688.com/offer/<id>.html
-  if (host.endsWith("1688.com")) {
+  if (host === "1688.com" || host.endsWith(".1688.com")) {
     const m = path.match(/\/offer\/(\d+)/);
     if (host.startsWith("detail.") && m?.[1]) return { platform: "1688", id: m[1], url };
     return null;
   }
 
   // Taobao: item.taobao.com?id=
-  if (host === "item.taobao.com" || host.endsWith(".item.taobao.com")) {
+  if (host === "taobao.com" || host.endsWith(".taobao.com") || host === "detail.tmall.com") {
     const id = parsed.searchParams.get("id");
     if (id && /^\d+$/.test(id.trim())) return { platform: "taobao", id: id.trim(), url };
     return null;
@@ -53,18 +53,10 @@ const USFANS_PLATFORM: Record<SourcePlatform, string> = {
   weidian: "3",
 };
 
-const LOVEGOBUY_SHOP_TYPE: Record<SourcePlatform, string> = {
-  "1688": "ali_1688",
-  taobao: "taobao",
-  weidian: "weidian",
-};
-
-/** Kod zaproszenia LoveGoBuy. */
-export const LOVEGOBUY_REF = "7KN8NW";
-
-/** Buduje link LoveGoBuy, np. https://www.lovegobuy.com/product?id=7866805981&shop_type=weidian&invite_code=7KN8NW */
-export function lovegobuyUrl(platform: SourcePlatform, id: string): string {
-  return `https://www.lovegobuy.com/product?id=${id}&shop_type=${LOVEGOBUY_SHOP_TYPE[platform]}&invite_code=${LOVEGOBUY_REF}`;
+export const ESGOBUY_REF = "XNZ02HX8BH";
+const ESGOBUY_TYPE: Record<SourcePlatform, string> = { "1688": "3", taobao: "1", weidian: "5" };
+export function esgobuyUrl(platform: SourcePlatform, id: string): string {
+  return `https://www.esgobuy.com/productdetail?type=${ESGOBUY_TYPE[platform]}&id=${id}&affcode=${ESGOBUY_REF}`;
 }
 
 /** Buduje kanoniczny link źródłowy z platformy i ID. */
@@ -110,23 +102,26 @@ export function extractSourceLink(raw: string): ParsedLink | null {
   for (const key of ["url", "link", "productLink", "itemUrl", "goodsUrl"]) {
     const val = parsed.searchParams.get(key);
     if (val) {
-      const nested = parseSourceLink(decodeURIComponent(val));
+      const nested = parseSourceLink(val);
       if (nested) return nested;
     }
   }
 
   // 2) Agenci ze wzorcem /product/{platforma}/{id} lub ?shop_type=&id=
   const host = parsed.hostname.toLowerCase();
-  const map = host.includes("usfans")
-    ? CODE_MAPS["usfans"]!
-    : host.includes("litbuy")
-      ? CODE_MAPS["litbuy"]!
-      : CODE_MAPS["generic"]!;
+  const map = (host.includes("usfans") ? CODE_MAPS["usfans"] : host.includes("litbuy") ? CODE_MAPS["litbuy"] : CODE_MAPS["generic"]) ?? {};
+  if (host === "esgobuy.com" || host.endsWith(".esgobuy.com")) {
+    const type = parsed.searchParams.get("type") ?? parsed.searchParams.get("platform");
+    const id = parsed.searchParams.get("id");
+    const platform = type === "3" ? "1688" : type === "5" ? "weidian" : type === "1" ? "taobao" : null;
+    if (platform && id && /^\d+$/.test(id)) return { platform, id, url: buildSourceUrl(platform, id) };
+    return null;
+  }
 
   const m = parsed.pathname.match(/\/(?:product|item|goods)\/([a-z0-9_]+)\/(\d+)/i);
-  if (m) {
-    const platform = map[m[1]!.toLowerCase()];
-    if (platform) return { platform, id: m[2]!, url: buildSourceUrl(platform, m[2]!) };
+  if (m?.[1] && m[2]) {
+    const platform = map[m[1].toLowerCase()];
+    if (platform) return { platform, id: m[2], url: buildSourceUrl(platform, m[2]) };
   }
 
   const shopType = (
@@ -137,7 +132,7 @@ export function extractSourceLink(raw: string): ParsedLink | null {
   ).toLowerCase();
   const id = parsed.searchParams.get("id") ?? parsed.searchParams.get("itemID");
   if (shopType && id && /^\d+$/.test(id)) {
-    const platform = CODE_MAPS["generic"]![shopType];
+    const platform = CODE_MAPS["generic"]?.[shopType];
     if (platform) return { platform, id, url: buildSourceUrl(platform, id) };
   }
 
@@ -149,7 +144,7 @@ export function extractSourceLink(raw: string): ParsedLink | null {
 export const KAKOBUY_REF = "six7n";
 
 /** Moje kody polecające — nadpisują cudze refy w linkach agentów. */
-export const MY_REFS = { usfans: "5FTXZW", kakobuy: KAKOBUY_REF, lovegobuy: LOVEGOBUY_REF } as const;
+export const MY_REFS = { usfans: "5FTXZW", kakobuy: KAKOBUY_REF, esgobuy: ESGOBUY_REF } as const;
 
 /**
  * Podmienia kod polecający w DOWOLNYM linku agenta na mój ref.
@@ -171,8 +166,12 @@ export function withMyRef(rawUrl: string): string {
     u.searchParams.set("ref", MY_REFS.usfans);
     return u.toString();
   }
-  if (host.includes("lovegobuy.com")) {
-    u.searchParams.set("invite_code", MY_REFS.lovegobuy);
+  if (host === "lovegobuy.com" || host.endsWith(".lovegobuy.com")) {
+    const source = extractSourceLink(input);
+    return source ? esgobuyUrl(source.platform, source.id) : `https://www.esgobuy.com/?affcode=${ESGOBUY_REF}`;
+  }
+  if (host === "esgobuy.com" || host.endsWith(".esgobuy.com")) {
+    u.searchParams.set("affcode", ESGOBUY_REF);
     return u.toString();
   }
   if (host.includes("kakobuy.com")) {
@@ -209,8 +208,8 @@ export function convertLink(rawUrl: string, agentName: string, template?: string
   if (agent === "kakobuy" || agent === "kakaobuy") {
     return `https://item.kakobuy.com/item/details?url=${encodeURIComponent(parsed.url)}&affcode=${KAKOBUY_REF}`;
   }
-  if (agent === "lovegobuy" || agent === "litbuy") {
-    return lovegobuyUrl(parsed.platform, parsed.id);
+  if (agent === "esgobuy" || agent === "lovegobuy" || agent === "litbuy") {
+    return esgobuyUrl(parsed.platform, parsed.id);
   }
 
   const tpl = (template ?? "").trim();
@@ -225,11 +224,11 @@ export function convertLink(rawUrl: string, agentName: string, template?: string
   return original;
 }
 
-/** Klucz agenta niezależny od wielkości liter i literówek (Kakaobuy = KakoBuy, Litbuy = LoveGoBuy). */
+/** Klucz agenta niezależny od wielkości liter i literówek (Kakaobuy = KakoBuy, Litbuy/LoveGoBuy = ESGobuy). */
 export function agentKey(name: string): string {
   const k = normalizeAgent(name ?? "");
   if (k === "kakaobuy") return "kakobuy";
-  if (k === "litbuy") return "lovegobuy";
+  if (k === "litbuy" || k === "lovegobuy") return "esgobuy";
   return k;
 }
 
@@ -245,7 +244,7 @@ export function productAgentLink(
   const links = p.agent_links ?? {};
   const want = agentKey(agentName);
   const direct = Object.entries(links).find(([k, v]) => agentKey(k) === want && v)?.[1];
-  if (direct) return want === "lovegobuy" ? convertLink(direct, "LoveGoBuy") || direct : direct;
+  if (direct) return want === "esgobuy" ? convertLink(direct, "ESGobuy") || direct : direct;
   for (const src of [p.store_url, ...Object.values(links), p.qc_url]) {
     if (!src || !extractSourceLink(src)) continue;
     const conv = convertLink(src, agentName);

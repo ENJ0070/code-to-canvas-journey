@@ -1,4 +1,5 @@
 import { convertLink } from "@/lib/linkConverter";
+import { pricesFromUsd } from "@/lib/import-prices";
 /** Prosty parser CSV / TSV (obsługuje cudzysłowy i wielolinijkowe pola). */
 export function parseDelimited(text: string): string[][] {
   const src = text.replace(/\r\n?/g, "\n").trim();
@@ -10,7 +11,7 @@ export function parseDelimited(text: string): string[][] {
   let quoted = false;
 
   for (let i = 0; i < src.length; i++) {
-    const c = src[i]!;
+    const c = src[i] ?? "";
     if (quoted) {
       if (c === '"') {
         if (src[i + 1] === '"') {
@@ -48,6 +49,11 @@ const HEADER_ALIASES: Record<string, string> = {
   cena: "price",
   cenapln: "price",
   pricepln: "price",
+  priceusd: "price_usd",
+  cenausd: "price_usd",
+  usd: "price_usd",
+  dollar: "price_usd",
+  dollars: "price_usd",
   pricecny: "price_cny",
   cenacny: "price_cny",
   cny: "price_cny",
@@ -125,13 +131,13 @@ function links(value: string): Record<string, string> {
         .filter(([, url]) => typeof url === "string" && url.trim())
         .map(([agent, url]): [string, string] => {
           const u = String(url).trim();
-          // Litbuy zastępujemy sponsorem LoveGoBuy (ten sam produkt 1688/Weidian).
-          if (/^litbuy$/i.test(agent.trim()) || /litbuy\.com/i.test(u)) {
-            return ["LoveGoBuy", convertLink(u, "LoveGoBuy")];
+          // Litbuy i LoveGoBuy zastępujemy ESGobuy (ten sam produkt 1688/Weidian).
+          if (/^(litbuy|lovegobuy|esgobuy)$/i.test(agent.trim()) || /(?:litbuy|lovegobuy|esgobuy)\.com/i.test(u)) {
+            return ["ESGobuy", convertLink(u, "ESGobuy")];
           }
           return [agent, u];
         })
-        .filter(([agent, u]) => agent !== "LoveGoBuy" || /lovegobuy\.com/.test(u)),
+        .filter(([agent, u]) => agent !== "ESGobuy" || /esgobuy\.com/.test(u)),
     );
   } catch {
     return {};
@@ -154,11 +160,13 @@ export function rowsToProducts(rows: string[][]): ImportedRow[] {
     const images = list(get("images"));
     const main = get("image_url") || images[0] || "";
     const sizes = list(get("sizes"));
+    const usd = get("price_usd");
+    const converted = usd ? pricesFromUsd(num(usd)) : null;
     out.push({
       title,
       category: get("category"),
-      price: num(get("price")),
-      price_cny: num(get("price_cny")),
+      price: converted?.price ?? num(get("price")),
+      price_cny: converted?.price_cny ?? num(get("price_cny")),
       image_url: main || null,
       images: images.filter((u) => u !== main),
       qc_url: get("qc_url") || null,

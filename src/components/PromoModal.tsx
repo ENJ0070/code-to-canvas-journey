@@ -16,7 +16,7 @@ let openedThisLoad = false;
 /** 12 godzin w sekundach — licznik odlicza od nowa przy każdym wejściu. */
 const COUNTDOWN = 12 * 60 * 60;
 
-/** Klucz agenta w ustawieniach okienka bonusów, np. "lovegobuy". */
+/** Klucz agenta w ustawieniach okienka bonusów, np. "esgobuy". */
 export const promoSlug = (name: string) => name.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 export const promoKey = (slug: string, field: string) => `promo_${slug}_${field}`;
 export const PROMO_FIELDS: [string, string][] = [
@@ -76,8 +76,8 @@ export function PromoModal() {
     return () => clearInterval(i);
   }, [open]);
 
-  const list = useMemo(() => (agents ?? []).filter((a) => a.referral_url).sort((a, b) => Number(!/lovegobuy/i.test(a.name)) - Number(!/lovegobuy/i.test(b.name))), [agents]);
-  const main = list.find((a) => promoSlug(a.name) === "lovegobuy") ?? list[0] ?? null;
+  const list = useMemo(() => (agents ?? []).filter((a) => a.referral_url).sort((a, b) => Number(!/esgobuy/i.test(a.name)) - Number(!/esgobuy/i.test(b.name))), [agents]);
+  const main = list.find((a) => promoSlug(a.name) === "esgobuy") ?? list[0] ?? null;
   const agent = list.find((a) => a.id === agentId) ?? main;
 
   if (!open || !settings) return null;
