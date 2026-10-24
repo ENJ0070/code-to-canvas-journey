@@ -113,18 +113,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lovable_probe: {
-        Row: {
-          id: number
-        }
-        Insert: {
-          id: number
-        }
-        Update: {
-          id?: number
-        }
-        Relationships: []
-      }
       products: {
         Row: {
           agent_links: Json
