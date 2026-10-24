@@ -1,5 +1,5 @@
 # RENJP
-- [ ] Make profile full-screen and mobile-friendly, add white dot cursor, smooth pointer-linked motion and music volume control; verify desktop/mobile interactions.
+- [x] Make profile full-screen and mobile-friendly, add white dot cursor, smooth pointer-linked motion and music volume control; verified live music playback, mute/restore, volume limits and desktop/mobile layout.
 - [x] Import uploaded 440-product CSV; archive 412 main photos and available warehouse QC, recover 72 broken image references, verify product search and QC download; investigate FindQC access.
 - [ ] Recover 22 remaining legacy main photos (requires original image files or accessible product photos); connect FindQC only after authorized API documentation/access is available.
 - [x] Hide public profile navigation and site header on the shareable profile; match screenshot categories and remove old catalogue fallback (hosted products already empty); verify public pages.
