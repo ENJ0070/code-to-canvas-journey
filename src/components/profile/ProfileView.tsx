@@ -10,12 +10,13 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   const [shared, setShared] = useState(false);
   const [audioError, setAudioError] = useState('');
   const started = useRef(false);
+  const [gate, setGate] = useState(false);
   function seekStart(el: HTMLAudioElement) { if (!started.current) { started.current = true; try { el.currentTime = config.musicStart || 0; } catch { /* ignore */ } } }
   useEffect(() => {
     const el = audio.current;
     if (preview || !config.music || !el) return;
     let done = false;
-    const start = async () => { if (done) return; seekStart(el); try { el.muted = false; await el.play(); done = true; setPlaying(true); cleanup(); } catch { /* browser blocked autoplay; wait for first interaction */ } };
+    const start = async () => { if (done) return; seekStart(el); try { el.muted = false; await el.play(); done = true; setPlaying(true); setGate(false); cleanup(); } catch { setGate(true); } };
     const events = ['pointerdown', 'keydown', 'touchstart', 'scroll'] as const;
     const cleanup = () => events.forEach(ev => window.removeEventListener(ev, start));
     events.forEach(ev => window.addEventListener(ev, start, { passive: true }));
@@ -35,6 +36,7 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   return <div className={`profile-stage ${preview ? 'profile-preview' : ''}`}>
     {config.background && <img src={config.background} alt="" className="profile-backdrop" />}
     <div className="profile-shade" />
+    {gate && !playing && <button type="button" onClick={() => { setGate(false); void toggleMusic(); }} className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 text-lg font-medium tracking-wide text-foreground backdrop-blur-md">kliknij, aby wejść</button>}
     {config.decoration === 'snow' && <div className="profile-snow" aria-hidden="true">{Array.from({ length: 30 }, (_, i) => <span key={i} style={{ left: `${(i * 37 + 3) % 100}%`, animationDelay: `${-i * .73}s`, animationDuration: `${9 + i % 8}s` }}>✦</span>)}</div>}
     {!preview && <div className="profile-controls">{config.music && <Button variant="outline" size="icon" title={playing ? 'Wycisz muzykę' : 'Odtwórz muzykę'} aria-label={playing ? 'Wycisz muzykę' : 'Odtwórz muzykę'} onClick={() => void toggleMusic()}>{playing ? <Volume2 size={18}/> : <VolumeX size={18}/>}</Button>}<Button variant="outline" size="icon" title={shared ? 'Skopiowano link' : 'Kopiuj link do profilu'} aria-label="Kopiuj link do profilu" onClick={() => void share()}><Share2 size={17}/></Button></div>}
     {config.music && <audio ref={audio} src={config.music} loop preload="none" onError={() => setAudioError('Nie udało się odtworzyć muzyki.')} />}
