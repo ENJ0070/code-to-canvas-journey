@@ -14,7 +14,7 @@ export const profileSchema = z.object({
   links: z.array(z.object({ id: z.string().max(100), title: z.string().trim().min(1).max(120), subtitle: z.string().max(200), url: z.string().max(2000).refine(v => Boolean(safeProfileUrl(v)), 'Podaj adres https:// lub ścieżkę strony'), image: media })).max(40),
 });
 export type ProfileConfig = z.infer<typeof profileSchema>;
-export const defaultProfile: ProfileConfig = { version: 1, name: 'PKMREPS', bio: 'Findsy, QC i wszystko do następnego haulu.', avatar: '', background: '', music: '', musicStart: 0, decoration: 'snow', links: [
+export const defaultProfile: ProfileConfig = { version: 1, name: 'PKMREPS', bio: 'Findsy, QC i wszystko do następnego haulu.\n\n', avatar: '', background: '', music: '', musicStart: 0, decoration: 'snow', links: [
   { id: 'finder', title: 'Znajdź swój następny item', subtitle: 'PKMREPS · Find Engine', url: '/', image: '' },
   { id: 'qc', title: 'QC Finder', subtitle: 'Zdjęcia przed zakupem', url: '/qc', image: '' },
   { id: 'agents', title: 'Agenci', subtitle: '', url: '/agenci', image: '' },
