@@ -9,14 +9,14 @@ export const lookupQc = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const { fetchWarehouseQc } = await import('@/lib/warehouse-qc.server');
-    const warehouse = await fetchWarehouseQc(data.url).catch(() => []);
     const { fetchFinderQcByUrl } = await import('@/lib/finderqc.server');
-    const finder = warehouse.length ? null : await fetchFinderQcByUrl(data.url, 1, 4);
-    const qcImages = warehouse.length ? warehouse : finder?.images ?? [];
+    const [warehouse, finder] = await Promise.allSettled([fetchWarehouseQc(data.url), fetchFinderQcByUrl(data.url, 1, 4)]);
+    const qcImages = Array.from(new Set([...(warehouse.status === 'fulfilled' ? warehouse.value : []), ...(finder.status === 'fulfilled' ? finder.value.images : [])]));
+    if (!qcImages.length && (warehouse.status === 'rejected' || finder.status === 'rejected')) throw new Error('Źródło QC jest chwilowo niedostępne.');
     if (!qcImages.length) return { ok: false as const, error: "not-found" };
     return {
       ok: true as const,
-      title: finder?.title || '',
+      title: finder.status === 'fulfilled' ? finder.value.title : '',
       priceCny: 0,
       images: [] as string[],
       colorImages: [] as string[],
@@ -85,9 +85,9 @@ export const syncProductMedia = createServerFn({ method: "POST" })
             import("@/lib/finderqc.server"),
             fetchAgentDetails(src).catch(() => null),
           ]);
-          const finder = currentQc.length
+          const finder = data.onlyMissing && currentQc.length
             ? null
-            : await fetchFinderQcByUrl(src, 1, 10).catch(() => null);
+            : await fetchFinderQcByUrl(src, 1, 4).catch(() => null);
           if (!details && !finder?.images.length) return void skipped++;
 
           const images = Array.from(
@@ -95,7 +95,7 @@ export const syncProductMedia = createServerFn({ method: "POST" })
           ).slice(0, 24);
           const qc = Array.from(
             new Set([...currentQc, ...(finder?.images ?? []), ...(details?.qcImages ?? [])]),
-          ).slice(0, 10);
+          );
           const patch: { images?: string[]; qc_images?: string[]; image_url?: string } = {};
           if ((!data.onlyMissing || !currentImages.length) && images.length) patch.images = images;
           if ((!data.onlyMissing || !currentQc.length) && qc.length) patch.qc_images = qc;
