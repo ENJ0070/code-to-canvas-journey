@@ -2,12 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 
 /** Pobiera arkusz Google Sheets / plik CSV z publicznego linku (omija CORS). */
 export const fetchSheetCsv = createServerFn({ method: "POST" })
-  .inputValidator((data: { url: string }) => {
+  .inputValidator((data: { url: string; token: string }) => {
     const url = String(data?.url ?? "").trim();
     if (!/^https:\/\//i.test(url)) throw new Error("Podaj publiczny link https");
-    return { url };
+    return { url, token: String(data.token ?? "").slice(0, 4000) };
   })
   .handler(async ({ data }) => {
+    const { verifyToken } = await import("./session.server");
+    if ((await verifyToken(data.token))?.role !== "admin") throw new Error("Zaloguj się jako administrator.");
     let url = data.url;
     // Zwykły link do arkusza → eksport CSV.
     const m = url.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
