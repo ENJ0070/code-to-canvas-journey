@@ -41,6 +41,7 @@ const LANG_CODES = LANGS.map((l) => l.code);
 /** Domyślne teksty. Admin może nadpisać każdy z nich w zakładce „Języki”. */
 export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; en: string }> = {
   "nav.finder": { pl: "Product Finder", en: "Product Finder" },
+  "nav.profile": { pl: "Profil", en: "Profile", de: "Profil", fr: "Profil", es: "Perfil", it: "Profilo", zh: "个人主页", pt: "Perfil" },
   "nav.outfits": { pl: "Losowanie outfitów", en: "Outfit roll" },
   "nav.sellers": { pl: "Sprzedawcy", en: "Stores" },
   "nav.agents": { pl: "Agenci", en: "Agents" },

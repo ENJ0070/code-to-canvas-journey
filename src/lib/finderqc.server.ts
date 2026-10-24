@@ -28,30 +28,11 @@ const HEADERS = {
   Referer: "https://finderqc.com/",
 };
 
-/** Pobiera JSON; przy blokadzie anty-botowej korzysta z publicznego pośrednika. */
+/** Use the upstream JSON contract; do not bypass denied requests with a proxy. */
 async function getJson(url: string): Promise<any> {
-  try {
-    const res = await fetch(url, { headers: HEADERS });
-    if (res.ok) return await res.json();
-  } catch {
-    /* spróbuj przez pośrednika */
-  }
-  const proxied = `https://r.jina.ai/${url}`;
-  const res = await fetch(proxied, { headers: { ...HEADERS, "x-respond-with": "text" } });
-  if (!res.ok) return null;
-  const text = await res.text();
-  try {
-    return JSON.parse(text);
-  } catch {
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start < 0 || end <= start) return null;
-    try {
-      return JSON.parse(text.slice(start, end + 1));
-    } catch {
-      return null;
-    }
-  }
+  const res = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(12000) });
+  if (!res.ok) { console.warn('FinderQC unavailable', res.status); throw new Error('Źródło QC jest chwilowo niedostępne.'); }
+  return await res.json();
 }
 
 /**
@@ -88,7 +69,7 @@ export async function fetchFinderQcById(
       source: `https://finderqc.com/product/${spu.mallType || "Weidian"}/${itemId}`,
     };
   } catch {
-    return EMPTY;
+    throw new Error('Nie udało się pobrać zdjęć ze źródła QC.');
   }
 }
 

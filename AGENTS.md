@@ -22,3 +22,6 @@
 - Use the shared category symbol resolver in catalogue and category management so renamed categories keep consistent automatic symbols without schema changes.
 - Whole-page translation runs client-side over text nodes via a server AI function with per-language localStorage cache; mark untranslatable areas with data-no-translate. Why: covers text outside the dictionary.
 - Serve catalogue, agent and settings data from the hosted database; the bundled JSON snapshot is a read-only fallback merged by product id. Why: the panels edit the database, so a snapshot must never win over a stored row.
+- Keep the public profile in a validated, versioned settings JSON record and authorize edits with the existing signed admin session; it is a single site-owned profile, not a new account system.
+- Store auxiliary images under catalog/<purpose> and profile music under catalog/profile/music in the private media bucket; only explicitly public catalog/archive paths may be served.
+- Merge independent QC sources and surface upstream failures; tracking dates must come from provider data, never tracking-number prefix guesses or stale event-history classification.

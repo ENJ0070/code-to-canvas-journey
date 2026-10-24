@@ -142,6 +142,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPanel = pathname.startsWith("/admin") || pathname.startsWith("/seller");
+  const isProfile = pathname === '/profil';
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -149,12 +150,12 @@ function RootComponent() {
         <CurrencyProvider>
         <CartProvider>
         <div className="relative isolate min-h-screen">
-          {!isPanel && <CosmicWeb dense={pathname === "/"} />}
+          {!isPanel && !isProfile && <CosmicWeb dense={pathname === "/"} />}
           {!isPanel && <Header />}
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
-          {!isPanel && <FloatingIsland />}
-          {!isPanel && <PromoModal />}
+          {!isPanel && !isProfile && <FloatingIsland />}
+          {!isPanel && !isProfile && <PromoModal />}
 
           {!isPanel && <AutoTranslate />}
           <ScrollToTop />

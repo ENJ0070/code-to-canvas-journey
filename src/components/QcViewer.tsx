@@ -1,3 +1,8 @@
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
+import { useServerFn } from '@tanstack/react-start';
+import { qcDownloadUrl } from '@/lib/qc-download.functions';
+import { toast } from 'sonner';
 import { useCallback, useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { StableImage } from "@/components/StableImage";
@@ -52,6 +57,13 @@ export function QcLightbox({
   onClose: () => void;
 }) {
   const [i, setI] = useState(index);
+  const download = useServerFn(qcDownloadUrl);
+  const [downloading, setDownloading] = useState(false);
+  async function saveImage() {
+    const image = images[i]; if (!image) return;
+    setDownloading(true);
+    try { const result = await download({ data: { url: image } }); const a = document.createElement('a'); a.href = result.url; a.download = `qc-${i + 1}.jpg`; a.click(); } catch { toast.error('Nie udało się pobrać zdjęcia.'); } finally { setDownloading(false); }
+  }
   const [scale, setScale] = useState(1);
   const [rot, setRot] = useState(0);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -89,18 +101,19 @@ export function QcLightbox({
   }, [go, onClose]);
 
   const btn =
-    "grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-black/60 text-base text-white transition-colors hover:border-primary hover:text-primary";
+    "grid h-10 w-10 place-items-center rounded-full border border-border bg-surface-deep/60 text-base text-foreground transition-colors hover:border-primary hover:text-primary";
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black/90" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-surface-deep/95" onClick={onClose}>
       <div
         className="flex items-center justify-between gap-2 p-3"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+        <span className="rounded-full bg-surface-deep/60 px-3 py-1 text-xs font-semibold text-foreground">
           {i + 1} / {images.length}
         </span>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" title="Pobierz zdjęcie QC" aria-label="Pobierz zdjęcie QC" disabled={downloading} onClick={() => void saveImage()}><Download size={18}/></Button>
           <button className={btn} title="Pomniejsz" onClick={() => setScale((s) => Math.max(1, s - 0.4))}>
             −
           </button>
@@ -171,7 +184,7 @@ export function QcLightbox({
               reset();
             }}
             className={`h-14 w-14 shrink-0 overflow-hidden rounded-lg border ${
-              k === i ? "border-primary" : "border-white/20"
+              k === i ? "border-primary" : "border-border"
             }`}
           >
             <StableImage src={u} alt="" loading="lazy" className="h-full w-full object-cover" />

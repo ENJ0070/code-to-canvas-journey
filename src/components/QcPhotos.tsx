@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { QcGrid } from "@/components/QcViewer";
 import { QcLoading } from "@/components/QcLoading";
+import { Button } from '@/components/ui/button';
 
 export type QcPage = {
   ok: boolean;
@@ -42,8 +43,11 @@ export function QcPhotos({
   const [shown, setShown] = useState(STEP);
   const [busy, setBusy] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchNext = useCallback(async () => {
+    if (busy) return;
+    setError('');
     setBusy(true);
     setTouched(true);
     const next = page + 1;
@@ -54,11 +58,11 @@ export function QcPhotos({
       setPage(next);
       setShown((s) => Math.max(s, next === 1 ? STEP : s + STEP));
     } catch {
-      setHasMore(false);
+      setError('Nie udało się połączyć ze źródłem QC. Spróbuj ponownie.');
     } finally {
       setBusy(false);
     }
-  }, [loadPage, page]);
+  }, [loadPage, page, busy]);
 
   useEffect(() => {
     if (autoLoad && page === 0 && !busy) void fetchNext();
@@ -86,18 +90,19 @@ export function QcPhotos({
     <div className="space-y-3">
       {images.length > 0 ? <QcGrid images={images.slice(0, shown)} {...(cols ? { cols } : {})} /> : null}
       {busy ? <QcLoading seconds={images.length ? 2 : 4} /> : null}
-      {!busy && touched && images.length === 0 ? (
+      {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+      {!busy && !error && touched && images.length === 0 ? (
         <p className="rounded-xl border border-border bg-surface-deep p-4 text-center text-sm text-muted-foreground">
           {emptyText}
         </p>
       ) : null}
       {!busy && showMore && canShowMore ? (
-        <button
+        <Button variant="outline"
           onClick={more}
           className="w-full rounded-lg border border-border px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-primary transition-colors hover:border-primary"
         >
           {images.length === 0 ? startText : buttonText}
-        </button>
+        </Button>
       ) : null}
     </div>
   );

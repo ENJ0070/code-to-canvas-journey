@@ -15,9 +15,9 @@ export async function archiveImage(source: string): Promise<string> {
     const publicUrl = `/api/public/product-image?path=${encodeURIComponent(path)}`;
     const existing = await bucket.list("archive", { search: `${hash}.img`, limit: 1 });
     if (existing.data?.some(file => file.name === `${hash}.img`)) return publicUrl;
-    const response = await fetch(url, { redirect: "error", headers: { Referer: "https://weidian.com/" } });
-    const type = response.headers.get("content-type")?.split(";")[0] ?? "";
-    if (!response.ok || !/^image\/(jpeg|png|webp|gif|avif)$/.test(type)) return source;
+    const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(12000), headers: { Referer: "https://weidian.com/" } });
+    let type = response.headers.get("content-type")?.split(";")[0] ?? "";
+    if (!response.ok || (!/^image\/(jpeg|png|webp|gif|avif)$/.test(type) && type !== 'application/octet-stream')) return source;
     if (Number(response.headers.get("content-length")) > MAX_BYTES) return source;
     const reader = response.body?.getReader();
     if (!reader) return source;
@@ -34,6 +34,14 @@ export async function archiveImage(source: string): Promise<string> {
     const bytes = new Uint8Array(length);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
+    if (type === 'application/octet-stream') {
+      const signature = String.fromCharCode(...bytes.slice(0, 12));
+      if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) type = 'image/jpeg';
+      else if (bytes[0] === 137 && signature.slice(1, 4) === 'PNG') type = 'image/png';
+      else if (signature.startsWith('GIF8')) type = 'image/gif';
+      else if (signature.startsWith('RIFF') && signature.slice(8) === 'WEBP') type = 'image/webp';
+      else return source;
+    }
     const { error } = await bucket.upload(path, bytes, { contentType: type, cacheControl: "31536000", upsert: false });
     if (error && !/already exists|duplicate/i.test(error.message)) return source;
     return publicUrl;

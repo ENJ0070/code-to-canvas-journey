@@ -29,6 +29,8 @@ export const Route = createFileRoute("/api/public/product-image")({
           headers: {
             "Content-Type": data.type || "application/octet-stream",
             "Cache-Control": "public, max-age=31536000, immutable",
+            "X-Content-Type-Options": "nosniff",
+            ...(new URL(request.url).searchParams.get('download') === '1' ? { 'Content-Disposition': `attachment; filename="${path.split('/').pop()}"` } : {}),
           },
         });
       },

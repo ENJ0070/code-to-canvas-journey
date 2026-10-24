@@ -55,6 +55,7 @@ function HeaderActions() {
 
 const tabs = [
   { to: "/", key: "nav.finder", icon: "🏠" },
+  { to: "/profil", key: "nav.profile", icon: "👤" },
   { to: "/outfity", key: "nav.outfits", icon: "👕" },
   { to: "/sprzedawcy", key: "nav.sellers", icon: "🏬" },
   { to: "/agenci", key: "nav.agents", icon: "🧭" },
@@ -85,7 +86,7 @@ export function Header() {
               {settings?.["brand_label"] || "PKMREPS x LOVEGOBUY"}
             </span>
           </Link>
-          <nav className="ml-auto hidden shrink-0 flex-nowrap items-center justify-end gap-0.5 pl-4 lg:flex">
+          <nav className="ml-auto hidden min-w-0 flex-wrap items-center justify-end gap-0.5 pl-4 lg:flex">
             {tabs.map((tb) => (
               <Link
                 key={tb.to}

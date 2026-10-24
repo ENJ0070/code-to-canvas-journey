@@ -14,26 +14,19 @@ export const finderQcByLink = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { fetchFinderQcByUrl } = await import("@/lib/finderqc.server");
 
-    // Najpierw magazyn USFans — odpowiada od razu, więc wyszukiwarka nie zwalnia.
-    if (data.page === 1) {
-      const { fetchUsfansDetails } = await import("@/lib/agentApi");
-      const details = await fetchUsfansDetails(data.url).catch(() => null);
-      const images = (details?.qcImages ?? []).filter((u) => /^(https?:\/\/|\/api\/public\/product-image\?)/i.test(u));
-      if (images.length) {
-        return {
-          ok: true as const,
-          title: details?.title ?? "",
-          images,
-          totalPhotos: images.length,
-          hasMore: true,
-          source: "",
-        };
-      }
-    }
+    const { fetchUsfansDetails } = await import('@/lib/agentApi');
+    const { archiveProductImages } = await import('@/lib/image-storage.server');
+    const [agent, finder] = await Promise.allSettled([
+      data.page === 1 ? fetchUsfansDetails(data.url) : Promise.resolve(null),
+      fetchFinderQcByUrl(data.url, data.page, data.pageSize),
+    ]);
+    const details = agent.status === 'fulfilled' ? agent.value : null;
+    const found = finder.status === 'fulfilled' ? finder.value : null;
+    const images = Array.from(new Set([...(details?.qcImages ?? []), ...(found?.images ?? [])]));
+    if (!images.length && finder.status === 'rejected') throw new Error('Źródło QC jest chwilowo niedostępne.');
+    const saved = await archiveProductImages({ qc_images: images });
+    return { ok: Boolean(details || found?.ok), title: details?.title || found?.title || '', images: saved.qc_images, totalPhotos: Math.max(images.length, found?.totalPhotos || 0), hasMore: found?.hasMore || false, source: found?.source || '' };
 
-    // Dalsze strony: katalog FinderQC (wolniejszy, chodzi przez pośrednika).
-    const finderPage = data.page > 1 ? data.page - 1 : 1;
-    return await fetchFinderQcByUrl(data.url, finderPage, data.pageSize);
   });
 
 
@@ -87,7 +80,7 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
           title,
           images: cached,
           totalPhotos: cached.length,
-          hasMore: true,
+          hasMore: Boolean(src),
           source: "",
         };
       }
@@ -119,6 +112,14 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
           source: "",
         };
       }
+    }
+
+    if (src) {
+      const finder = await fetchFinderQcByUrl(src, 1, data.pageSize);
+      const { archiveProductImages } = await import('@/lib/image-storage.server');
+      const saved = await archiveProductImages({ qc_images: finder.images });
+      if (saved.qc_images.length) await supabaseAdmin.from('products').update({ qc_images: saved.qc_images }).eq('id', data.productId);
+      return { ...finder, title: title || finder.title, images: saved.qc_images };
     }
 
     // Zapas 2: zdjęcia QC zapisane wcześniej w bazie.

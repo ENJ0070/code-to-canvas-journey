@@ -1,145 +1,23 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from '@tanstack/react-start';
+import { latestTrackingEvent, trackingStage, providerDeliveryDate } from './tracking';
+export type TrackResult = { ok: boolean; error?: string; code?: string; source?: string; stageKey?: string | undefined; lastStatus?: string; lastTime?: string; deliveryDate?: string | undefined; events?: { status: string; time: string }[]; unavailable?: boolean; destination?: string; };
 
-/** Etapy drogi paczki + orientacyjny czas pozostały do doręczenia. */
-const STAGES = [
-  { key: "s7", min: 0, max: 0, match: /(dostarcz|delivered|signed|签收)/i },
-  { key: "s6", min: 0, max: 1, match: /(out for delivery|doręcz|kurier w drodze|paczkomat|ready for pickup|do odbioru)/i },
-  { key: "s5", min: 1, max: 2, match: /(poland|polska|polsk|warsaw|warszaw|sortown|inpost|dpd|dhl parcel|local courier|delivery center)/i },
-  { key: "s4", min: 2, max: 4, match: /(customs|clearance|odpraw|cło|clo|import scan|arrived in destination|handed over to)/i },
-  { key: "s3", min: 4, max: 7, match: /(transit|flight|linehaul|arrived at|departed from|in transport|transport)/i },
-  { key: "s2", min: 7, max: 11, match: /(shipped|departed|export|left|dispatch|wysłan|takeoff|accepted by airline)/i },
-  { key: "s1", min: 10, max: 14, match: /(warehouse|magazyn|packed|awaiting|received by|order|created|oczek|spakowan)/i },
-] as const;
-
-export type TrackResult = {
-  ok: boolean;
-  error?: string;
-  code?: string;
-  source?: string;
-  stageKey?: string;
-  minDays?: number;
-  maxDays?: number;
-  lastStatus?: string;
-  lastTime?: string;
-  /** true = brak danych na żywo, szacunek na podstawie przewoźnika */
-  estimated?: boolean;
-};
-
-/** Szacunek na podstawie formatu numeru (jak na 17track), gdy brak danych na żywo. Zakresy w dniach roboczych. */
-function guessFromCode(code: string) {
-  const c = code.toUpperCase().replace(/\s+/g, "");
-  if (/^CJ/.test(c)) return { source: "CJPacket", stageKey: "s2", min: 9, max: 15 };
-  if (/^(YT|YUN)/.test(c)) return { source: "Yun Express", stageKey: "s2", min: 8, max: 14 };
-  if (/^(SF|SFC)/.test(c)) return { source: "SF Express", stageKey: "s2", min: 5, max: 9 };
-  if (/^(LP|UF|GV|SY|4PX)/.test(c)) return { source: "Cainiao / 4PX", stageKey: "s2", min: 10, max: 16 };
-  if (/^(LW|LK|LN|LX|LY)/.test(c) && /CN$/.test(c)) return { source: "Cainiao Standard", stageKey: "s2", min: 9, max: 16 };
-  if (/^EV\d/.test(c)) return { source: "EMS / China Post EMS", stageKey: "s2", min: 7, max: 12 };
-  if (/^(1Z|H\d{10})/.test(c)) return { source: "UPS / DHL", stageKey: "s2", min: 5, max: 9 };
-  if (/^(3S|JJD|JD)/.test(c)) return { source: "DHL eCommerce", stageKey: "s2", min: 8, max: 14 };
-  if (/^7\d{11}$/.test(c)) return { source: "FedEx", stageKey: "s2", min: 5, max: 9 };
-  if (/^(RV|RA|RB|RC|RE|RI|RM|RN|RO|RP|RS|RU|RW|RX|RY|RZ)/.test(c) && /CN$/.test(c))
-    return { source: "China Post Registered", stageKey: "s2", min: 12, max: 20 };
-  if (/^(UB|UC|UD|UE|UG|UH)/.test(c) && /CN$/.test(c)) return { source: "China Post Ordinary", stageKey: "s2", min: 15, max: 25 };
-  if (/NL$/.test(c)) return { source: "PostNL", stageKey: "s4", min: 3, max: 6 };
-  if (/DE$/.test(c)) return { source: "Deutsche Post / DHL", stageKey: "s4", min: 3, max: 6 };
-  if (/(PL|PLA)$/.test(c) || /^(6|00)\d{9,}$/.test(c)) return { source: "Kurier PL", stageKey: "s5", min: 1, max: 2 };
-  if (/CN$/.test(c)) return { source: "China Post", stageKey: "s2", min: 12, max: 20 };
-  return { source: "Auto-detect", stageKey: "s3", min: 6, max: 12 };
-}
-
-function classify(text: string) {
-  for (const s of STAGES) if (s.match.test(text)) return s;
-  return STAGES[6];
-}
-
-
-/** Cainiao global tracking — darmowe API pokrywające większość przesyłek z Chin. */
-async function fromCainiao(code: string) {
-  const url = `https://global.cainiao.com/global/detail.json?mailNos=${encodeURIComponent(code)}&lang=en-US`;
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36",
-      Accept: "application/json,text/plain,*/*",
-    },
-  });
-  if (!res.ok) return null;
-  const json = (await res.json()) as any;
-  const mod = json?.module?.[0];
-  const list = mod?.detailList;
-  if (!Array.isArray(list) || list.length === 0) return null;
-  const last = list[0];
-  // Wszystkie zdarzenia — etap liczymy z najbardziej zaawansowanego, nie tylko ostatniego.
-  const history = list
-    .map((e: any) => String(e?.desc ?? e?.standerdDesc ?? ""))
-    .filter(Boolean)
-    .join(" | ");
-  return {
-    source: "Cainiao / 17track network",
-    lastStatus: String(last?.desc ?? last?.standerdDesc ?? "").trim(),
-    lastTime: String(last?.time ?? last?.timeStr ?? "").trim(),
-    history,
-  };
-}
-
-/** Fallback: publiczna strona ParcelsApp — wyciągamy ostatni opis statusu. */
-async function fromParcelsApp(code: string) {
-  const res = await fetch(`https://parcelsapp.com/en/tracking/${encodeURIComponent(code)}`, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36",
-      "Accept-Language": "en",
-    },
-  });
-  if (!res.ok) return null;
-  const html = await res.text();
-  const m =
-    html.match(/<span class="event-content">([\s\S]*?)<\/span>/i) ??
-    html.match(/"status"\s*:\s*"([^"]{6,120})"/i);
-  const text = (m?.[1] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  if (!text) return null;
-  return { source: "ParcelsApp", lastStatus: text, lastTime: "" };
-}
-
-export const trackParcel = createServerFn({ method: "POST" })
+/** Only actual carrier events are shown. A number prefix is not evidence of an ETA. */
+export const trackParcel = createServerFn({ method: 'POST' })
   .inputValidator((data: { code: string }) => {
-    const code = String(data?.code ?? "").trim();
-    if (code.length < 6) throw new Error("SHORT_CODE");
-    return { code: code.slice(0, 64) };
+    const code = String(data?.code ?? '').trim().replace(/\s/g, '').toUpperCase();
+    if (!/^[A-Z0-9-]{6,64}$/.test(code)) throw new Error('Nieprawidłowy numer przesyłki.');
+    return { code };
   })
   .handler(async ({ data }): Promise<TrackResult> => {
-    let hit: { source: string; lastStatus: string; lastTime: string; history?: string } | null = null;
-    for (const fn of [fromCainiao, fromParcelsApp]) {
-      try {
-        hit = await fn(data.code);
-      } catch {
-        hit = null;
-      }
-      if (hit?.lastStatus) break;
-    }
-    if (!hit?.lastStatus) {
-      const g = guessFromCode(data.code);
-      return {
-        ok: true,
-        estimated: true,
-        code: data.code,
-        source: g.source,
-        stageKey: g.stageKey,
-        minDays: g.min,
-        maxDays: g.max,
-      };
-    }
-
-
-    const stage = classify(`${hit.lastStatus} | ${hit.history ?? ""}`);
-    return {
-      ok: true,
-      code: data.code,
-      source: hit.source,
-      stageKey: stage.key,
-      minDays: stage.min,
-      maxDays: stage.max,
-      lastStatus: hit.lastStatus,
-      lastTime: hit.lastTime,
-    };
+    try {
+      const response = await fetch(`https://global.cainiao.com/global/detail.json?mailNos=${encodeURIComponent(data.code)}&lang=en-US`, { signal: AbortSignal.timeout(10000), headers: { Accept: 'application/json' } });
+      if (!response.ok) { console.warn('Tracking provider unavailable', response.status); return { ok: true, unavailable: true, code: data.code, destination: 'Polska' }; }
+      const json = await response.json() as { module?: { detailList?: { desc?: string; standerdDesc?: string; time?: string; timeStr?: string }[]; estimatedDeliveryDate?: string }[] };
+      const parcel = json.module?.[0];
+      const events = (parcel?.detailList ?? []).map(e => ({ status: String(e.desc || e.standerdDesc || '').trim(), time: String(e.time || e.timeStr || '').trim() })).filter(e => Boolean(e.status));
+      const latest = latestTrackingEvent(events);
+      if (latest) return { ok: true, code: data.code, source: 'Cainiao', destination: 'Polska (wybrany kierunek)', lastStatus: latest.status, lastTime: latest.time, stageKey: trackingStage(latest.status), deliveryDate: providerDeliveryDate(parcel?.estimatedDeliveryDate), events: events.slice(0, 30) };
+    } catch { console.warn('Tracking provider returned no usable data'); }
+    return { ok: true, unavailable: true, code: data.code, destination: 'Polska' };
   });
