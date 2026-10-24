@@ -16,8 +16,8 @@ export function categoryEmoji(name: string): string {
   if (category.includes('zegarki')) return '⌚';
   if (category.includes('elektronika')) return '🎧';
   if (category.includes('lego')) return '🧱';
-  if (category.includes('do pokoju')) return '🛋️';
-  if (category.includes('zestawy')) return '👚';
+  if (category === 'room' || category.includes('do pokoju')) return '📦';
+  if (category === 'sets' || category.includes('zestawy')) return '📦';
   if (category.includes('akcesoria')) return '🧢';
   return '📦';
 }
