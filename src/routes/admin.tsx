@@ -1,3 +1,5 @@
+import { SheetAiImport } from "@/components/SheetAiImport";
+import { Button } from "@/components/ui/button";
 import { changeAdminCredentials } from "@/lib/secure.functions";
 import { ProfileEditor } from '@/components/profile/ProfileEditor';
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -24,7 +26,7 @@ import { ImageUploader } from "@/components/ImageUploader";
 import { scrapeProduct } from "@/lib/scrape.functions";
 import { syncProductMedia } from "@/lib/media.functions";
 import { DICT, DICT_KEYS, i18nSettingKey } from "@/lib/i18n";
-import { DEFAULT_SHIRT_SIZES, isShirt, parseDelimited, rowsToProducts } from "@/lib/csvImport";
+import { DEFAULT_SHIRT_SIZES, isShirt, parseDelimited, rowsToProducts, type ImportedRow } from "@/lib/csvImport";
 import { fetchSheetCsv } from "@/lib/sheet.functions";
 import { translateToEnglish } from "@/lib/translate.functions";
 import {
@@ -265,7 +267,7 @@ function PromoAlertTab() {
   const { data: agents } = useAgents();
   const refresh = useRefresh();
   const list = agents ?? [];
-  const [sel, setSel] = useState("lovegobuy");
+  const [sel, setSel] = useState("esgobuy");
   const [form, setForm] = useState<Record<string, string>>({});
   useEffect(() => {
     const f: Record<string, string> = {};
@@ -285,7 +287,7 @@ function PromoAlertTab() {
     <section className="mt-6 rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-black/20">
       <h2 className="mb-1 text-lg font-bold">Okienko bonusów (popup)</h2>
       <p className="mb-4 text-xs text-muted-foreground">
-        Ustaw osobno dla każdego agenta: kod zniżkowy, link rejestracji i teksty. Puste pole = tekst domyślny. LoveGoBuy otwiera się jako pierwszy.
+        Ustaw osobno dla każdego agenta: kod zniżkowy, link rejestracji i teksty. Puste pole = tekst domyślny. ESGobuy otwiera się jako pierwszy.
       </p>
       <div className="mb-4 flex flex-wrap gap-2">
         {list.map((a) => {
@@ -317,7 +319,7 @@ function PromoAlertTab() {
 }
 
 const settingFields: [string, string][] = [
-  ["brand_label", "Napis w lewym górnym rogu (np. PKMREPS x LOVEGOBUY)"],
+  ["brand_label", "Napis w lewym górnym rogu (np. PKMREPS x ESGOBUY)"],
   ["agent_logo_url", "Logo agenta (URL)"],
   ["primary_agent_url", "Główny link rejestracyjny"],
   ["promo_banner_url", "Baner promo (URL)"],
@@ -2384,6 +2386,7 @@ function productsToCsv(products: Product[]): string {
 function ImportTab() {
   const { data: agents } = useAgents();
   const { data: sellers } = useSellers();
+  const { data: settings } = useSettings();
   const { data: allProducts } = useProducts();
   const [sellerId, setSellerId] = useState("");
   const [showOnHome, setShowOnHome] = useState(false);
@@ -2406,13 +2409,14 @@ function ImportTab() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const preview = useMemo(() => rowsToProducts(parseDelimited(text)), [text]);
+  const [aiRows, setAiRows] = useState<{ text: string; rows: ImportedRow[] } | null>(null);
+  const preview = useMemo(() => aiRows?.text === text ? aiRows.rows : rowsToProducts(parseDelimited(text)), [text, aiRows]);
 
   const loadSheet = async () => {
     setBusy(true);
     setMsg("Pobieram arkusz...");
     try {
-      const { csv } = await fetchSheetCsv({ data: { url: sheetUrl.trim() } });
+      const { csv } = await fetchSheetCsv({ data: { url: sheetUrl.trim(), token: getPanelToken() } });
       setText(csv);
       setMsg("Arkusz wczytany — sprawdź podgląd poniżej.");
     } catch (e) {
@@ -2429,11 +2433,12 @@ function ImportTab() {
     try {
       const rows = preview.map((p, i) => {
         const links: Record<string, string> = { ...p.agent_links };
-        const src = extractSourceLink(p.store_url);
+        const src = [p.store_url, ...Object.values(p.agent_links)].map(extractSourceLink).find(Boolean);
         if (src) {
+          links["ESGobuy"] = convertLink(src.url, "ESGobuy");
           for (const a of agents ?? []) {
-            const url = convertLink(src.url, a.name, a.referral_url);
-            if (url) links[a.name] = url;
+            const url = convertLink(src.url, a.name, settings?.[`converter_${a.name.trim().toLowerCase()}`]);
+            if (url && url !== src.url) links[a.name] = url;
           }
         }
         return {
@@ -2569,9 +2574,9 @@ function ImportTab() {
           value={sheetUrl}
           onChange={(e) => setSheetUrl(e.target.value)}
         />
-        <button className={btn} disabled={busy} onClick={() => void loadSheet()}>
+        <Button disabled={busy} onClick={() => void loadSheet()}>
           Wczytaj arkusz
-        </button>
+        </Button>
       </div>
 
 
@@ -2584,6 +2589,8 @@ function ImportTab() {
         onChange={(e) => setText(e.target.value)}
       />
 
+      <SheetAiImport text={text} disabled={busy} onBusy={setBusy} onResult={(rows) => setAiRows({ text, rows })} />
+
       {preview.length ? (
         <div className="mt-4 overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-xs">
@@ -2591,7 +2598,7 @@ function ImportTab() {
               <tr>
                 <th className="p-2">Tytuł</th>
                 <th className="p-2">Kategoria</th>
-                <th className="p-2">Cena</th>
+                <th className="p-2">PLN / USD / CNY</th>
                 <th className="p-2">Zdjęcie</th>
               </tr>
             </thead>
@@ -2600,8 +2607,8 @@ function ImportTab() {
                 <tr key={`${p.title}-${i}`} className="border-t border-border">
                   <td className="p-2">{p.title}</td>
                   <td className="p-2">{p.category}</td>
-                  <td className="p-2">{p.price}</td>
-                  <td className="p-2 truncate max-w-[180px]">{p.image_url ?? "—"}</td>
+                  <td className="p-2">{p.price.toFixed(2)} zł / ${(p.price * 0.25).toFixed(2)} / ¥{p.price_cny.toFixed(2)}</td>
+                  <td className="p-2">{p.image_url ? <img src={p.image_url} alt={p.title} className="h-16 w-16 object-contain" loading="lazy" /> : "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -2610,9 +2617,9 @@ function ImportTab() {
       ) : null}
 
       {msg ? <p className="mt-3 text-xs text-brand-cyan">{msg}</p> : null}
-      <button className={`${btn} mt-5`} disabled={busy || !preview.length} onClick={() => void importAll()}>
+      <Button className="mt-5" disabled={busy || !preview.length} onClick={() => void importAll()}>
         Importuj {preview.length ? `(${preview.length})` : ""}
-      </button>
+      </Button>
     </section>
   );
 }
