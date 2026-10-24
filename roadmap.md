@@ -1,4 +1,5 @@
 # RENJP
+- [ ] Import uploaded 440-product CSV with available photos and warehouse QC; investigate FindQC and verify catalogue readback.
 - [x] Hide public profile navigation and site header on the shareable profile; match screenshot categories and remove old catalogue fallback (hosted products already empty); verify public pages.
 - [x] Separate pasted-link QC results from tools and catalogue, optimize loading, and exclude product/color photos; verify warehouse photos, original download and mobile layout.
 - [x] Check existing errors and verify public pages and regression tests.
