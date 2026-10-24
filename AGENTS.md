@@ -19,7 +19,7 @@
 - Homepage promotional photos, copy and destinations read admin-managed settings; defaults apply only when a field is empty.
 
 - Scope homepage layout styling to the homepage; preserve the original shared palette and other public surfaces to avoid cross-page redesigns.
-- Use the shared category symbol resolver in catalogue and category management so renamed categories keep consistent automatic symbols without schema changes.
+- Use the shared CategoryIcon vector resolver in catalogue and category management; resolve symbols from normalized names without schema changes so both surfaces remain consistent.
 - Whole-page translation runs client-side over text nodes via a server AI function with per-language localStorage cache; mark untranslatable areas with data-no-translate. Why: covers text outside the dictionary.
 - Serve catalogue, agent and settings data from the hosted database; never merge bundled product snapshots into catalogue reads. Why: deleted products must stay deleted and new imports must be authoritative.
 - Keep the public profile in a validated, versioned settings JSON record and authorize edits with the existing signed admin session; it is a single site-owned profile, not a new account system.
