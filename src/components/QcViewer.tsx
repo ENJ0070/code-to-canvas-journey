@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useCallback, useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { StableImage } from "@/components/StableImage";
+import { qcImageFallbacks } from '@/lib/qc-image';
 
 /** Siatka miniatur QC — klik otwiera przeglądarkę ze zoomem i obrotem. */
 export function QcGrid({
@@ -36,7 +37,7 @@ export function QcGrid({
             onClick={() => setOpen(i)}
             className="h-auto aspect-square overflow-hidden rounded-lg border border-border p-0 transition-colors hover:border-primary [content-visibility:auto] [contain-intrinsic-size:240px]"
           >
-            <StableImage src={u} alt={`QC ${i + 1}`} loading="lazy" width={480} height={480} className="h-full w-full object-cover" />
+            <StableImage src={u} fallbacks={qcImageFallbacks(u)} alt={`QC ${i + 1}`} loading="lazy" width={480} height={480} className="h-full w-full object-cover" />
           </Button>
         ))}
       </div>
@@ -150,6 +151,7 @@ export function QcLightbox({
       >
         <StableImage
           src={images[i]}
+          fallbacks={qcImageFallbacks(images[i] ?? '')}
           alt={`QC ${i + 1}`}
           draggable={false}
           className="absolute left-1/2 top-1/2 max-h-[80vh] max-w-[92vw] rounded-xl object-contain transition-transform duration-100"
@@ -188,7 +190,7 @@ export function QcLightbox({
               k === i ? "border-primary" : "border-border"
             }`}
           >
-            <StableImage src={u} alt="" loading="lazy" className="h-full w-full object-cover" />
+            <StableImage src={u} fallbacks={qcImageFallbacks(u)} alt="" loading="lazy" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>
