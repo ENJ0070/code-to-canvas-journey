@@ -7,6 +7,7 @@ import { useLang } from "@/lib/i18n";
 import { QcGrid } from "@/components/QcViewer";
 import { QcPhotos } from "@/components/QcPhotos";
 import { QcSearchForm } from "@/components/QcSearchForm";
+import { QC_SETS_PER_PAGE } from '@/lib/qc-pagination';
 
 export const Route = createFileRoute("/qc")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -38,7 +39,7 @@ function QcPage() {
   const runProduct = useServerFn(finderQcByProduct);
   const { product: productId } = Route.useSearch();
   const loadProductPage = useCallback(
-    (page: number) => runProduct({ data: { productId: productId ?? "", page, pageSize: 3 } }),
+    (page: number) => runProduct({ data: { productId: productId ?? "", page, pageSize: QC_SETS_PER_PAGE } }),
     [runProduct, productId],
   );
 
@@ -61,6 +62,7 @@ function QcPage() {
             key={productId}
             loadPage={loadProductPage}
             autoLoad
+            showMore
             emptyText={t("qc.notFound")}
           />
         </section>

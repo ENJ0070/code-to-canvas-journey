@@ -14,6 +14,7 @@ import { formatKg, productWeightKg } from "@/lib/weight";
 import { finderQcByProduct } from "@/lib/finderqc.functions";
 import { StableImage } from "@/components/StableImage";
 import { productAgentLink } from "@/lib/linkConverter";
+import { QC_SETS_PER_PAGE } from '@/lib/qc-pagination';
 
 /** Interactive shopping modal: pick colorway + size, then buy through an agent. */
 export function ProductModal({
@@ -35,7 +36,7 @@ export function ProductModal({
   // Zdjęcia QC zapisane przy produkcie pokazują się od razu, bez klikania.
   const storedQc = (product.qc_images ?? []).filter((u) => /^(https?:\/\/|\/api\/public\/product-image\?)/i.test(u));
   const loadQcPage = useCallback(
-    (page: number) => fetchQc({ data: { productId: product.id, page, pageSize: 3 } }),
+    (page: number) => fetchQc({ data: { productId: product.id, page, pageSize: QC_SETS_PER_PAGE } }),
     [fetchQc, product.id],
   );
 

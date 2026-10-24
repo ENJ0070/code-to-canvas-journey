@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { QcGrid } from "@/components/QcViewer";
 import { QcLoading } from "@/components/QcLoading";
 import { Button } from '@/components/ui/button';
+import { QC_PHOTOS_PER_PAGE } from '@/lib/qc-pagination';
 
 export type QcPage = {
   ok: boolean;
@@ -13,9 +14,9 @@ export type QcPage = {
   source: string;
 };
 
-const STEP = 6;
+const STEP = QC_PHOTOS_PER_PAGE;
 
-/** Galeria QC z FinderQC: 6 zdjęć na start i przycisk „Pokaż więcej”. */
+/** Four QC sets per page; thumbnails stay lazy-loaded in QcGrid. */
 export function QcPhotos({
   loadPage,
   autoLoad = false,
