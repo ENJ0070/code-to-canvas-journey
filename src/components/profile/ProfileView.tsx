@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Volume2, VolumeX, Share2, ScanSearch, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { ProfileConfig } from '@/lib/profile';
+import { ProfileSocials } from './ProfileSocials';
 import offerImage from '@/assets/shipping-offer-web.jpg';
 
 export function ProfileView({ config, preview = false }: { config: ProfileConfig; preview?: boolean }) {
@@ -43,7 +44,7 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     <div className="profile-column" data-no-translate>
       <header className="profile-identity">
         {config.avatar ? <img src={config.avatar} className="profile-avatar" alt={`Zdjęcie ${config.name}`}/> : <div className="profile-avatar profile-monogram">{config.name.slice(0, 2).toUpperCase()}</div>}
-        <h1>{config.name}</h1><p>{config.bio}</p>
+        <h1>{config.name}</h1><p>{config.bio}</p><ProfileSocials socials={config.socials}/>
       </header>
       {audioError && <p role="alert" className="text-center text-xs text-destructive">{audioError}</p>}
       <div className="profile-links">{config.links.map((link, i) => <a key={link.id} href={link.url} target={link.url.startsWith('/') ? undefined : '_blank'} rel="noopener noreferrer" className={i === 0 ? 'profile-featured' : 'profile-link'}>
