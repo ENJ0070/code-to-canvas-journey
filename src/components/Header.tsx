@@ -82,7 +82,7 @@ export function Header() {
               />
             ) : null}
             <span className="font-display text-lg font-bold tracking-tight text-foreground">
-              {settings?.["brand_label"] || "PKMREPS x LOVEGOBUY"}
+              {settings?.["brand_label"] || "PKMREPS x ESGOBUY"}
             </span>
           </Link>
           <nav className="ml-auto hidden min-w-0 flex-wrap items-center justify-end gap-0.5 pl-4 lg:flex">
