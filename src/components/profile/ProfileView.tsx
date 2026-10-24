@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Volume2, VolumeX, Share2, ScanSearch, Link2, MapPin } from 'lucide-react';
+import { ArrowUpRight, Volume2, VolumeX, Share2, ScanSearch, Link2, MapPin, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import type { ProfileConfig } from '@/lib/profile';
@@ -105,7 +105,7 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     <div className="profile-column" data-no-translate>
       <header className="profile-identity">
         {config.avatar ? <img src={config.avatar} className="profile-avatar" alt={`Zdjęcie ${config.name}`}/> : <div className="profile-avatar profile-monogram">{config.name.slice(0, 2).toUpperCase()}</div>}
-        <h1>{config.name}</h1><p>{config.bio}</p>{config.location && <div className="profile-location" title="Lokalizacja"><MapPin size={14} aria-hidden="true"/><span>{config.location}</span></div>}<ProfileSocials socials={config.socials}/>
+        <h1 className="profile-name"><span>{config.name}</span><span className="profile-verified" role="img" aria-label="Zweryfikowany profil" title="Zweryfikowany profil"><BadgeCheck size={22} aria-hidden="true"/></span></h1><p>{config.bio}</p>{config.location && <div className="profile-location" title="Lokalizacja"><MapPin size={14} aria-hidden="true"/><span>{config.location}</span></div>}<ProfileSocials socials={config.socials}/>
       </header>
       {audioError && <p role="alert" className="text-center text-xs text-destructive">{audioError}</p>}
       <div className="profile-links">{config.links.map((link, i) => <a key={link.id} href={link.url} target={link.url.startsWith('/') ? undefined : '_blank'} rel="noopener noreferrer" className={i === 0 ? 'profile-featured' : 'profile-link'}>
