@@ -9,13 +9,14 @@ const media = z.string().max(2000).refine(v => !v || Boolean(safeProfileUrl(v)),
 export const profileSchema = z.object({
   version: z.literal(1).default(1), name: z.string().trim().min(1).max(80),
   bio: z.string().max(500), avatar: media, background: media, music: media,
+  backgroundVideo: media.default(''), location: z.string().trim().max(100).default('Shenzhen, China'),
   musicStart: z.number().min(0).max(3600).default(0),
   decoration: z.enum(['none', 'snow']),
   links: z.array(z.object({ id: z.string().max(100), title: z.string().trim().min(1).max(120), subtitle: z.string().max(200), url: z.string().max(2000).refine(v => Boolean(safeProfileUrl(v)), 'Podaj adres https:// lub ścieżkę strony'), image: media })).max(40),
   socials: z.object({ discord: media, tiktok: media, website: media }).default({ discord: '', tiktok: '', website: '/' }),
 });
 export type ProfileConfig = z.infer<typeof profileSchema>;
-export const defaultProfile: ProfileConfig = { version: 1, name: 'PKMREPS', bio: 'Findsy, QC i wszystko do następnego haulu.\n\n', avatar: '', background: '', music: '', musicStart: 0, decoration: 'snow', socials: { discord: '', tiktok: '', website: '/' }, links: [
+export const defaultProfile: ProfileConfig = { version: 1, name: 'PKMREPS', bio: 'Findsy, QC i wszystko do następnego haulu.\n\n', avatar: '', background: '', backgroundVideo: '', location: 'Shenzhen, China', music: '', musicStart: 0, decoration: 'snow', socials: { discord: '', tiktok: '', website: '/' }, links: [
   { id: 'finder', title: 'Znajdź swój następny item', subtitle: 'PKMREPS · Find Engine', url: '/', image: '' },
   { id: 'qc', title: 'QC Finder', subtitle: 'Zdjęcia przed zakupem', url: '/qc', image: '' },
   { id: 'agents', title: 'Agenci', subtitle: '', url: '/agenci', image: '' },

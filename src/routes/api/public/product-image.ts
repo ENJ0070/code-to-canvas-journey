@@ -25,9 +25,20 @@ export const Route = createFileRoute("/api/public/product-image")({
         }
         if (!data) return new Response("Image not found", { status: 404 });
 
+        const range = request.headers.get('Range');
+        if (range && /^catalog\/profile\/(video|music)\//.test(path)) {
+          const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+          if (!match || (!match[1] && !match[2])) return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${data.size}` } });
+          const start = match[1] ? Number(match[1]) : Math.max(0, data.size - Number(match[2]));
+          const end = match[1] && match[2] ? Math.min(Number(match[2]), data.size - 1) : data.size - 1;
+          if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= data.size) return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${data.size}` } });
+          return new Response(data.slice(start, end + 1, data.type), { status: 206, headers: { 'Content-Type': data.type || 'application/octet-stream', 'Content-Range': `bytes ${start}-${end}/${data.size}`, 'Content-Length': `${end - start + 1}`, 'Accept-Ranges': 'bytes', 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' } });
+        }
+
         return new Response(data, {
           headers: {
             "Content-Type": data.type || "application/octet-stream",
+            "Accept-Ranges": "bytes",
             "Cache-Control": "public, max-age=31536000, immutable",
             "X-Content-Type-Options": "nosniff",
             ...(new URL(request.url).searchParams.get('download') === '1' ? { 'Content-Disposition': `attachment; filename="${path.split('/').pop()}"` } : {}),

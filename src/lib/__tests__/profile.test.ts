@@ -9,4 +9,6 @@ describe('Public profile', () => {
   it('adds socials automatically to profile data saved before they existed', () => expect(parseProfile(JSON.stringify({ ...defaultProfile, socials: undefined })).socials).toEqual({ discord: '', tiktok: '', website: '/' }));
   it('rejects executable social links', () => expect(profileSchema.safeParse({ ...defaultProfile, socials: { discord: 'javascript:alert(1)', tiktok: '', website: '/' } }).success).toBe(false));
   it('recovers from invalid saved data', () => expect(parseProfile('{')).toEqual(defaultProfile));
+  it('sets Shenzhen, China for older profiles without a location', () => expect(parseProfile(JSON.stringify({ ...defaultProfile, location: undefined })).location).toBe('Shenzhen, China'));
+  it('preserves configured background video', () => expect(profileSchema.parse({ ...defaultProfile, backgroundVideo: '/clip.mp4' }).backgroundVideo).toBe('/clip.mp4'));
 });
