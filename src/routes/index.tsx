@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { ArrowRight, Search, Package, ScanSearch, Link2, ChevronRight, Calculator } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { DiscordIcon } from '@/components/profile/ProfileSocials';
 import { ProductCard } from '@/components/ProductCard';
 import { ProductModal } from '@/components/ProductModal';
 import { useProducts, useAgents, useCategories, useSettings, type Product } from '@/lib/store';

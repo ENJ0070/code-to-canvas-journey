@@ -322,6 +322,7 @@ const settingFields: [string, string][] = [
   ["brand_label", "Napis w lewym górnym rogu (np. PKMREPS x ESGOBUY)"],
   ["agent_logo_url", "Logo agenta (URL)"],
   ["primary_agent_url", "Główny link rejestracyjny"],
+  ["discord_url", "Link do Discorda (zaproszenie)"],
   ["promo_banner_url", "Baner promo (URL)"],
   ["promo_code", "Kod promocyjny"],
   ["home_title", "Nagłówek strony głównej"],
