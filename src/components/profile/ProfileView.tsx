@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Volume2, VolumeX, Share2, ScanSearch, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { ProfileConfig } from '@/lib/profile';
@@ -9,10 +9,25 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   const [playing, setPlaying] = useState(false);
   const [shared, setShared] = useState(false);
   const [audioError, setAudioError] = useState('');
+  const started = useRef(false);
+  function seekStart(el: HTMLAudioElement) { if (!started.current) { started.current = true; try { el.currentTime = config.musicStart || 0; } catch { /* ignore */ } } }
+  useEffect(() => {
+    const el = audio.current;
+    if (preview || !config.music || !el) return;
+    let done = false;
+    const start = async () => { if (done) return; seekStart(el); try { el.muted = false; await el.play(); done = true; setPlaying(true); cleanup(); } catch { /* browser blocked autoplay; wait for first interaction */ } };
+    const events = ['pointerdown', 'keydown', 'touchstart', 'scroll'] as const;
+    const cleanup = () => events.forEach(ev => window.removeEventListener(ev, start));
+    events.forEach(ev => window.addEventListener(ev, start, { passive: true }));
+    void start();
+    return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.music, preview]);
   async function toggleMusic() {
     if (!audio.current) return;
     if (playing) { audio.current.pause(); setPlaying(false); return; }
-    try { await audio.current.play(); setPlaying(true); setAudioError(''); } catch { setAudioError('Nie udało się odtworzyć muzyki.'); }
+    seekStart(audio.current);
+    try { audio.current.muted = false; await audio.current.play(); setPlaying(true); setAudioError(''); } catch { setAudioError('Nie udało się odtworzyć muzyki.'); }
   }
   async function share() {
     try { await navigator.clipboard.writeText(window.location.origin + '/profil'); setShared(true); setTimeout(() => setShared(false), 2000); } catch { setShared(false); }
