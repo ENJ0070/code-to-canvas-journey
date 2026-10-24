@@ -149,7 +149,7 @@ export function ProductModal({
                 </a>
               ) : null}
               {[...agents]
-                .sort((x, y) => Number(!/lovegobuy/i.test(x.name)) - Number(!/lovegobuy/i.test(y.name)))
+                .sort((x, y) => Number(!/esgobuy/i.test(x.name)) - Number(!/esgobuy/i.test(y.name)))
                 .map((a) => {
                 const href = productAgentLink(product, a.name) || a.referral_url;
                 return (

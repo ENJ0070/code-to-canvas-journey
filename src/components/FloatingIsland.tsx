@@ -166,10 +166,10 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
 export function FloatingIsland() {
   const { data: socials } = useSocialLinks();
 
-  // Stała kolejność: LoveGoBuy, TikTok, Discord, Linktree, potem reszta.
+  // Stała kolejność: ESGobuy, TikTok, Discord, Linktree, potem reszta.
   const rank = (l: { label: string; url: string }) => {
     const s = `${l.label} ${l.url}`.toLowerCase();
-    if (s.includes("lovegobuy")) return 0;
+    if (s.includes("esgobuy")) return 0;
     if (s.includes("tiktok")) return 1;
     if (s.includes("discord")) return 2;
     if (s.includes("linktr")) return 3;

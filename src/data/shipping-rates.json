@@ -1,7 +1,7 @@
 [
   {
     "id": "55fe01e0-3313-49a8-8784-8aab71a7370c",
-    "agent_name": "LoveGoBuy",
+    "agent_name": "ESGobuy",
     "line_name": "Standard",
     "base_price": 0,
     "price_per_kg": 0,
@@ -62,7 +62,7 @@
     },
     "discount_percent": 40,
     "coupon_code": "PKMR",
-    "signup_url": "https://www.lovegobuy.com/?invite_code=7KN8NW"
+    "signup_url": "https://www.esgobuy.com/?affcode=XNZ02HX8BH"
   },
   {
     "id": "f98157c2-b69f-499e-a4d0-181701c9a849",
