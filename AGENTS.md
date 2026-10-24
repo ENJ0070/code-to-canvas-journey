@@ -27,6 +27,7 @@
 - Store auxiliary images under catalog/<purpose> and profile music under catalog/profile/music in the private media bucket; only explicitly public catalog/archive paths may be served.
 - Upload profile background videos through signed-admin FormData with bounded byte-signature validation under catalog/profile/video; serve media byte ranges through the existing public catalog endpoint. Why: allow mobile video playback without exposing private storage or base64 upload overhead.
 - Merge independent QC sources and surface upstream failures; tracking dates must come from provider data, never tracking-number prefix guesses or stale event-history classification.
+- Keep QC set counts and photo-page bounds in the shared QC pagination module; provider pagination counts sets while gallery rendering counts photos, so limits must not be interchanged.
 - Pasted-link QC searches navigate to the un-nested /qc/wyniki route; fetch warehouse-only data without the catalogue, cache transient results client-side, use bounded lazy thumbnails, and archive original bytes only for download or persistence to avoid blocking gallery reads.
 - QC viewers use a same-origin fallback for known photo CDN URLs only; validate original image bytes, bound downloads, reject redirects and preserve upstream access denials to handle browser loading failures without an open proxy.
 - Product detail overlays mount in document.body through a portal so page stacking contexts cannot hide the modal or nested QC controls behind navigation.

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { QC_SETS_PER_PAGE, qcPageImages } from './qc-pagination';
 
 /** Zdjęcia QC z FinderQC po wklejonym linku. */
 export const finderQcByLink = createServerFn({ method: "POST" })
@@ -8,7 +9,7 @@ export const finderQcByLink = createServerFn({ method: "POST" })
     return {
       url,
       page: Math.min(50, Math.max(1, Number(data?.page) || 1)),
-      pageSize: Math.min(12, Math.max(1, Number(data?.pageSize) || 4)),
+      pageSize: QC_SETS_PER_PAGE,
     };
   })
   .handler(async ({ data }) => {
@@ -21,7 +22,7 @@ export const finderQcByLink = createServerFn({ method: "POST" })
     ]);
     const warehouse = agent.status === 'fulfilled' ? agent.value : [];
     const found = finder.status === 'fulfilled' ? finder.value : null;
-    const images = Array.from(new Set([...warehouse, ...(found?.images ?? [])]));
+    const images = qcPageImages(warehouse, found?.images ?? []);
     if (!images.length && finder.status === 'rejected') throw new Error('Źródło QC jest chwilowo niedostępne.');
     // Transient search does not archive every image before returning. Downloads persist original bytes on demand.
     return { ok: Boolean(images.length || found?.ok), title: found?.title || '', images, totalPhotos: Math.max(images.length, found?.totalPhotos || 0), hasMore: found?.hasMore || false, source: found?.source || (warehouse.length ? 'USFans · magazyn QC' : '') };
@@ -37,7 +38,7 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
     return {
       productId,
       page: Math.min(50, Math.max(1, Number(data?.page) || 1)),
-      pageSize: Math.min(12, Math.max(1, Number(data?.pageSize) || 4)),
+      pageSize: QC_SETS_PER_PAGE,
     };
   })
   .handler(async ({ data }) => {
