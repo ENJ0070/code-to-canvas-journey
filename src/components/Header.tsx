@@ -55,7 +55,6 @@ function HeaderActions() {
 
 const tabs = [
   { to: "/", key: "nav.finder", icon: "🏠" },
-  { to: "/profil", key: "nav.profile", icon: "👤" },
   { to: "/outfity", key: "nav.outfits", icon: "👕" },
   { to: "/sprzedawcy", key: "nav.sellers", icon: "🏬" },
   { to: "/agenci", key: "nav.agents", icon: "🧭" },

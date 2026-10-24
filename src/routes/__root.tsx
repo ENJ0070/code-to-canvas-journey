@@ -152,7 +152,7 @@ function RootComponent() {
         <CartProvider>
         <div className="relative isolate min-h-screen">
           {!isPanel && !isProfile && !isQcResults && <CosmicWeb dense={pathname === "/"} />}
-          {!isPanel && <Header />}
+          {!isPanel && !isProfile && <Header />}
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           {!isPanel && !isProfile && !isQcResults && <FloatingIsland />}
