@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { QcGrid } from "@/components/QcViewer";
 import { QcLoading } from "@/components/QcLoading";
@@ -20,6 +20,8 @@ export function QcPhotos({
   loadPage,
   autoLoad = false,
   initialImages,
+  initialPage = 0,
+  initialHasMore = true,
   cols,
   showMore = false,
   emptyText = "Nie znaleziono zdjęć QC.",
@@ -30,6 +32,8 @@ export function QcPhotos({
   autoLoad?: boolean;
   /** Zdjęcia znane od razu (np. zapisane przy produkcie) — widoczne bez klikania. */
   initialImages?: string[];
+  initialPage?: number;
+  initialHasMore?: boolean;
   cols?: string;
   /** Pokazuj przycisk dociągania kolejnych zdjęć. */
   showMore?: boolean;
@@ -38,31 +42,37 @@ export function QcPhotos({
   startText?: string;
 }) {
   const [images, setImages] = useState<string[]>(initialImages ?? []);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(initialPage);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const [shown, setShown] = useState(STEP);
   const [busy, setBusy] = useState(false);
-  const [touched, setTouched] = useState(false);
+  const [touched, setTouched] = useState(initialPage > 0);
   const [error, setError] = useState('');
+  const inFlight = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
   const fetchNext = useCallback(async () => {
-    if (busy) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setError('');
     setBusy(true);
     setTouched(true);
     const next = page + 1;
     try {
       const res = await loadPage(next);
+      if (!mounted.current) return;
       setImages((prev) => Array.from(new Set([...prev, ...res.images])));
       setHasMore(res.hasMore);
       setPage(next);
       setShown((s) => Math.max(s, next === 1 ? STEP : s + STEP));
     } catch {
-      setError('Nie udało się połączyć ze źródłem QC. Spróbuj ponownie.');
+      if (mounted.current) setError('Nie udało się połączyć ze źródłem QC. Spróbuj ponownie.');
     } finally {
-      setBusy(false);
+      inFlight.current = false;
+      if (mounted.current) setBusy(false);
     }
-  }, [loadPage, page, busy]);
+  }, [loadPage, page]);
 
   useEffect(() => {
     if (autoLoad && page === 0 && !busy) void fetchNext();
@@ -78,7 +88,6 @@ export function QcPhotos({
   function more() {
     if (shown < images.length) {
       setShown((s) => s + STEP);
-      if (images.length - shown <= STEP && hasMore) void fetchNext();
       return;
     }
     if (hasMore) void fetchNext();
@@ -89,7 +98,7 @@ export function QcPhotos({
   return (
     <div className="space-y-3">
       {images.length > 0 ? <QcGrid images={images.slice(0, shown)} {...(cols ? { cols } : {})} /> : null}
-      {busy ? <QcLoading seconds={images.length ? 2 : 4} /> : null}
+      {busy ? <QcLoading /> : null}
       {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
       {!busy && !error && touched && images.length === 0 ? (
         <p className="rounded-xl border border-border bg-surface-deep p-4 text-center text-sm text-muted-foreground">

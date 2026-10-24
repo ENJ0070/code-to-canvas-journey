@@ -1,28 +1,12 @@
-import { useEffect, useState } from "react";
+import { LoaderCircle } from 'lucide-react';
 
-const EMOJIS = ["🔍", "📦", "📸", "✨"];
-
-/** Animowany loader QC z emoji i odliczaniem (3–5 s). */
-export function QcLoading({ seconds = 4, label = "Szukam zdjęć QC" }: { seconds?: number; label?: string }) {
-  const [left, setLeft] = useState(seconds);
-  const [frame, setFrame] = useState(0);
-
-  useEffect(() => {
-    const a = setInterval(() => setLeft((v) => (v > 1 ? v - 1 : 1)), 1000);
-    const b = setInterval(() => setFrame((f) => (f + 1) % EMOJIS.length), 400);
-    return () => {
-      clearInterval(a);
-      clearInterval(b);
-    };
-  }, []);
+/** No polling state or guessed countdown while the provider is working. */
+export function QcLoading({ label = "Szukam zdjęć QC" }: { seconds?: number; label?: string }) {
 
   return (
-    <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface-deep p-6 text-center">
-      <span className="text-3xl" aria-hidden>
-        {EMOJIS[frame]}
-      </span>
+    <div role="status" className="flex min-h-40 flex-col items-center justify-center gap-3 border-y border-border bg-surface-deep p-6 text-center">
+      <LoaderCircle className="h-6 w-6 animate-spin motion-reduce:animate-none text-muted-foreground" aria-hidden/>
       <p className="text-sm font-semibold">{label}…</p>
-      <p className="text-xs text-muted-foreground">~{left} s</p>
     </div>
   );
 }

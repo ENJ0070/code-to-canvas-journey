@@ -23,6 +23,7 @@ import { Route as QcRouteImport } from './routes/qc'
 import { Route as SellerRouteImport } from './routes/seller'
 import { Route as SprzedawcyRouteImport } from './routes/sprzedawcy'
 import { Route as ApiRemoveBackgroundRouteImport } from './routes/api/remove-background'
+import { Route as QcWynikiRouteImport } from './routes/qc_.wyniki'
 import { Route as SklepSlugRouteImport } from './routes/sklep.$slug'
 import { Route as ApiPublicProductImageRouteImport } from './routes/api/public/product-image'
 
@@ -96,6 +97,11 @@ const ApiRemoveBackgroundRoute = ApiRemoveBackgroundRouteImport.update({
   path: '/api/remove-background',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QcWynikiRoute = QcWynikiRouteImport.update({
+  id: '/qc_/wyniki',
+  path: '/qc/wyniki',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SklepSlugRoute = SklepSlugRouteImport.update({
   id: '/sklep/$slug',
   path: '/sklep/$slug',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/seller': typeof SellerRoute
   '/sprzedawcy': typeof SprzedawcyRoute
   '/api/remove-background': typeof ApiRemoveBackgroundRoute
+  '/qc/wyniki': typeof QcWynikiRoute
   '/sklep/$slug': typeof SklepSlugRoute
   '/api/public/product-image': typeof ApiPublicProductImageRoute
 }
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/seller': typeof SellerRoute
   '/sprzedawcy': typeof SprzedawcyRoute
   '/api/remove-background': typeof ApiRemoveBackgroundRoute
+  '/qc/wyniki': typeof QcWynikiRoute
   '/sklep/$slug': typeof SklepSlugRoute
   '/api/public/product-image': typeof ApiPublicProductImageRoute
 }
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/seller': typeof SellerRoute
   '/sprzedawcy': typeof SprzedawcyRoute
   '/api/remove-background': typeof ApiRemoveBackgroundRoute
+  '/qc_/wyniki': typeof QcWynikiRoute
   '/sklep/$slug': typeof SklepSlugRoute
   '/api/public/product-image': typeof ApiPublicProductImageRoute
 }
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/seller'
     | '/sprzedawcy'
     | '/api/remove-background'
+    | '/qc/wyniki'
     | '/sklep/$slug'
     | '/api/public/product-image'
   fileRoutesByTo: FileRoutesByTo
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/seller'
     | '/sprzedawcy'
     | '/api/remove-background'
+    | '/qc/wyniki'
     | '/sklep/$slug'
     | '/api/public/product-image'
   id:
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/seller'
     | '/sprzedawcy'
     | '/api/remove-background'
+    | '/qc_/wyniki'
     | '/sklep/$slug'
     | '/api/public/product-image'
   fileRoutesById: FileRoutesById
@@ -234,6 +246,7 @@ export interface RootRouteChildren {
   SellerRoute: typeof SellerRoute
   SprzedawcyRoute: typeof SprzedawcyRoute
   ApiRemoveBackgroundRoute: typeof ApiRemoveBackgroundRoute
+  QcWynikiRoute: typeof QcWynikiRoute
   SklepSlugRoute: typeof SklepSlugRoute
   ApiPublicProductImageRoute: typeof ApiPublicProductImageRoute
 }
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRemoveBackgroundRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/qc_/wyniki': {
+      id: '/qc_/wyniki'
+      path: '/qc/wyniki'
+      fullPath: '/qc/wyniki'
+      preLoaderRoute: typeof QcWynikiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sklep/$slug': {
       id: '/sklep/$slug'
       path: '/sklep/$slug'
@@ -370,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellerRoute: SellerRoute,
   SprzedawcyRoute: SprzedawcyRoute,
   ApiRemoveBackgroundRoute: ApiRemoveBackgroundRoute,
+  QcWynikiRoute: QcWynikiRoute,
   SklepSlugRoute: SklepSlugRoute,
   ApiPublicProductImageRoute: ApiPublicProductImageRoute,
 }
