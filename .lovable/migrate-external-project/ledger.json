@@ -1,0 +1,58 @@
+[
+ {
+  "capability": "code",
+  "source": "TanStack Start app",
+  "outcome": "migrate",
+  "status": "verified",
+  "next_action": "copy source"
+ },
+ {
+  "capability": "schema",
+  "source": "supabase/migrations",
+  "outcome": "migrate",
+  "status": "verified",
+  "next_action": "apply in Lovable Cloud"
+ },
+ {
+  "capability": "records",
+  "source": "hosted DB + bundled JSON snapshot",
+  "outcome": "migrate",
+  "status": "pending",
+  "next_action": "request table CSV exports"
+ },
+ {
+  "capability": "auth identities",
+  "source": "Cloud auth (sellers, admin)",
+  "outcome": "migrate",
+  "status": "pending",
+  "next_action": "request user export"
+ },
+ {
+  "capability": "uploaded file bytes",
+  "source": "product-images bucket",
+  "outcome": "migrate",
+  "status": "pending",
+  "next_action": "request photo export"
+ },
+ {
+  "capability": "secrets",
+  "source": "PANEL_SESSION_SECRET, PANEL_ADMIN_LOGIN/PASSWORD",
+  "outcome": "migrate",
+  "status": "PANEL_SESSION_SECRET generated; admin login/password pending",
+  "next_action": "set via secure form"
+ },
+ {
+  "capability": "AI (translate, bg removal)",
+  "source": "Lovable AI",
+  "outcome": "keep",
+  "status": "migrated, not live-tested",
+  "next_action": "verify"
+ },
+ {
+  "capability": "public endpoint",
+  "source": "/api/public/product-image",
+  "outcome": "keep",
+  "status": "migrated",
+  "next_action": "verify"
+ }
+]

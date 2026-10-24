@@ -1,0 +1,27 @@
+# RENJP
+- [x] Replace homepage promotion artwork with matching colors and a right-side −25% tag; preserve copy and remove background-logo uploads.
+- [x] Configure administrator login/password securely and verify sign-in.
+- [x] Add screenshot categories and match category emojis in the catalogue and management panel.
+- [x] Restore original presentation outside the homepage and original colors; keep only requested homepage layout changes and secure authentication.
+- [x] Restore admin login/password without email; verify login, settings save and uploaded homepage banner.
+- [x] Import public application pages and tools; verify route rendering.
+- [x] Rebuild homepage with PKMR offer; cursor-following spiderweb removed on request (static decorative web only).
+- [x] Keep outfit link in menu only; tool tiles under the hero; categories above products; weight calculator only on the tools page.
+- [x] Sort products without photos last in the shared catalogue used by browsing surfaces.
+- [x] Create Cloud schema, secure panel authentication, private photo storage and archive endpoint.
+- [x] Implement streaming AI background removal; gateway returns completed image.
+- [x] Verify filters, calculator, mobile width and unsigned-access rejection.
+- [ ] Import existing records, user IDs/emails and photo bytes (waiting for owner exports).
+- [x] Verify admin settings writes and signed-in image upload/display.
+- [ ] Verify seller invitations and original account ownership (waiting for source user data).
+- [ ] Verify live QC/tracking and external agent integrations (waiting for real test links/numbers and any source integration setup).
+- [ ] Verify hosted cutover (app unpublished; publishing not requested).
+- [x] Editable per-agent bonus popup (code, signup link, texts), LoveGoBuy first.
+- [x] Admin-only raw source link under agent links in product editor.
+- [x] Products CSV: Litbuy links → LoveGoBuy.
+- [x] Whole-site automatic translation for every language.
+- [x] Seller login with username + password only (no email) — panel assigns login and password, /seller signs in with them.
+- [x] Connect hosted backend (Lovable Cloud), recreate secure schema, private photo bucket and email sign-in.
+- [x] Import records: 439 products, 3 agents, 18 categories, 19 settings, 1 seller, 4 social links, 3 shipping lines.
+- [x] Copy product photos and social icons into the project's own private photo storage; no links left to the old backend.
+- [x] Verify administrator sign-in, seller creation in the panel and seller sign-in at /seller.
