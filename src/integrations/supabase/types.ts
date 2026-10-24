@@ -14,7 +14,18 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lovable_probe: {
+        Row: {
+          id: number
+        }
+        Insert: {
+          id: number
+        }
+        Update: {
+          id?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
