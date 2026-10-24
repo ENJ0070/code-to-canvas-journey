@@ -1,4 +1,6 @@
 # RENJP
+- [x] Import uploaded 440-product CSV; archive 412 main photos and available warehouse QC, recover 72 broken image references, verify product search and QC download; investigate FindQC access.
+- [ ] Recover 22 remaining legacy main photos (requires original image files or accessible product photos); connect FindQC only after authorized API documentation/access is available.
 - [x] Hide public profile navigation and site header on the shareable profile; match screenshot categories and remove old catalogue fallback (hosted products already empty); verify public pages.
 - [x] Separate pasted-link QC results from tools and catalogue, optimize loading, and exclude product/color photos; verify warehouse photos, original download and mobile layout.
 - [x] Check existing errors and verify public pages and regression tests.
