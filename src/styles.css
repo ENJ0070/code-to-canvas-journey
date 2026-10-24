@@ -275,11 +275,16 @@
 .home-layout .product-grid { gap:20px; }
 
 /* Internal profile: shared palette, translucent links and optional full-bleed media. */
-:root { --profile-overlay: color-mix(in oklab, var(--surface-deep) 65%, transparent); --profile-glass: color-mix(in oklab, var(--surface) 78%, transparent); }
-.profile-stage { position:relative; min-height:calc(100svh - 92px); overflow:hidden; background:var(--surface-deep); padding:64px 24px 32px; }
-.profile-backdrop { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-.profile-shade { position:absolute; inset:0; background:var(--profile-overlay); }
-.profile-column { position:relative; z-index:2; width:100%; max-width:460px; margin:auto; }
+:root { --profile-overlay: color-mix(in oklab, var(--surface-deep) 65%, transparent); --profile-glass: color-mix(in oklab, var(--surface) 78%, transparent); --profile-cursor: oklch(1 0 0); --profile-cursor-shadow: 0 0 10px color-mix(in oklab, var(--profile-cursor) 35%, transparent); }
+.profile-stage { --profile-x:0; --profile-y:0; position:relative; display:grid; align-items:center; min-height:100svh; min-height:100dvh; width:100%; overflow:clip; background:var(--surface-deep); padding:92px 32px 48px; isolation:isolate; }
+.profile-backdrop { position:fixed; inset:-30px; width:calc(100% + 60px); height:calc(100% + 60px); max-width:none; object-fit:cover; pointer-events:none; transform:translate3d(calc(var(--profile-x) * -12px),calc(var(--profile-y) * -12px),0); will-change:transform; }
+.profile-shade { position:fixed; inset:0; background:var(--profile-overlay); pointer-events:none; }
+.profile-column { position:relative; z-index:2; width:100%; max-width:460px; margin:auto; transform:perspective(1100px) translate3d(calc(var(--profile-x) * 10px),calc(var(--profile-y) * 8px),0) rotateX(calc(var(--profile-y) * -4deg)) rotateY(calc(var(--profile-x) * 5deg)); will-change:transform; transform-origin:center; }
+.profile-cursor { display:none; position:fixed; top:0; left:0; z-index:100; pointer-events:none; }
+.profile-cursor span { display:block; width:10px; height:10px; border-radius:50%; background:var(--profile-cursor); box-shadow:var(--profile-cursor-shadow); transform:translate(-50%,-50%); }
+@media (hover:hover) and (pointer:fine) { .profile-pointer-active, .profile-pointer-active * { cursor:none !important; } .profile-pointer-active .profile-cursor { display:block; } }
+.profile-stage .profile-entry { position:fixed; inset:0; width:100%; height:100dvh; z-index:50; border-radius:0; background:var(--profile-overlay); color:var(--foreground); backdrop-filter:blur(18px); font-size:18px; font-weight:500; }
+.profile-stage .profile-entry:hover { background:var(--profile-overlay); }
 .profile-identity { text-align:center; margin-bottom:32px; }
 .profile-avatar { width:96px; height:96px; margin:0 auto 20px; border-radius:50%; object-fit:cover; border:2px solid var(--border); box-shadow:var(--glow-strong); animation:profile-avatar-tilt 4s ease-in-out infinite; }
 @keyframes profile-avatar-tilt { 0%,100% { transform:rotate(0deg); } 25% { transform:rotate(-20deg); } 75% { transform:rotate(20deg); } }
@@ -300,11 +305,17 @@
 .profile-link { display:flex; align-items:center; gap:14px; min-height:72px; padding:14px 18px; }
 .profile-link > img,.profile-link-symbol { display:grid; place-items:center; width:38px; height:38px; border-radius:6px; object-fit:cover; flex-shrink:0; background:var(--secondary); color:var(--brand-sky); }
 .profile-footer { display:flex; justify-content:center; gap:10px; margin-top:40px; font-size:10px; color:var(--muted-foreground); }
-.profile-controls { position:absolute; z-index:3; top:20px; right:24px; display:flex; gap:8px; }
+.profile-controls { position:fixed; z-index:3; top:max(20px,env(safe-area-inset-top)); left:max(24px,env(safe-area-inset-left)); display:flex; gap:8px; }
+.profile-volume { display:grid; grid-template-columns:36px minmax(70px,100px) 36px; align-items:center; gap:10px; padding:4px 12px 4px 4px; background:var(--profile-glass); border:1px solid var(--border); border-radius:8px; backdrop-filter:blur(18px); }
+.profile-volume output { font-size:11px; color:var(--muted-foreground); text-align:right; font-variant-numeric:tabular-nums; }
+.profile-share { position:fixed; z-index:3; top:max(20px,env(safe-area-inset-top)); right:max(24px,env(safe-area-inset-right)); }
 .profile-preview { min-height:0; padding:40px 20px 24px; }
+.profile-preview .profile-backdrop,.profile-preview .profile-shade { position:absolute; }
 .profile-preview .profile-identity h1 { font-size:26px; }
-.profile-snow { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:1; }
+.profile-snow { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:1; transform:translate3d(calc(var(--profile-x) * 6px),0,0); }
+.profile-preview .profile-snow { position:absolute; }
 .profile-snow span { position:absolute; top:-20px; color:var(--primary); opacity:.45; font-size:9px; animation:profile-snowfall linear infinite; }
 @keyframes profile-snowfall { from { transform:translate3d(0,-20px,0) rotate(0); } to { transform:translate3d(28px,1200px,0) rotate(180deg); } }
-@media (prefers-reduced-motion:reduce) { .profile-snow { display:none; } .profile-featured,.profile-link { transition:none; } }
-@media(max-width:640px) { .profile-stage { padding:64px 18px 28px; } .profile-controls { top:16px; right:18px; } .profile-identity h1 { font-size:28px; } .profile-link { padding:12px; } }
+@media (prefers-reduced-motion:reduce) { .profile-snow { display:none; } .profile-featured,.profile-link { transition:none; } .profile-column,.profile-backdrop { transform:none; will-change:auto; } }
+@media (hover:none), (pointer:coarse) { .profile-column,.profile-backdrop { transform:none; will-change:auto; } .profile-cursor { display:none; } }
+@media(max-width:640px) { .profile-stage { padding:88px 18px max(28px,env(safe-area-inset-bottom)); } .profile-controls { top:max(16px,env(safe-area-inset-top)); left:16px; } .profile-share { top:max(16px,env(safe-area-inset-top)); right:16px; } .profile-volume { grid-template-columns:32px minmax(64px,86px) 32px; gap:8px; } .profile-identity h1 { font-size:28px; } .profile-link { padding:12px; } .profile-link > svg,.profile-featured-caption > svg { flex-shrink:0; } .profile-featured-caption { padding:16px; } }
