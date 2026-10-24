@@ -10,15 +10,19 @@ export const lookupQc = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { fetchAgentDetails } = await import("@/lib/agentApi");
     const details = await fetchAgentDetails(data.url).catch(() => null);
-    if (!details) return { ok: false as const, error: "not-found" };
+    const { fetchFinderQcByUrl } = await import('@/lib/finderqc.server');
+    const finder = details?.qcImages.length ? null : await fetchFinderQcByUrl(data.url, 1, 4);
+    const { archiveProductImages } = await import('@/lib/image-storage.server');
+    const saved = await archiveProductImages({ qc_images: details?.qcImages.length ? details.qcImages : finder?.images ?? [] });
+    if (!details && !saved.qc_images.length) return { ok: false as const, error: "not-found" };
     return {
       ok: true as const,
-      title: details.title,
-      priceCny: details.priceCny,
-      images: details.images,
-      colorImages: details.colorImages,
-      qcImages: details.qcImages,
-      sizes: details.sizes,
+      title: details?.title || finder?.title || '',
+      priceCny: details?.priceCny || 0,
+      images: details?.images || [],
+      colorImages: details?.colorImages || [],
+      qcImages: saved.qc_images,
+      sizes: details?.sizes || [],
     };
   });
 
@@ -85,13 +89,13 @@ export const syncProductMedia = createServerFn({ method: "POST" })
           const finder = currentQc.length
             ? null
             : await fetchFinderQcByUrl(src, 1, 10).catch(() => null);
-          if (!details) return void skipped++;
+          if (!details && !finder?.images.length) return void skipped++;
 
           const images = Array.from(
-            new Set([...currentImages, ...details.colorImages, ...details.images]),
+            new Set([...currentImages, ...(details?.colorImages ?? []), ...(details?.images ?? [])]),
           ).slice(0, 24);
           const qc = Array.from(
-            new Set([...currentQc, ...(finder?.images ?? []), ...details.qcImages]),
+            new Set([...currentQc, ...(finder?.images ?? []), ...(details?.qcImages ?? [])]),
           ).slice(0, 10);
           const patch: { images?: string[]; qc_images?: string[]; image_url?: string } = {};
           if ((!data.onlyMissing || !currentImages.length) && images.length) patch.images = images;
