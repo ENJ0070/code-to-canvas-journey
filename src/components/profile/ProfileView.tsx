@@ -100,8 +100,9 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     try { el.volume = volumeRef.current / 100; el.muted = volumeRef.current === 0; await el.play(); setPlaying(true); setAudioError(''); } catch { setAudioError('Nie udało się odtworzyć muzyki.'); }
   }
   async function toggleMusic() {
-    if (!playing) { if (volume === 0) changeVolume(previousVolume.current); await startMusic(); return; }
-    changeVolume(volume === 0 ? previousVolume.current : 0);
+    const el = audio.current;
+    if (!el || el.paused) { if (volumeRef.current === 0) changeVolume(previousVolume.current); await startMusic(); return; }
+    changeVolume(volumeRef.current === 0 ? previousVolume.current : 0);
   }
   async function share() {
     try { await navigator.clipboard.writeText(window.location.origin + '/profil'); setShared(true); setTimeout(() => setShared(false), 2000); } catch { setShared(false); }
