@@ -1,5 +1,5 @@
 # RENJP
-- [ ] Hide public profile navigation and site header on the shareable profile; match screenshot categories and remove old catalogue rows and fallback.
+- [x] Hide public profile navigation and site header on the shareable profile; match screenshot categories and remove old catalogue fallback (hosted products already empty); verify public pages.
 - [x] Separate pasted-link QC results from tools and catalogue, optimize loading, and exclude product/color photos; verify warehouse photos, original download and mobile layout.
 - [x] Check existing errors and verify public pages and regression tests.
 - [x] Add editable internal profile with featured link, tiles, background, music and snow; verify admin save/readback and image/audio uploads.
