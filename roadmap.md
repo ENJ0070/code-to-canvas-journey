@@ -1,4 +1,5 @@
 # RENJP
+- [ ] Add requested visual verification badge beside profile name.
 - [ ] Remove profile entry gate, add editable video background and Shenzhen, China location; test playback and saved settings.
 - [x] Make profile full-screen and mobile-friendly, add white dot cursor, smooth pointer-linked motion and music volume control; verified live music playback, mute/restore, volume limits and desktop/mobile layout.
 - [x] Import uploaded 440-product CSV; archive 412 main photos and available warehouse QC, recover 72 broken image references, verify product search and QC download; investigate FindQC access.
