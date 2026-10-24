@@ -14,7 +14,7 @@ export function SheetAiImport({ text, disabled, onResult, onBusy }: { text: stri
   const analyze = async () => {
     const [headers, ...rows] = parseDelimited(text);
     if (!headers || !rows.length) return;
-    stop.current = false; setRunning(true); onBusy(true); setWarnings([]);
+    stop.current = false; setRunning(true); onBusy(true); setWarnings([]); onResult([]);
     const products: ImportedRow[] = [];
     const notes: string[] = [];
     try {
