@@ -121,25 +121,25 @@ export type Database = {
           created_at: string
           dislikes: number
           display_order: number
-          for_women: boolean
+          for_women: boolean | null
           id: string
           image_url: string | null
           images: string[]
           likes: number
           price: number
           price_cny: number
-          promoted: boolean
+          promoted: boolean | null
           qc_images: string[]
           qc_url: string | null
           quality: string
           seller_id: string | null
-          show_on_home: boolean
+          show_on_home: boolean | null
           sizes: string[]
           store_name: string
           store_url: string
           tiktok_url: string | null
           title: string
-          verified: boolean
+          verified: boolean | null
           views: number
         }
         Insert: {
@@ -149,25 +149,25 @@ export type Database = {
           created_at?: string
           dislikes?: number
           display_order?: number
-          for_women?: boolean
-          id?: string
+          for_women?: boolean | null
+          id: string
           image_url?: string | null
           images?: string[]
           likes?: number
           price?: number
           price_cny?: number
-          promoted?: boolean
+          promoted?: boolean | null
           qc_images?: string[]
           qc_url?: string | null
           quality?: string
           seller_id?: string | null
-          show_on_home?: boolean
+          show_on_home?: boolean | null
           sizes?: string[]
           store_name?: string
           store_url?: string
           tiktok_url?: string | null
           title: string
-          verified?: boolean
+          verified?: boolean | null
           views?: number
         }
         Update: {
@@ -177,37 +177,37 @@ export type Database = {
           created_at?: string
           dislikes?: number
           display_order?: number
-          for_women?: boolean
+          for_women?: boolean | null
           id?: string
           image_url?: string | null
           images?: string[]
           likes?: number
           price?: number
           price_cny?: number
-          promoted?: boolean
+          promoted?: boolean | null
           qc_images?: string[]
           qc_url?: string | null
           quality?: string
           seller_id?: string | null
-          show_on_home?: boolean
+          show_on_home?: boolean | null
           sizes?: string[]
           store_name?: string
           store_url?: string
           tiktok_url?: string | null
           title?: string
-          verified?: boolean
+          verified?: boolean | null
           views?: number
         }
         Relationships: [
           {
-            foreignKeyName: "products_seller_id_fkey"
+            foreignKeyName: "products_seller_fk"
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "products_seller_id_fkey"
+            foreignKeyName: "products_seller_fk"
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "sellers_public"
