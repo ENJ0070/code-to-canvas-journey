@@ -1,4 +1,5 @@
 # RENJP
+- [ ] Verify existing external Supabase records/media and preserve current administrator credentials as a protected password hash; verify real panel sign-in.
 - [x] Check all 440 catalogue products and archive 42 new warehouse QC photos across 9 products without erasing originals; catalogue now has 1460 QC photos on 334 products.
 - [ ] Complete QC for remaining 106 products (16 lack recognizable source links; warehouse has no further photos; FinderQC returns HTTP 403 and requires authorized access).
 - [x] Request four FinderQC sets per search page and show up to twenty photos with lazy thumbnails; 14 QC tests pass; real search shows six available warehouse photos with explicit FinderQC-unavailable notice and no runtime errors.
