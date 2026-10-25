@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Publiczna odczyt: settings" ON public.settings;
+CREATE POLICY "Publiczna odczyt: settings" ON public.settings FOR SELECT TO anon, authenticated USING (left(key, 7) <> 'secret_');
