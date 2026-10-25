@@ -26,7 +26,12 @@ export const getPanelSession = createServerFn({ method: "POST" })
 
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator((data: { login: string; password: string }) => ({login:String(data?.login??'').trim().slice(0,120),password:String(data?.password??'').slice(0,500)}))
-  .handler(async ({data}) => { const {loginPanel}=await import('./panel-auth.server');return loginPanel(data.login,data.password); });
+  .handler(async ({data}) => {
+    if (!process.env['PANEL_SESSION_SECRET']) return { ok: false as const, error: 'Na tym serwerze brakuje ustawienia PANEL_SESSION_SECRET.' };
+    if (!process.env['SUPABASE_URL'] || !process.env['SUPABASE_SERVICE_ROLE_KEY']) return { ok: false as const, error: 'Na tym serwerze brakuje ustawień SUPABASE_URL lub SUPABASE_SERVICE_ROLE_KEY.' };
+    try { const {loginPanel}=await import('./panel-auth.server');return await loginPanel(data.login,data.password); }
+    catch (e) { console.error('adminLogin failed', e instanceof Error ? e.message : e); return { ok: false as const, error: 'Błąd serwera podczas logowania. Spróbuj ponownie.' }; }
+  });
 export const changeAdminCredentials = createServerFn({method:'POST'})
  .inputValidator((data:{token:string;current:string;login:string;password:string})=>data)
  .handler(async({data})=>{const {changePanelCredentials}=await import('./panel-auth.server');return changePanelCredentials(data.token,data.current,data.login,data.password)});

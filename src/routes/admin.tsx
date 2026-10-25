@@ -106,7 +106,7 @@ function AdminPage() {
 
   const login = async () => {
     setErr("");
-    const res = await adminLogin({data:{login:user.trim(),password:pass}}).catch(()=>({ok:false as const,error:"Nie udało się połączyć z panelem."}));
+    const res = await adminLogin({data:{login:user.trim(),password:pass}}).catch(()=>({ok:false as const,error:"Nie udało się połączyć z panelem. Odśwież stronę (Ctrl+F5) i spróbuj ponownie."}));
     if (!res.ok || !("token" in res)) {
       setErr("error" in res ? res.error : "Nieprawidłowy login lub hasło."); return;
     }
