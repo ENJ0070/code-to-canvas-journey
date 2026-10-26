@@ -10,10 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AgenciRouteImport } from './routes/agenci'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as EnjRouteImport } from './routes/enj'
 import { Route as LinkiRouteImport } from './routes/linki'
 import { Route as OutfityRouteImport } from './routes/outfity'
 import { Route as PoradnikRouteImport } from './routes/poradnik'
@@ -33,11 +33,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AgenciRoute = AgenciRouteImport.update({
   id: '/agenci',
   path: '/agenci',
@@ -51,6 +46,11 @@ const AuthRoute = AuthRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnjRoute = EnjRouteImport.update({
+  id: '/enj',
+  path: '/enj',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LinkiRoute = LinkiRouteImport.update({
@@ -121,10 +121,10 @@ const ApiPublicQcImageRoute = ApiPublicQcImageRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/agenci': typeof AgenciRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
+  '/enj': typeof EnjRoute
   '/linki': typeof LinkiRoute
   '/outfity': typeof OutfityRoute
   '/poradnik': typeof PoradnikRoute
@@ -141,10 +141,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/agenci': typeof AgenciRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
+  '/enj': typeof EnjRoute
   '/linki': typeof LinkiRoute
   '/outfity': typeof OutfityRoute
   '/poradnik': typeof PoradnikRoute
@@ -162,10 +162,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/agenci': typeof AgenciRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
+  '/enj': typeof EnjRoute
   '/linki': typeof LinkiRoute
   '/outfity': typeof OutfityRoute
   '/poradnik': typeof PoradnikRoute
@@ -184,10 +184,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
     | '/agenci'
     | '/auth'
     | '/cart'
+    | '/enj'
     | '/linki'
     | '/outfity'
     | '/poradnik'
@@ -204,10 +204,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/agenci'
     | '/auth'
     | '/cart'
+    | '/enj'
     | '/linki'
     | '/outfity'
     | '/poradnik'
@@ -224,10 +224,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
     | '/agenci'
     | '/auth'
     | '/cart'
+    | '/enj'
     | '/linki'
     | '/outfity'
     | '/poradnik'
@@ -245,10 +245,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
   AgenciRoute: typeof AgenciRoute
   AuthRoute: typeof AuthRoute
   CartRoute: typeof CartRoute
+  EnjRoute: typeof EnjRoute
   LinkiRoute: typeof LinkiRoute
   OutfityRoute: typeof OutfityRoute
   PoradnikRoute: typeof PoradnikRoute
@@ -273,13 +273,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/agenci': {
       id: '/agenci'
       path: '/agenci'
@@ -299,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enj': {
+      id: '/enj'
+      path: '/enj'
+      fullPath: '/enj'
+      preLoaderRoute: typeof EnjRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/linki': {
@@ -397,10 +397,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
   AgenciRoute: AgenciRoute,
   AuthRoute: AuthRoute,
   CartRoute: CartRoute,
+  EnjRoute: EnjRoute,
   LinkiRoute: LinkiRoute,
   OutfityRoute: OutfityRoute,
   PoradnikRoute: PoradnikRoute,

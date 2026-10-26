@@ -1,4 +1,10 @@
 const symbols: Record<string, string[]> = {
+  finder: ['M3 10l9-7 9 7 M5 9v12h5v-7h4v7h5V9'],
+  sprzedawcy: ['M3 10l2-7h14l2 7 M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0 M5 13v8h14v-8 M10 21v-6h4v6'],
+  agenci: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18 M15 9l-2 4-4 2 2-4z'],
+  promocje: ['M3 3h8l10 10-8 8L3 11z M7 7h.01 M12 10l5 5 M16 10h.01 M12 15h.01'],
+  poradnik: ['M12 5C8 2 4 3 2 4v15c4-2 7-1 10 1 3-2 6-3 10-1V4c-2-1-6-2-10 1z M12 5v15'],
+  tiktok: ['M14 3v12a4 4 0 1 1-4-4 M14 3c1 4 3 5 7 5 M14 7c2 3 4 4 7 4'],
   wszystkie: ['M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z'],
   akcesoria: ['M4 14a8 8 0 0 1 16 0 M4 14h16v3H4z M20 17l3 2h-9 M12 6v8'],
   'akcesoria (ciuch)': ['M5 3h14l-2 8 3 10H4l3-10z M7 11h10 M9 5v3 M15 5v3 M9 15h6'],

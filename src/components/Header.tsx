@@ -5,6 +5,7 @@ import { LANGS, LanguageFlag, useLang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { SettingsPanel } from "@/components/FloatingIsland";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
 function HeaderActions() {
   const { items } = useCart();
@@ -54,13 +55,13 @@ function HeaderActions() {
 }
 
 const tabs = [
-  { to: "/", key: "nav.finder", icon: "🏠" },
-  { to: "/outfity", key: "nav.outfits", icon: "👕" },
-  { to: "/sprzedawcy", key: "nav.sellers", icon: "🏬" },
-  { to: "/agenci", key: "nav.agents", icon: "🧭" },
-  { to: "/promocje", key: "nav.promos", icon: "🔥" },
-  { to: "/poradnik", key: "nav.guide", icon: "📘" },
-  { to: "/linki", key: "nav.tiktok", icon: "🎵" },
+  { to: "/", key: "nav.finder", icon: "finder" },
+  { to: "/outfity", key: "nav.outfits", icon: "koszulki" },
+  { to: "/sprzedawcy", key: "nav.sellers", icon: "sprzedawcy" },
+  { to: "/agenci", key: "nav.agents", icon: "agenci" },
+  { to: "/promocje", key: "nav.promos", icon: "promocje" },
+  { to: "/poradnik", key: "nav.guide", icon: "poradnik" },
+  { to: "/linki", key: "nav.tiktok", icon: "tiktok" },
 ] as const;
 
 export function Header() {
@@ -97,8 +98,8 @@ export function Header() {
                     "whitespace-nowrap rounded-lg px-2.5 py-2 text-[13px] font-semibold text-primary bg-secondary glow-ring xl:px-3 xl:text-sm",
                 }}
               >
-                <span aria-hidden="true" className="mr-1.5 hidden xl:inline">
-                  {tb.icon}
+                <span aria-hidden="true" className="mr-1.5 inline-flex align-middle">
+                  <CategoryIcon name={tb.icon} />
                 </span>
                 {t(tb.key)}
               </Link>
@@ -118,8 +119,8 @@ export function Header() {
                   "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold text-primary bg-secondary",
               }}
             >
-              <span aria-hidden="true" className="mr-1">
-                {tb.icon}
+              <span aria-hidden="true" className="mr-1 inline-flex align-middle">
+                <CategoryIcon name={tb.icon} />
               </span>
               {t(tb.key)}
             </Link>

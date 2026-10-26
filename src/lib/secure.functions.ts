@@ -77,6 +77,12 @@ export const secureMutate = createServerFn({ method: "POST" })
     const session = await verifyToken(data.token);
     if (!session) return { error: "Unauthorized" };
 
+    // Credential changes must always require the current password, not a generic settings write.
+    if (data.table === "settings") {
+      const rows = Array.isArray(data.values) ? data.values : [data.values];
+      if (rows.some(row => row && typeof row === "object" && String((row as Record<string, unknown>)['key'] ?? '').startsWith('secret_'))) return { error: "Unauthorized" };
+    }
+
     if (session.role === "seller") {
       if (data.op === "upsert") return { error: "Unauthorized" };
       // Sellers may only manage their own products and their own store row.
@@ -340,15 +346,17 @@ export const adminDeleteSeller = createServerFn({ method: "POST" })
 
 /** Admin-only: usuwa WSZYSTKIE produkty (opcjonalnie tylko danego sprzedawcy) po potwierdzeniu hasłem. */
 export const adminDeleteAllProducts = createServerFn({ method: "POST" })
-  .inputValidator((data: { token: string; passwordHash: string; sellerId?: string | null }) => ({
+  .inputValidator((data: { token: string; password: string; sellerId?: string | null }) => ({
     token: cleanToken(data?.token),
-    passwordHash: String(data?.passwordHash ?? "").trim(),
+    password: typeof data?.password === 'string' && data.password.length <= 500 ? data.password : '',
     sellerId: data?.sellerId ? String(data.sellerId).slice(0, 100) : null,
   }))
   .handler(async ({ data }) => {
     const { verifyToken } = await import("@/lib/session.server");
     const session = await verifyToken(data.token);
     if (!session || session.role !== "admin") return { error: "Unauthorized", deleted: 0 };
+    const { confirmPanelPassword } = await import("@/lib/panel-auth.server");
+    if (!await confirmPanelPassword(data.token, data.password)) return { error: "Wrong password", deleted: 0 };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("products").delete({ count: "exact" });
     q = data.sellerId ? q.eq("seller_id", data.sellerId) : q.not("id", "is", null);

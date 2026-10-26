@@ -35,7 +35,6 @@ import {
   parseList,
   safeStorage,
   saveSetting,
-  sha256Hex,
   useAgents,
   useAgentsRaw,
   useCategories,
@@ -53,7 +52,7 @@ import {
 
 
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/enj")({
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
@@ -2530,7 +2529,7 @@ function ImportTab() {
             const pass = prompt(`Usunąć ${who}? Wpisz hasło administratora:`);
             if (!pass) return;
             const res = await adminDeleteAllProducts({
-              data: { token: getPanelToken(), passwordHash: await sha256Hex(pass), sellerId: sellerId || null },
+              data: { token: getPanelToken(), password: pass, sellerId: sellerId || null },
             }).catch(() => ({ error: "Operation failed", deleted: 0 }));
             if (res.error === "Wrong password") toast.error("Złe hasło.");
             else if (res.error) toast.error("Nie udało się usunąć produktów.");
