@@ -1,5 +1,5 @@
 # RENJP
-- [ ] Harden panel session and credential validation, replace navigation emoji with vector icons, rename /admin to /enj, and verify changes.
+- [x] Harden signed sessions and credential checks, fail closed on storage errors, rate-limit password checks, require real password for bulk deletion, replace menu emoji with vector icons and move /admin to /enj; seven tests and real panel login passed.
 - [x] Verify existing external Supabase records/media and preserve current administrator credentials as a protected password hash; fresh real panel sign-in succeeded and private settings are hidden from public reads.
 - [ ] Recover missing pre-cutover QC photos and remaining old media/settings (requires the previous database/storage export or original files; current external database has no archived QC photos).
 - [x] Check all 440 catalogue products and archive 42 new warehouse QC photos across 9 products without erasing originals; catalogue now has 1460 QC photos on 334 products.
