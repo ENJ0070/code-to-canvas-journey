@@ -8,7 +8,7 @@ import { useLang } from "@/lib/i18n";
  */
 const ENTRY_PATH = typeof window === "undefined" ? "/" : window.location.pathname;
 const SHOWN_ON_LOAD = // pokazujemy od razu po załadowaniu każdej publicznej strony
-  !ENTRY_PATH.startsWith("/admin") && !ENTRY_PATH.startsWith("/seller");
+  !ENTRY_PATH.startsWith("/enj") && !ENTRY_PATH.startsWith("/seller");
 
 /** Okienko otwiera się najwyżej raz na załadowanie strony. */
 let openedThisLoad = false;
