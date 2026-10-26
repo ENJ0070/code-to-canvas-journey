@@ -52,7 +52,7 @@ import {
 
 
 
-export const Route = createFileRoute("/enj")({
+export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
