@@ -12,6 +12,8 @@
 - Preserve the target TanStack bootstrap and generated Cloud integration modules when importing source; these bind the app to its runtime.
 - Authenticate admin operations with server-signed, expiring sessions and server-only credentials; seller operations use Cloud identity and protected roles. Never bundle credentials.
 - Keep panel credential hashes and login-attempt state behind the settings secret_ row filter; persist credentials only through the authenticated panel flow so public settings reads never expose them.
+- Validate exact signed-token structure and bounded expiry, fail closed on credential/throttle storage errors, and require rate-limited current-password verification for credential changes and bulk deletion; generic settings writes cannot touch secret_ keys. Why: browser confirmation and a renamed panel URL are not authorization.
+- The administrator content route is /enj, with no legacy /admin alias; keep navigation and panel layout detection aligned. Why: the requested private panel address must replace the old address.
 - Keep immutable product/QC image bytes in private storage and expose only intentionally public archive/catalog prefixes through the cached photo endpoint.
 - Use streaming image editing with an authenticated server route; persist terminal access blocks and never automatically retry denied requests.
 
