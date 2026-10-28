@@ -70,44 +70,23 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   useEffect(() => {
     const el = audio.current;
     if (preview || !config.music || !el) return;
-    let done = false;
     started.current = false;
-    const gestureEvents = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'] as const;
-    const unmute = (event?: Event) => {
-      if (!autoMutedRef.current) return;
-      if (event?.target instanceof Element && event.target.closest('.profile-volume')) return;
-      autoMutedRef.current = false;
-      setAutoMuted(false);
-      el.muted = volumeRef.current === 0;
-      window.removeEventListener('pointerdown', unmute);
-      window.removeEventListener('keydown', unmute);
+    // Music never starts by itself; it only plays after the visitor presses the music button.
+    // Leaving the tab pauses it and nothing resumes it automatically (mobile tab-switch bug).
+    const onHidden = () => { if (document.hidden && !el.paused) el.pause(); };
+    const onPause = () => setPlaying(false);
+    const onPlay = () => setPlaying(true);
+    document.addEventListener('visibilitychange', onHidden);
+    window.addEventListener('pagehide', onHidden);
+    el.addEventListener('pause', onPause);
+    el.addEventListener('play', onPlay);
+    return () => {
+      el.pause();
+      document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener('pagehide', onHidden);
+      el.removeEventListener('pause', onPause);
+      el.removeEventListener('play', onPlay);
     };
-    const start = async (event?: Event) => {
-      if (done) return;
-      // The volume controls handle their own gesture; starting here too would make the same click mute again.
-      if (event?.target instanceof Element && event.target.closest('.profile-volume')) return;
-      seekStart(el);
-      try {
-        el.volume = volumeRef.current / 100; el.muted = false;
-        await el.play(); done = true; setPlaying(true); setAudioError(''); cleanup();
-      } catch {
-        // Browsers block unmuted autoplay: start the music straight away muted, then unmute on the first interaction.
-        try {
-          el.muted = true;
-          autoMutedRef.current = true; setAutoMuted(true);
-          await el.play(); done = true; setPlaying(true); cleanup();
-          window.addEventListener('pointerdown', unmute, { passive: true });
-          window.addEventListener('keydown', unmute);
-        } catch { /* Browser still refuses playback; keep the profile visible and silent. */ }
-      }
-    };
-    const onPlaying = () => { done = true; setPlaying(true); cleanup(); };
-    const cleanup = () => { gestureEvents.forEach(ev => window.removeEventListener(ev, start)); el.removeEventListener('playing', onPlaying); window.removeEventListener('pointerdown', unmute); window.removeEventListener('keydown', unmute); };
-    gestureEvents.forEach(ev => window.addEventListener(ev, start, { passive: true }));
-    el.addEventListener('playing', onPlaying);
-    void start();
-    return () => { done = true; cleanup(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.music, preview]);
   function changeVolume(value: number) {
     const next = Math.max(0, Math.min(100, value));
@@ -115,7 +94,6 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     volumeRef.current = next;
     if (next > 0) previousVolume.current = next;
     if (audio.current) { audio.current.volume = next / 100; audio.current.muted = next === 0; }
-    if (next > 0 && autoMutedRef.current) { autoMutedRef.current = false; setAutoMuted(false); }
   }
   async function startMusic() {
     const el = audio.current;
@@ -125,9 +103,9 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   }
   async function toggleMusic() {
     const el = audio.current;
-    if (el && autoMutedRef.current) { autoMutedRef.current = false; setAutoMuted(false); el.muted = volumeRef.current === 0; return; }
-    if (!el || (el.paused && !playing)) { if (volumeRef.current === 0) changeVolume(previousVolume.current); await startMusic(); return; }
-    changeVolume(volumeRef.current === 0 ? previousVolume.current : 0);
+    if (!el) return;
+    if (el.paused) { if (volumeRef.current === 0) changeVolume(previousVolume.current); await startMusic(); return; }
+    el.pause();
   }
   async function share() {
     try { await navigator.clipboard.writeText(window.location.origin + '/profil'); setShared(true); setTimeout(() => setShared(false), 2000); } catch { setShared(false); }
