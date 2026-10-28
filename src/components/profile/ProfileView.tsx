@@ -11,8 +11,6 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   const stage = useRef<HTMLDivElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [autoMuted, setAutoMuted] = useState(false);
-  const autoMutedRef = useRef(false);
   const [volume, setVolume] = useState(70);
   const volumeRef = useRef(70);
   const previousVolume = useRef(70);
@@ -70,44 +68,23 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   useEffect(() => {
     const el = audio.current;
     if (preview || !config.music || !el) return;
-    let done = false;
     started.current = false;
-    const gestureEvents = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'] as const;
-    const unmute = (event?: Event) => {
-      if (!autoMutedRef.current) return;
-      if (event?.target instanceof Element && event.target.closest('.profile-volume')) return;
-      autoMutedRef.current = false;
-      setAutoMuted(false);
-      el.muted = volumeRef.current === 0;
-      window.removeEventListener('pointerdown', unmute);
-      window.removeEventListener('keydown', unmute);
+    // Music never starts by itself; it only plays after the visitor presses the music button.
+    // Leaving the tab pauses it and nothing resumes it automatically (mobile tab-switch bug).
+    const onHidden = () => { if (document.hidden && !el.paused) el.pause(); };
+    const onPause = () => setPlaying(false);
+    const onPlay = () => setPlaying(true);
+    document.addEventListener('visibilitychange', onHidden);
+    window.addEventListener('pagehide', onHidden);
+    el.addEventListener('pause', onPause);
+    el.addEventListener('play', onPlay);
+    return () => {
+      el.pause();
+      document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener('pagehide', onHidden);
+      el.removeEventListener('pause', onPause);
+      el.removeEventListener('play', onPlay);
     };
-    const start = async (event?: Event) => {
-      if (done) return;
-      // The volume controls handle their own gesture; starting here too would make the same click mute again.
-      if (event?.target instanceof Element && event.target.closest('.profile-volume')) return;
-      seekStart(el);
-      try {
-        el.volume = volumeRef.current / 100; el.muted = false;
-        await el.play(); done = true; setPlaying(true); setAudioError(''); cleanup();
-      } catch {
-        // Browsers block unmuted autoplay: start the music straight away muted, then unmute on the first interaction.
-        try {
-          el.muted = true;
-          autoMutedRef.current = true; setAutoMuted(true);
-          await el.play(); done = true; setPlaying(true); cleanup();
-          window.addEventListener('pointerdown', unmute, { passive: true });
-          window.addEventListener('keydown', unmute);
-        } catch { /* Browser still refuses playback; keep the profile visible and silent. */ }
-      }
-    };
-    const onPlaying = () => { done = true; setPlaying(true); cleanup(); };
-    const cleanup = () => { gestureEvents.forEach(ev => window.removeEventListener(ev, start)); el.removeEventListener('playing', onPlaying); window.removeEventListener('pointerdown', unmute); window.removeEventListener('keydown', unmute); };
-    gestureEvents.forEach(ev => window.addEventListener(ev, start, { passive: true }));
-    el.addEventListener('playing', onPlaying);
-    void start();
-    return () => { done = true; cleanup(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.music, preview]);
   function changeVolume(value: number) {
     const next = Math.max(0, Math.min(100, value));
@@ -115,7 +92,6 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     volumeRef.current = next;
     if (next > 0) previousVolume.current = next;
     if (audio.current) { audio.current.volume = next / 100; audio.current.muted = next === 0; }
-    if (next > 0 && autoMutedRef.current) { autoMutedRef.current = false; setAutoMuted(false); }
   }
   async function startMusic() {
     const el = audio.current;
@@ -125,9 +101,9 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   }
   async function toggleMusic() {
     const el = audio.current;
-    if (el && autoMutedRef.current) { autoMutedRef.current = false; setAutoMuted(false); el.muted = volumeRef.current === 0; return; }
-    if (!el || (el.paused && !playing)) { if (volumeRef.current === 0) changeVolume(previousVolume.current); await startMusic(); return; }
-    changeVolume(volumeRef.current === 0 ? previousVolume.current : 0);
+    if (!el) return;
+    if (el.paused) { if (volumeRef.current === 0) changeVolume(previousVolume.current); await startMusic(); return; }
+    el.pause();
   }
   async function share() {
     try { await navigator.clipboard.writeText(window.location.origin + '/profil'); setShared(true); setTimeout(() => setShared(false), 2000); } catch { setShared(false); }
@@ -138,7 +114,7 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     {config.backgroundVideo && !videoFailed && <video key={config.backgroundVideo} src={config.backgroundVideo} poster={config.background || undefined} autoPlay loop muted playsInline preload="metadata" className="profile-backdrop" aria-hidden="true" onError={() => setVideoFailed(true)} />}
     <div className="profile-shade" />
     {config.decoration === 'snow' && <div className="profile-snow" aria-hidden="true">{Array.from({ length: 30 }, (_, i) => <span key={i} style={{ left: `${(i * 37 + 3) % 100}%`, animationDelay: `${-i * .73}s`, animationDuration: `${9 + i % 8}s` }}>✦</span>)}</div>}
-    {!preview && <><div className="profile-controls">{config.music && <div className="profile-volume"><Button variant="ghost" size="icon" title={playing && volume > 0 ? 'Wycisz muzykę' : 'Włącz muzykę'} aria-label={playing && volume > 0 ? 'Wycisz muzykę' : 'Włącz muzykę'} onClick={() => void toggleMusic()}>{playing && volume > 0 ? <Volume2 size={18}/> : <VolumeX size={18}/>}</Button><Slider aria-label="Głośność muzyki" value={[volume]} min={0} max={100} step={1} onValueChange={values => { const value = values[0]; if (value !== undefined) changeVolume(value); }} /><output aria-live="off">{volume}%</output></div>}</div><div className="profile-share"><Button variant="outline" size="icon" title={shared ? 'Skopiowano link' : 'Kopiuj link do profilu'} aria-label="Kopiuj link do profilu" onClick={() => void share()}><Share2 size={17}/></Button></div></>}
+    {!preview && <><div className="profile-controls">{config.music && <div className="profile-volume"><Button variant="ghost" size="icon" title={playing ? 'Zatrzymaj muzykę' : 'Włącz muzykę'} aria-label={playing ? 'Zatrzymaj muzykę' : 'Włącz muzykę'} onClick={() => void toggleMusic()}>{playing && volume > 0 ? <Volume2 size={18}/> : <VolumeX size={18}/>}</Button><Slider aria-label="Głośność muzyki" value={[volume]} min={0} max={100} step={1} onValueChange={values => { const value = values[0]; if (value !== undefined) changeVolume(value); }} /><output aria-live="off">{volume}%</output></div>}</div><div className="profile-share"><Button variant="outline" size="icon" title={shared ? 'Skopiowano link' : 'Kopiuj link do profilu'} aria-label="Kopiuj link do profilu" onClick={() => void share()}><Share2 size={17}/></Button></div></>}
     {config.music && <audio ref={audio} src={config.music} loop preload="metadata" onLoadedMetadata={() => { if (audio.current) seekStart(audio.current); }} onError={() => setAudioError('Nie udało się odtworzyć muzyki.')} />}
     <div className="profile-column" data-no-translate>
       <header className="profile-identity">
