@@ -11,8 +11,6 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
   const stage = useRef<HTMLDivElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [autoMuted, setAutoMuted] = useState(false);
-  const autoMutedRef = useRef(false);
   const [volume, setVolume] = useState(70);
   const volumeRef = useRef(70);
   const previousVolume = useRef(70);
@@ -116,7 +114,7 @@ export function ProfileView({ config, preview = false }: { config: ProfileConfig
     {config.backgroundVideo && !videoFailed && <video key={config.backgroundVideo} src={config.backgroundVideo} poster={config.background || undefined} autoPlay loop muted playsInline preload="metadata" className="profile-backdrop" aria-hidden="true" onError={() => setVideoFailed(true)} />}
     <div className="profile-shade" />
     {config.decoration === 'snow' && <div className="profile-snow" aria-hidden="true">{Array.from({ length: 30 }, (_, i) => <span key={i} style={{ left: `${(i * 37 + 3) % 100}%`, animationDelay: `${-i * .73}s`, animationDuration: `${9 + i % 8}s` }}>✦</span>)}</div>}
-    {!preview && <><div className="profile-controls">{config.music && <div className="profile-volume"><Button variant="ghost" size="icon" title={playing && volume > 0 ? 'Wycisz muzykę' : 'Włącz muzykę'} aria-label={playing && volume > 0 ? 'Wycisz muzykę' : 'Włącz muzykę'} onClick={() => void toggleMusic()}>{playing && volume > 0 ? <Volume2 size={18}/> : <VolumeX size={18}/>}</Button><Slider aria-label="Głośność muzyki" value={[volume]} min={0} max={100} step={1} onValueChange={values => { const value = values[0]; if (value !== undefined) changeVolume(value); }} /><output aria-live="off">{volume}%</output></div>}</div><div className="profile-share"><Button variant="outline" size="icon" title={shared ? 'Skopiowano link' : 'Kopiuj link do profilu'} aria-label="Kopiuj link do profilu" onClick={() => void share()}><Share2 size={17}/></Button></div></>}
+    {!preview && <><div className="profile-controls">{config.music && <div className="profile-volume"><Button variant="ghost" size="icon" title={playing ? 'Zatrzymaj muzykę' : 'Włącz muzykę'} aria-label={playing ? 'Zatrzymaj muzykę' : 'Włącz muzykę'} onClick={() => void toggleMusic()}>{playing && volume > 0 ? <Volume2 size={18}/> : <VolumeX size={18}/>}</Button><Slider aria-label="Głośność muzyki" value={[volume]} min={0} max={100} step={1} onValueChange={values => { const value = values[0]; if (value !== undefined) changeVolume(value); }} /><output aria-live="off">{volume}%</output></div>}</div><div className="profile-share"><Button variant="outline" size="icon" title={shared ? 'Skopiowano link' : 'Kopiuj link do profilu'} aria-label="Kopiuj link do profilu" onClick={() => void share()}><Share2 size={17}/></Button></div></>}
     {config.music && <audio ref={audio} src={config.music} loop preload="metadata" onLoadedMetadata={() => { if (audio.current) seekStart(audio.current); }} onError={() => setAudioError('Nie udało się odtworzyć muzyki.')} />}
     <div className="profile-column" data-no-translate>
       <header className="profile-identity">
