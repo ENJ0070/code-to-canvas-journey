@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { changeAdminCredentials } from "@/lib/secure.functions";
 import { ProfileEditor } from '@/components/profile/ProfileEditor';
 import { CategoryIcon } from "@/components/CategoryIcon";
+import { hasMissingMainImage, hasMissingQc, sortAdminProducts } from "@/lib/admin-product-order";
 import { supabase } from "@/integrations/supabase/client";
 import { getPanelSession } from "@/lib/secure.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -1263,18 +1264,11 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
   }, [products, orderIds]);
 
   const q = search.trim().toLowerCase();
-  /** Produkt bez działającego zdjęcia — trafia na samą górę listy do poprawy. */
-  const brokenImage = (p: Product) =>
-    !p.image_url || p.image_url.startsWith("/api/public/product-image");
-  /** Produkt bez zdjęć QC (sprawdzone u agentów — brak w magazynie) — na samą górę. */
-  const noQc = (p: Product) => (p.qc_images ?? []).length === 0;
+  const brokenImage = hasMissingMainImage;
+  const noQc = hasMissingQc;
   /** Produkt bez jakiegokolwiek linku (agenci / sklep). */
   const noLink = (p: Product) =>
     !Object.values(p.agent_links ?? {}).some((v) => (v ?? "").trim()) && !(p.store_url ?? "").trim();
-  /** Im więcej braków, tym wyżej na liście. */
-  const gapScore = (p: Product) =>
-    (noLink(p) ? 4 : 0) + (brokenImage(p) ? 2 : 0) + (noQc(p) ? 1 : 0);
-
   const matched = useMemo(() => {
     const list = ordered.filter((p) =>
       tiktokOnly && !(p.tiktok_url ?? "").trim()
@@ -1285,13 +1279,8 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
           )
         : true,
     );
-    if (orderIds) return list;
-    // Stabilne sortowanie: najpierw produkty z brakami (link → zdjęcie → QC).
-    return list
-      .map((p, i) => ({ p, i }))
-      .sort((a, b) => gapScore(b.p) - gapScore(a.p) || a.i - b.i)
-      .map((x) => x.p);
-  }, [ordered, q, orderIds]);
+    return sortAdminProducts(list);
+  }, [ordered, q, tiktokOnly]);
 
 
   useEffect(() => {
@@ -1322,21 +1311,23 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
 
   /** Przenieś przeciągany produkt na pozycję docelową: najpierw UI, potem zapis. */
   const reorder = async (targetId: string) => {
-    const list = [...ordered];
+    const list = sortAdminProducts(ordered);
     const from = list.findIndex((p) => p.id === dragId);
     const to = list.findIndex((p) => p.id === targetId);
     setDragId(null);
     setOverId(null);
     if (from < 0 || to < 0 || from === to) return;
     const [moved] = list.splice(from, 1);
-    list.splice(to, 0, moved!);
+    if (!moved) return;
+    list.splice(to, 0, moved);
     setOrderIds(list.map((p) => p.id));
 
     // Zapisujemy tylko wiersze, których pozycja faktycznie się zmieniła.
     const lo = Math.min(from, to);
     const hi = Math.max(from, to);
     for (let i = lo; i <= hi; i++) {
-      const p = list[i]!;
+      const p = list[i];
+      if (!p) continue;
       if (p.display_order === i) continue;
       await panelDb.from("products").update({ display_order: i }).eq("id", p.id);
     }
