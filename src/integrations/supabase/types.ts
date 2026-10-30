@@ -475,6 +475,7 @@ export type Database = {
     }
     Functions: {
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      increment_profile_views: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
