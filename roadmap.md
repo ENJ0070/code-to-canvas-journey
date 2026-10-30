@@ -1,4 +1,6 @@
 # RENJP
+- [ ] Prioritize admin products: zero price, missing main photo, missing QC; verify tests and signed-admin list.
+- [ ] Explain screenshot reach plus 40% without misrepresenting estimates as measured product visits.
 - [x] Harden signed sessions and credential checks, fail closed on storage errors, rate-limit password checks, require real password for bulk deletion, replace menu emoji with vector icons and move /admin to /enj; seven tests and real panel login passed.
 - [x] Verify existing external Supabase records/media and preserve current administrator credentials as a protected password hash; fresh real panel sign-in succeeded and private settings are hidden from public reads.
 - [ ] Recover missing pre-cutover QC photos and remaining old media/settings (requires the previous database/storage export or original files; current external database has no archived QC photos).
