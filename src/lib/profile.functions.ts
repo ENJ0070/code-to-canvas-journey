@@ -53,3 +53,10 @@ export const uploadProfileVideo = createServerFn({ method: 'POST' })
     if (error) throw new Error('Nie udało się zapisać filmu.');
     return { url: `/api/public/product-image?path=${encodeURIComponent(path)}` };
   });
+/** Publiczny licznik wejść na profil — wspólny dla wszystkich, zapisywany w bazie. */
+export const registerProfileView = createServerFn({ method: 'POST' }).handler(async () => {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { data, error } = await supabaseAdmin.rpc('increment_profile_views' as never);
+  if (error) return { views: null as number | null };
+  return { views: Number(data) || null };
+});
