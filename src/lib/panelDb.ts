@@ -17,9 +17,10 @@ async function run(
     });
   } catch (error) {
     result = {
-      error: error instanceof Error && error.message === "Unauthorized"
-        ? "Unauthorized"
-        : "Operation failed",
+      error:
+        error instanceof Error && error.message === "Unauthorized"
+          ? "Unauthorized"
+          : "Operation failed",
     };
   }
   if (result.error) {
@@ -35,7 +36,6 @@ async function run(
   }
   return result;
 }
-
 
 /**
  * Mirrors the small slice of the Supabase query API the panels use, but routes

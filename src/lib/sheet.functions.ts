@@ -9,7 +9,8 @@ export const fetchSheetCsv = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const { verifyToken } = await import("./session.server");
-    if ((await verifyToken(data.token))?.role !== "admin") throw new Error("Zaloguj się jako administrator.");
+    if ((await verifyToken(data.token))?.role !== "admin")
+      throw new Error("Zaloguj się jako administrator.");
     let url = data.url;
     // Zwykły link do arkusza → eksport CSV.
     const m = url.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);

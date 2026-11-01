@@ -23,6 +23,9 @@ export function adminProductPriority(product: ReviewProduct): number {
 export function sortAdminProducts<T extends ReviewProduct>(products: readonly T[]): T[] {
   return products
     .map((product, index) => ({ product, index }))
-    .sort((a, b) => adminProductPriority(a.product) - adminProductPriority(b.product) || a.index - b.index)
+    .sort(
+      (a, b) =>
+        adminProductPriority(a.product) - adminProductPriority(b.product) || a.index - b.index,
+    )
     .map(({ product }) => product);
 }

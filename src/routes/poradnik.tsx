@@ -32,10 +32,12 @@ export const Route = createFileRoute("/poradnik")({
   component: PoradnikPage,
 });
 
-const card = "rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-primary/50";
+const card =
+  "rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-primary/50";
 const field =
   "w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm outline-none focus:border-primary";
-const cta = "mt-3 w-full rounded-lg gradient-brand px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-surface-deep";
+const cta =
+  "mt-3 w-full rounded-lg gradient-brand px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-surface-deep";
 
 function PackageTracker() {
   const { t } = useLang();
@@ -85,27 +87,82 @@ function PackageTracker() {
 
       {error ? <p className="mt-3 text-xs text-destructive">{error}</p> : null}
 
-      {result ? <div className="mt-4 border-t border-border pt-4" aria-live="polite">
-        <p className="text-xs text-muted-foreground">Chiny → Polska · {result.code}</p>
-        {result.unavailable ? <p className="mt-3 text-sm">Brak potwierdzonych danych przewoźnika. Termin dostawy nie jest dostępny.</p> : <>
-          <p className="mt-3 text-sm font-semibold">{result.lastStatus}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{result.lastTime} · Źródło: {result.source}</p>
-          <p className="mt-4 text-xs text-muted-foreground">Przewidywany dzień dostawy</p>
-          <p className="mt-1 font-semibold text-primary">{result.deliveryDate ? new Date(result.deliveryDate + 'T12:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Przewoźnik nie podał terminu'}</p>
-          {Boolean(result.events?.length) && <details className="mt-4 text-xs"><summary className="cursor-pointer text-muted-foreground">Historia przesyłki</summary><ol className="mt-3 space-y-3">{result.events?.map((event, i) => <li key={i}><p>{event.status}</p><p className="text-muted-foreground">{event.time}</p></li>)}</ol></details>}
-        </>}
-        <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" size="sm" asChild><a target="_blank" rel="noopener noreferrer" href={`https://t.17track.net/en#nums=${encodeURIComponent(result.code || '')}`}>17TRACK ↗</a></Button><Button variant="outline" size="sm" asChild><a target="_blank" rel="noopener noreferrer" href={`https://parcelsapp.com/en/tracking/${encodeURIComponent(result.code || '')}`}>Parcels ↗</a></Button></div>
-      </div> : null}
+      {result ? (
+        <div className="mt-4 border-t border-border pt-4" aria-live="polite">
+          <p className="text-xs text-muted-foreground">Chiny → Polska · {result.code}</p>
+          {result.unavailable ? (
+            <p className="mt-3 text-sm">
+              Brak potwierdzonych danych przewoźnika. Termin dostawy nie jest dostępny.
+            </p>
+          ) : (
+            <>
+              <p className="mt-3 text-sm font-semibold">{result.lastStatus}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {result.lastTime} · Źródło: {result.source}
+              </p>
+              <p className="mt-4 text-xs text-muted-foreground">Przewidywany dzień dostawy</p>
+              <p className="mt-1 font-semibold text-primary">
+                {result.deliveryDate
+                  ? new Date(result.deliveryDate + "T12:00:00").toLocaleDateString("pl-PL", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "Przewoźnik nie podał terminu"}
+              </p>
+              {Boolean(result.events?.length) && (
+                <details className="mt-4 text-xs">
+                  <summary className="cursor-pointer text-muted-foreground">
+                    Historia przesyłki
+                  </summary>
+                  <ol className="mt-3 space-y-3">
+                    {result.events?.map((event, i) => (
+                      <li key={i}>
+                        <p>{event.status}</p>
+                        <p className="text-muted-foreground">{event.time}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              )}
+            </>
+          )}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`https://t.17track.net/en#nums=${encodeURIComponent(result.code || "")}`}
+              >
+                17TRACK ↗
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`https://parcelsapp.com/en/tracking/${encodeURIComponent(result.code || "")}`}
+              >
+                Parcels ↗
+              </a>
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-
 function QcInspector() {
   const { t } = useLang();
-  return <div className={card}><h3 className="text-base font-bold">{t('guide.qcTitle')}</h3><p className="mt-1 mb-4 text-xs text-muted-foreground">{t('guide.qcDesc')}</p><QcSearchForm compact/></div>;
+  return (
+    <div className={card}>
+      <h3 className="text-base font-bold">{t("guide.qcTitle")}</h3>
+      <p className="mt-1 mb-4 text-xs text-muted-foreground">{t("guide.qcDesc")}</p>
+      <QcSearchForm compact />
+    </div>
+  );
 }
-
 
 function LinkConverter() {
   const { t } = useLang();
@@ -124,9 +181,7 @@ function LinkConverter() {
   return (
     <div className={card}>
       <h3 className="text-base font-bold">{t("guide.convTitle")}</h3>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {t("guide.convDesc")}
-      </p>
+      <p className="mt-1 text-xs text-muted-foreground">{t("guide.convDesc")}</p>
       <input
         className={`${field} mt-3`}
         placeholder={t("guide.convPlaceholder")}
@@ -135,9 +190,7 @@ function LinkConverter() {
       />
 
       {invalid ? (
-        <p className="mt-3 text-[11px] text-destructive">
-          {t("guide.convInvalid")}
-        </p>
+        <p className="mt-3 text-[11px] text-destructive">{t("guide.convInvalid")}</p>
       ) : null}
 
       {source ? (
@@ -198,8 +251,6 @@ function LinkConverter() {
   );
 }
 
-
-
 function PoradnikPage() {
   const { t } = useLang();
   const { data: steps } = useGuideSteps();
@@ -209,14 +260,18 @@ function PoradnikPage() {
       <h1 className="text-3xl font-black">
         {t("guide.title1")} <span className="text-gradient-brand">{t("guide.title2")}</span>
       </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {t("guide.subtitle")}
-      </p>
+      <p className="mt-2 text-sm text-muted-foreground">{t("guide.subtitle")}</p>
 
       <section className="mt-8 grid gap-5 lg:grid-cols-3">
-        <div id="tracking" className="min-w-0 scroll-mt-24"><PackageTracker /></div>
-        <div id="qc-finder" className="min-w-0 scroll-mt-24"><QcInspector /></div>
-        <div id="converter" className="min-w-0 scroll-mt-24"><LinkConverter /></div>
+        <div id="tracking" className="min-w-0 scroll-mt-24">
+          <PackageTracker />
+        </div>
+        <div id="qc-finder" className="min-w-0 scroll-mt-24">
+          <QcInspector />
+        </div>
+        <div id="converter" className="min-w-0 scroll-mt-24">
+          <LinkConverter />
+        </div>
       </section>
 
       <section id="shipping" className="mt-8 scroll-mt-28">
@@ -225,11 +280,10 @@ function PoradnikPage() {
 
       <section className="mt-14">
         <h2 className="text-2xl font-black">
-          {t("guide.stepsTitle1")} <span className="text-gradient-brand">{t("guide.stepsTitle2")}</span>
+          {t("guide.stepsTitle1")}{" "}
+          <span className="text-gradient-brand">{t("guide.stepsTitle2")}</span>
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("guide.stepsSubtitle")}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("guide.stepsSubtitle")}</p>
 
         <div className="mt-6 space-y-5">
           {(steps ?? []).map((s) => (

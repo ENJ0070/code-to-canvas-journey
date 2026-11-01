@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
-import { useServerFn } from '@tanstack/react-start';
-import { qcDownloadUrl } from '@/lib/qc-download.functions';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { qcDownloadUrl } from "@/lib/qc-download.functions";
+import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { StableImage } from "@/components/StableImage";
-import { qcImageFallbacks } from '@/lib/qc-image';
+import { qcImageFallbacks } from "@/lib/qc-image";
 
 /** Siatka miniatur QC — klik otwiera przeglądarkę ze zoomem i obrotem. */
 export function QcGrid({
@@ -31,13 +31,22 @@ export function QcGrid({
     <>
       <div className={`grid gap-2 ${cols}`}>
         {images.map((u, i) => (
-          <Button variant="ghost"
+          <Button
+            variant="ghost"
             key={`${u}-${i}`}
             aria-label={`Otwórz zdjęcie QC ${i + 1}`}
             onClick={() => setOpen(i)}
             className="h-auto aspect-square overflow-hidden rounded-lg border border-border p-0 transition-colors hover:border-primary [content-visibility:auto] [contain-intrinsic-size:240px]"
           >
-            <StableImage src={u} fallbacks={qcImageFallbacks(u)} alt={`QC ${i + 1}`} loading="lazy" width={480} height={480} className="h-full w-full object-cover" />
+            <StableImage
+              src={u}
+              fallbacks={qcImageFallbacks(u)}
+              alt={`QC ${i + 1}`}
+              loading="lazy"
+              width={480}
+              height={480}
+              className="h-full w-full object-cover"
+            />
           </Button>
         ))}
       </div>
@@ -62,9 +71,20 @@ export function QcLightbox({
   const download = useServerFn(qcDownloadUrl);
   const [downloading, setDownloading] = useState(false);
   async function saveImage() {
-    const image = images[i]; if (!image) return;
+    const image = images[i];
+    if (!image) return;
     setDownloading(true);
-    try { const result = await download({ data: { url: image } }); const a = document.createElement('a'); a.href = result.url; a.download = `qc-${i + 1}.jpg`; a.click(); } catch { toast.error('Nie udało się pobrać zdjęcia.'); } finally { setDownloading(false); }
+    try {
+      const result = await download({ data: { url: image } });
+      const a = document.createElement("a");
+      a.href = result.url;
+      a.download = `qc-${i + 1}.jpg`;
+      a.click();
+    } catch {
+      toast.error("Nie udało się pobrać zdjęcia.");
+    } finally {
+      setDownloading(false);
+    }
   }
   const [scale, setScale] = useState(1);
   const [rot, setRot] = useState(0);
@@ -115,11 +135,28 @@ export function QcLightbox({
           {i + 1} / {images.length}
         </span>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" title="Pobierz zdjęcie QC" aria-label="Pobierz zdjęcie QC" disabled={downloading} onClick={() => void saveImage()}><Download size={18}/></Button>
-          <button className={btn} title="Pomniejsz" onClick={() => setScale((s) => Math.max(1, s - 0.4))}>
+          <Button
+            variant="outline"
+            size="icon"
+            title="Pobierz zdjęcie QC"
+            aria-label="Pobierz zdjęcie QC"
+            disabled={downloading}
+            onClick={() => void saveImage()}
+          >
+            <Download size={18} />
+          </Button>
+          <button
+            className={btn}
+            title="Pomniejsz"
+            onClick={() => setScale((s) => Math.max(1, s - 0.4))}
+          >
             −
           </button>
-          <button className={btn} title="Powiększ" onClick={() => setScale((s) => Math.min(6, s + 0.4))}>
+          <button
+            className={btn}
+            title="Powiększ"
+            onClick={() => setScale((s) => Math.min(6, s + 0.4))}
+          >
             +
           </button>
           <button className={btn} title="Obróć" onClick={() => setRot((r) => r + 90)}>
@@ -151,7 +188,7 @@ export function QcLightbox({
       >
         <StableImage
           src={images[i]}
-          fallbacks={qcImageFallbacks(images[i] ?? '')}
+          fallbacks={qcImageFallbacks(images[i] ?? "")}
           alt={`QC ${i + 1}`}
           draggable={false}
           className="absolute left-1/2 top-1/2 max-h-[80vh] max-w-[92vw] rounded-xl object-contain transition-transform duration-100"
@@ -190,7 +227,13 @@ export function QcLightbox({
               k === i ? "border-primary" : "border-border"
             }`}
           >
-            <StableImage src={u} fallbacks={qcImageFallbacks(u)} alt="" loading="lazy" className="h-full w-full object-cover" />
+            <StableImage
+              src={u}
+              fallbacks={qcImageFallbacks(u)}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
           </button>
         ))}
       </div>

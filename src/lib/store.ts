@@ -87,8 +87,6 @@ export type ShippingRate = {
   signup_url: string;
 };
 
-
-
 /** Fixed conversion rates used across the catalog. */
 export const CNY_TO_PLN = 0.552421;
 export const PLN_TO_USD = 0.25;
@@ -143,7 +141,10 @@ export const useSellers = () =>
         .from("sellers_public")
         .select(SELLER_COLUMNS)
         .order("name")
-        .then((r) => r, () => ({ data: null, error: new Error("offline") }));
+        .then(
+          (r) => r,
+          () => ({ data: null, error: new Error("offline") }),
+        );
       const remote = error ? [] : ((data ?? []) as Seller[]);
       // Konta lokalne uzupełniają listę z bazy (te same id nie są duplikowane).
       const merged = [...remote];
@@ -189,10 +190,12 @@ export async function uploadImages(files: File[], folder = "uploads"): Promise<s
   return urls;
 }
 
-
-
 /** Klucz porównawczy nazwy agenta — usuwa różnice w wielkości liter i znakach. */
-const agentKey = (name: string) => name.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+const agentKey = (name: string) =>
+  name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 
 export const useAgents = () =>
   useQuery({
@@ -213,7 +216,6 @@ export const useAgents = () =>
       return unique;
     },
   });
-
 
 /** Surowa lista agentów (z duplikatami) — tylko do zarządzania w panelu admina. */
 export const useAgentsRaw = () =>
@@ -256,36 +258,41 @@ export const useProducts = () =>
         if (!page || page.length < 1000) break;
       }
       // Baza jest źródłem katalogu — usunięte produkty nie wracają z kopii importu.
-      return (data ?? []).sort((a,b) => Number(Boolean(b.image_url || b.images?.length || b.qc_images?.length)) - Number(Boolean(a.image_url || a.images?.length || a.qc_images?.length))).map((p) => {
-        const main = p.image_url || p.images?.find(Boolean) || p.qc_images?.find(Boolean) || null;
-        // Galeria bywa zduplikowana (to samo zdjęcie kilka razy / kopia głównego).
-        const extra = Array.from(new Set(((p.images ?? []) as string[]).filter(Boolean))).filter(
-          (u) => u !== main,
-        );
-        return {
-          ...p,
-          image_url: main,
-          // Linki "kup przez agenta" zawsze z moim refem.
-          agent_links: Object.fromEntries(
-            Object.entries((p.agent_links ?? {}) as Record<string, string>).map(([k, v]) => [
-              k,
-              withMyRef(v),
-            ]),
-          ),
-          sizes: Array.from(new Set(((p.sizes ?? []) as string[]).filter(Boolean))),
-          images: extra,
-          batch: p.batch ?? "",
-          display_order: p.display_order ?? 0,
-          price_cny: Number(p.price_cny ?? 0),
-          promoted: Boolean(p.promoted),
-          for_women: Boolean((p as { for_women?: boolean }).for_women),
-          verified: Boolean((p as { verified?: boolean }).verified),
-          show_on_home: Boolean((p as { show_on_home?: boolean }).show_on_home),
-          store_url: p.store_url ?? "",
-          store_name: p.store_name ?? "",
-        };
-      }) as Product[];
-
+      return (data ?? [])
+        .sort(
+          (a, b) =>
+            Number(Boolean(b.image_url || b.images?.length || b.qc_images?.length)) -
+            Number(Boolean(a.image_url || a.images?.length || a.qc_images?.length)),
+        )
+        .map((p) => {
+          const main = p.image_url || p.images?.find(Boolean) || p.qc_images?.find(Boolean) || null;
+          // Galeria bywa zduplikowana (to samo zdjęcie kilka razy / kopia głównego).
+          const extra = Array.from(new Set(((p.images ?? []) as string[]).filter(Boolean))).filter(
+            (u) => u !== main,
+          );
+          return {
+            ...p,
+            image_url: main,
+            // Linki "kup przez agenta" zawsze z moim refem.
+            agent_links: Object.fromEntries(
+              Object.entries((p.agent_links ?? {}) as Record<string, string>).map(([k, v]) => [
+                k,
+                withMyRef(v),
+              ]),
+            ),
+            sizes: Array.from(new Set(((p.sizes ?? []) as string[]).filter(Boolean))),
+            images: extra,
+            batch: p.batch ?? "",
+            display_order: p.display_order ?? 0,
+            price_cny: Number(p.price_cny ?? 0),
+            promoted: Boolean(p.promoted),
+            for_women: Boolean((p as { for_women?: boolean }).for_women),
+            verified: Boolean((p as { verified?: boolean }).verified),
+            show_on_home: Boolean((p as { show_on_home?: boolean }).show_on_home),
+            store_url: p.store_url ?? "",
+            store_name: p.store_name ?? "",
+          };
+        }) as Product[];
     },
   });
 
@@ -410,8 +417,14 @@ function jsSha256(text: string): string {
       w[i] = (w[i - 16]! + s0 + w[i - 7]! + s1) >>> 0;
     }
 
-    let a = H[0]!, b = H[1]!, c = H[2]!, d = H[3]!;
-    let e = H[4]!, f = H[5]!, g = H[6]!, h = H[7]!;
+    let a = H[0]!,
+      b = H[1]!,
+      c = H[2]!,
+      d = H[3]!;
+    let e = H[4]!,
+      f = H[5]!,
+      g = H[6]!,
+      h = H[7]!;
 
     for (let i = 0; i < 64; i++) {
       const S1 = rr(e, 6) ^ rr(e, 11) ^ rr(e, 25);
@@ -420,8 +433,14 @@ function jsSha256(text: string): string {
       const S0 = rr(a, 2) ^ rr(a, 13) ^ rr(a, 22);
       const maj = (a & b) ^ (a & c) ^ (b & c);
       const t2 = (S0 + maj) >>> 0;
-      h = g; g = f; f = e; e = (d + t1) >>> 0;
-      d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      h = g;
+      g = f;
+      f = e;
+      e = (d + t1) >>> 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (t1 + t2) >>> 0;
     }
 
     const vals = [a, b, c, d, e, f, g, h];
@@ -432,7 +451,6 @@ function jsSha256(text: string): string {
     .map((x) => (x >>> 0).toString(16).padStart(8, "0"))
     .join("");
 }
-
 
 export const usePromos = () =>
   useQuery({
@@ -469,7 +487,6 @@ export const useShippingRates = () =>
       // Hosting bez działających funkcji serwerowych (np. Vercel) — cennik z kodu.
       if (!data.length) data = LOCAL_SHIPPING_RATES as any[];
       return (data ?? []).map((r) => ({
-
         ...r,
         base_price: Number(r.base_price),
         price_per_kg: Number(r.price_per_kg),
@@ -509,7 +526,6 @@ export function shippingCostWithCoupon(rate: ShippingRate, kg: number): number |
   return Math.round(base * (1 - pct / 100) * 100) / 100;
 }
 
-
 /** Dostępne wagi: 0.5 kg – 25 kg co pół kilograma. */
 export const WEIGHT_STEPS = Array.from({ length: 50 }, (_, i) => (i + 1) * 0.5);
 
@@ -532,8 +548,10 @@ function hashOrder(id: string, seed: number): number {
 export function shuffleProducts<T extends { id: string }>(items: T[]): T[] {
   const seed = shuffleSeed();
   return [...items].sort((a, b) => {
-    const image = (p: T) => { const r = p as T & { image_url?: string | null; images?: string[]; qc_images?: string[] }; return Boolean(r.image_url || r.images?.some(Boolean) || r.qc_images?.some(Boolean)); };
+    const image = (p: T) => {
+      const r = p as T & { image_url?: string | null; images?: string[]; qc_images?: string[] };
+      return Boolean(r.image_url || r.images?.some(Boolean) || r.qc_images?.some(Boolean));
+    };
     return Number(image(b)) - Number(image(a)) || hashOrder(a.id, seed) - hashOrder(b.id, seed);
   });
 }
-

@@ -15,7 +15,9 @@ const ADMIN_TABLES = [
 
 type AdminTable = (typeof ADMIN_TABLES)[number];
 
-function cleanToken(value: unknown) { return String(value ?? "").slice(0, 4000); }
+function cleanToken(value: unknown) {
+  return String(value ?? "").slice(0, 4000);
+}
 
 export const getPanelSession = createServerFn({ method: "POST" })
   .inputValidator((data: { token: string }) => ({ token: cleanToken(data?.token) }))
@@ -25,22 +27,47 @@ export const getPanelSession = createServerFn({ method: "POST" })
   });
 
 export const adminLogin = createServerFn({ method: "POST" })
-  .inputValidator((data: { login: string; password: string }) => ({login:String(data?.login??'').trim().slice(0,120),password:String(data?.password??'').slice(0,500)}))
-  .handler(async ({data}) => {
-    if (!process.env['PANEL_SESSION_SECRET']) return { ok: false as const, error: 'Na tym serwerze brakuje ustawienia PANEL_SESSION_SECRET.' };
-    if (!process.env['SUPABASE_URL'] || !process.env['SUPABASE_SERVICE_ROLE_KEY']) return { ok: false as const, error: 'Na tym serwerze brakuje ustawień SUPABASE_URL lub SUPABASE_SERVICE_ROLE_KEY.' };
-    try { const {loginPanel}=await import('./panel-auth.server');return await loginPanel(data.login,data.password); }
-    catch (e) { console.error('adminLogin failed', e instanceof Error ? e.message : e); return { ok: false as const, error: 'Błąd serwera podczas logowania. Spróbuj ponownie.' }; }
+  .inputValidator((data: { login: string; password: string }) => ({
+    login: String(data?.login ?? "")
+      .trim()
+      .slice(0, 120),
+    password: String(data?.password ?? "").slice(0, 500),
+  }))
+  .handler(async ({ data }) => {
+    if (!process.env["PANEL_SESSION_SECRET"])
+      return {
+        ok: false as const,
+        error: "Na tym serwerze brakuje ustawienia PANEL_SESSION_SECRET.",
+      };
+    if (!process.env["SUPABASE_URL"] || !process.env["SUPABASE_SERVICE_ROLE_KEY"])
+      return {
+        ok: false as const,
+        error: "Na tym serwerze brakuje ustawień SUPABASE_URL lub SUPABASE_SERVICE_ROLE_KEY.",
+      };
+    try {
+      const { loginPanel } = await import("./panel-auth.server");
+      return await loginPanel(data.login, data.password);
+    } catch (e) {
+      console.error("adminLogin failed", e instanceof Error ? e.message : e);
+      return { ok: false as const, error: "Błąd serwera podczas logowania. Spróbuj ponownie." };
+    }
   });
-export const changeAdminCredentials = createServerFn({method:'POST'})
- .inputValidator((data:{token:string;current:string;login:string;password:string})=>data)
- .handler(async({data})=>{const {changePanelCredentials}=await import('./panel-auth.server');return changePanelCredentials(data.token,data.current,data.login,data.password)});
+export const changeAdminCredentials = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: { token: string; current: string; login: string; password: string }) => data,
+  )
+  .handler(async ({ data }) => {
+    const { changePanelCredentials } = await import("./panel-auth.server");
+    return changePanelCredentials(data.token, data.current, data.login, data.password);
+  });
 export const sellerLogin = createServerFn({ method: "POST" })
   .inputValidator((data: { token: string }) => ({ token: cleanToken(data?.token) }))
   .handler(async ({ data }) => {
     const { verifyToken } = await import("@/lib/session.server");
     const session = await verifyToken(data.token);
-    return session?.role === "seller" && session.sellerId ? { ok: true as const, token: data.token, sellerId: session.sellerId } : { ok: false as const };
+    return session?.role === "seller" && session.sellerId
+      ? { ok: true as const, token: data.token, sellerId: session.sellerId }
+      : { ok: false as const };
   });
 
 /**
@@ -80,7 +107,15 @@ export const secureMutate = createServerFn({ method: "POST" })
     // Credential changes must always require the current password, not a generic settings write.
     if (data.table === "settings") {
       const rows = Array.isArray(data.values) ? data.values : [data.values];
-      if (rows.some(row => row && typeof row === "object" && String((row as Record<string, unknown>)['key'] ?? '').startsWith('secret_'))) return { error: "Unauthorized" };
+      if (
+        rows.some(
+          (row) =>
+            row &&
+            typeof row === "object" &&
+            String((row as Record<string, unknown>)["key"] ?? "").startsWith("secret_"),
+        )
+      )
+        return { error: "Unauthorized" };
     }
 
     if (session.role === "seller") {
@@ -96,7 +131,11 @@ export const secureMutate = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    if (session.role === "seller" && data.table === "products" && (data.op === "update" || data.op === "delete")) {
+    if (
+      session.role === "seller" &&
+      data.table === "products" &&
+      (data.op === "update" || data.op === "delete")
+    ) {
       if (!data.id) return { error: "Unauthorized" };
       const { data: row } = await supabaseAdmin
         .from("products")
@@ -109,8 +148,12 @@ export const secureMutate = createServerFn({ method: "POST" })
     const scopeValues = (values: unknown) => {
       if (session.role !== "seller") return values;
       if (data.table === "sellers") {
-        const { password_hash: _p, username: _u, active: _a, ...rest } =
-          (values ?? {}) as Record<string, unknown>;
+        const {
+          password_hash: _p,
+          username: _u,
+          active: _a,
+          ...rest
+        } = (values ?? {}) as Record<string, unknown>;
         return rest;
       }
       const apply = (v: Record<string, unknown>) => {
@@ -131,55 +174,106 @@ export const secureMutate = createServerFn({ method: "POST" })
       const setAccount = async (login: string, currentUserId: string | null) => {
         const email = sellerLoginEmail(login);
         if (currentUserId) {
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(currentUserId, password ? { email, password, email_confirm: true } : { email, email_confirm: true });
+          const { error } = await supabaseAdmin.auth.admin.updateUserById(
+            currentUserId,
+            password ? { email, password, email_confirm: true } : { email, email_confirm: true },
+          );
           return error ? null : currentUserId;
         }
-        const { data: created, error } = await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: true });
+        const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
         if (created?.user) return created.user.id;
         if (!error) return null;
         // Konto z tym loginem już istnieje — ustawiamy nowe hasło.
         const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
         const found = list?.users.find((u) => u.email?.toLowerCase() === email);
         if (!found) return null;
-        const { error: upd } = await supabaseAdmin.auth.admin.updateUserById(found.id, { password, email_confirm: true });
+        const { error: upd } = await supabaseAdmin.auth.admin.updateUserById(found.id, {
+          password,
+          email_confirm: true,
+        });
         return upd ? null : found.id;
       };
       if (data.op === "insert" || data.op === "upsert" || data.op === "update") {
-        const login = String(safe['username'] ?? "").trim().toLowerCase();
+        const login = String(safe["username"] ?? "")
+          .trim()
+          .toLowerCase();
         const loginOk = /^[a-z0-9._@+-]{3,80}$/.test(login);
-        safe['username'] = login;
-        const sellerRowId = data.id ?? (safe['id'] ? String(safe['id']) : null);
-        const existing = sellerRowId ? await supabaseAdmin.from("sellers").select("id,user_id").eq("id", sellerRowId).maybeSingle() : null;
+        safe["username"] = login;
+        const sellerRowId = data.id ?? (safe["id"] ? String(safe["id"]) : null);
+        const existing = sellerRowId
+          ? await supabaseAdmin
+              .from("sellers")
+              .select("id,user_id")
+              .eq("id", sellerRowId)
+              .maybeSingle()
+          : null;
         if (!existing?.data) {
           if (!loginOk) return { error: "Podaj login sprzedawcy (min. 3 znaki, bez spacji)." };
           if (!password) return { error: "Ustaw hasło dla sprzedawcy (min. 8 znaków)." };
           const userId = await setAccount(login, null);
-          if (!userId) return { error: "Nie udało się utworzyć konta sprzedawcy — ten login może być zajęty." };
-          const { data: seller, error: sellerError } = await supabaseAdmin.from("sellers").insert({ ...safe, name: String(safe['name'] ?? ""), slug: String(safe['slug'] ?? ""), user_id: userId }).select("id").single();
+          if (!userId)
+            return {
+              error: "Nie udało się utworzyć konta sprzedawcy — ten login może być zajęty.",
+            };
+          const { data: seller, error: sellerError } = await supabaseAdmin
+            .from("sellers")
+            .insert({
+              ...safe,
+              name: String(safe["name"] ?? ""),
+              slug: String(safe["slug"] ?? ""),
+              user_id: userId,
+            })
+            .select("id")
+            .single();
           if (sellerError || !seller) {
             console.error("seller insert failed", sellerError?.message);
-            return { error: sellerError?.code === "23505" ? "Sklep o takim adresie (slug) już istnieje." : "Nie udało się zapisać sklepu." };
+            return {
+              error:
+                sellerError?.code === "23505"
+                  ? "Sklep o takim adresie (slug) już istnieje."
+                  : "Nie udało się zapisać sklepu.",
+            };
           }
-          await supabaseAdmin.from("user_roles").delete().eq("user_id", userId).eq("role", "seller");
-          const { error: roleError } = await supabaseAdmin.from("user_roles").insert({ user_id: userId, seller_id: seller.id, role: "seller" });
+          await supabaseAdmin
+            .from("user_roles")
+            .delete()
+            .eq("user_id", userId)
+            .eq("role", "seller");
+          const { error: roleError } = await supabaseAdmin
+            .from("user_roles")
+            .insert({ user_id: userId, seller_id: seller.id, role: "seller" });
           return { error: roleError ? "Nie udało się nadać dostępu do sklepu." : null };
         }
         const oldUserId = (existing.data as { user_id: string | null }).user_id;
         if (password) {
           if (!loginOk) return { error: "Podaj login sprzedawcy (min. 3 znaki, bez spacji)." };
           const userId = await setAccount(login, oldUserId);
-          if (!userId) return { error: "Nie udało się zmienić loginu/hasła — ten login może być zajęty." };
-          safe['user_id'] = userId;
+          if (!userId)
+            return { error: "Nie udało się zmienić loginu/hasła — ten login może być zajęty." };
+          safe["user_id"] = userId;
           if (!oldUserId) {
-            await supabaseAdmin.from("user_roles").delete().eq("user_id", userId).eq("role", "seller");
-            await supabaseAdmin.from("user_roles").insert({ user_id: userId, seller_id: existing.data.id, role: "seller" });
+            await supabaseAdmin
+              .from("user_roles")
+              .delete()
+              .eq("user_id", userId)
+              .eq("role", "seller");
+            await supabaseAdmin
+              .from("user_roles")
+              .insert({ user_id: userId, seller_id: existing.data.id, role: "seller" });
           }
         } else if (oldUserId) {
           if (!loginOk) return { error: "Podaj login sprzedawcy (min. 3 znaki, bez spacji)." };
-          await supabaseAdmin.auth.admin.updateUserById(oldUserId, { email: sellerLoginEmail(login), email_confirm: true });
+          await supabaseAdmin.auth.admin.updateUserById(oldUserId, {
+            email: sellerLoginEmail(login),
+            email_confirm: true,
+          });
         } else if (!loginOk) {
           // Sklep bez konta: zapisujemy logo, opis itp., login można nadać później.
-          safe['username'] = null;
+          safe["username"] = null;
         }
       }
       data.values = safe;
@@ -194,15 +288,19 @@ export const secureMutate = createServerFn({ method: "POST" })
       // Bulk CSV remains bounded; full galleries are archived by media sync.
       if (Array.isArray(values)) {
         const archived = [];
-        for (const row of values) archived.push(await archiveProductImages({ ...row, images: undefined, qc_images: undefined }).then((copy) => ({ ...row, image_url: copy.image_url })));
+        for (const row of values)
+          archived.push(
+            await archiveProductImages({ ...row, images: undefined, qc_images: undefined }).then(
+              (copy) => ({ ...row, image_url: copy.image_url }),
+            ),
+          );
         values = archived;
       } else values = await archiveProductImages(values as Record<string, unknown>);
     }
 
     if (data.op === "insert") ({ error } = await table.insert(values));
     else if (data.op === "upsert") ({ error } = await table.upsert(values));
-    else if (data.op === "update")
-      ({ error } = await table.update(values).eq("id", data.id));
+    else if (data.op === "update") ({ error } = await table.update(values).eq("id", data.id));
     else ({ error } = await table.delete().eq("id", data.id));
 
     if (error) console.error(`secureMutate ${data.table}/${data.op} failed`, error.message);
@@ -219,7 +317,10 @@ export const adminSellerUsernames = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin.from("sellers").select("id, username");
     return {
-      usernames: Object.fromEntries((rows ?? []).map((r) => [r.id, r.username])) as Record<string, string>,
+      usernames: Object.fromEntries((rows ?? []).map((r) => [r.id, r.username])) as Record<
+        string,
+        string
+      >,
     };
   });
 
@@ -269,15 +370,23 @@ export const registerProductView = createServerFn({ method: "POST" })
 
 /** Upload an image through the server so the storage bucket needs no public write access. */
 export const uploadImage = createServerFn({ method: "POST" })
-  .inputValidator((data: { token: string; folder: string; ext: string; contentType: string; base64: string }) => {
-    const folder = String(data?.folder ?? "uploads").replace(/[^a-zA-Z0-9/_-]/g, "").slice(0, 60) || "uploads";
-    const ext = String(data?.ext ?? "jpg").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6) || "jpg";
-    const contentType = String(data?.contentType ?? "application/octet-stream");
-    if (!contentType.startsWith("image/")) throw new Error("Only image uploads are allowed");
-    const base64 = String(data?.base64 ?? "");
-    if (!base64 || base64.length > 14_000_000) throw new Error("Invalid file");
-    return { token: cleanToken(data?.token), folder, ext, contentType, base64 };
-  })
+  .inputValidator(
+    (data: { token: string; folder: string; ext: string; contentType: string; base64: string }) => {
+      const folder =
+        String(data?.folder ?? "uploads")
+          .replace(/[^a-zA-Z0-9/_-]/g, "")
+          .slice(0, 60) || "uploads";
+      const ext =
+        String(data?.ext ?? "jpg")
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .slice(0, 6) || "jpg";
+      const contentType = String(data?.contentType ?? "application/octet-stream");
+      if (!contentType.startsWith("image/")) throw new Error("Only image uploads are allowed");
+      const base64 = String(data?.base64 ?? "");
+      if (!base64 || base64.length > 14_000_000) throw new Error("Invalid file");
+      return { token: cleanToken(data?.token), folder, ext, contentType, base64 };
+    },
+  )
   .handler(async ({ data }) => {
     const { verifyToken } = await import("@/lib/session.server");
     if (!(await verifyToken(data.token))) throw new Error("Unauthorized");
@@ -348,7 +457,8 @@ export const adminDeleteSeller = createServerFn({ method: "POST" })
 export const adminDeleteAllProducts = createServerFn({ method: "POST" })
   .inputValidator((data: { token: string; password: string; sellerId?: string | null }) => ({
     token: cleanToken(data?.token),
-    password: typeof data?.password === 'string' && data.password.length <= 500 ? data.password : '',
+    password:
+      typeof data?.password === "string" && data.password.length <= 500 ? data.password : "",
     sellerId: data?.sellerId ? String(data.sellerId).slice(0, 100) : null,
   }))
   .handler(async ({ data }) => {
@@ -356,7 +466,8 @@ export const adminDeleteAllProducts = createServerFn({ method: "POST" })
     const session = await verifyToken(data.token);
     if (!session || session.role !== "admin") return { error: "Unauthorized", deleted: 0 };
     const { confirmPanelPassword } = await import("@/lib/panel-auth.server");
-    if (!await confirmPanelPassword(data.token, data.password)) return { error: "Wrong password", deleted: 0 };
+    if (!(await confirmPanelPassword(data.token, data.password)))
+      return { error: "Wrong password", deleted: 0 };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("products").delete({ count: "exact" });
     q = data.sellerId ? q.eq("seller_id", data.sellerId) : q.not("id", "is", null);

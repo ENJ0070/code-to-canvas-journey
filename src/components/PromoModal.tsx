@@ -7,8 +7,7 @@ import { useLang } from "@/lib/i18n";
  * dokumentu — więc kliknięcia w podstrony (nawigacja wewnątrz aplikacji) jej nie zmieniają.
  */
 const ENTRY_PATH = typeof window === "undefined" ? "/" : window.location.pathname;
-const SHOWN_ON_LOAD = // pokazujemy od razu po załadowaniu każdej publicznej strony
-  !ENTRY_PATH.startsWith("/enj") && !ENTRY_PATH.startsWith("/seller");
+const SHOWN_ON_LOAD = !ENTRY_PATH.startsWith("/enj") && !ENTRY_PATH.startsWith("/seller"); // pokazujemy od razu po załadowaniu każdej publicznej strony
 
 /** Okienko otwiera się najwyżej raz na załadowanie strony. */
 let openedThisLoad = false;
@@ -17,7 +16,11 @@ let openedThisLoad = false;
 const COUNTDOWN = 12 * 60 * 60;
 
 /** Klucz agenta w ustawieniach okienka bonusów, np. "esgobuy". */
-export const promoSlug = (name: string) => name.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+export const promoSlug = (name: string) =>
+  name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 export const promoKey = (slug: string, field: string) => `promo_${slug}_${field}`;
 export const PROMO_FIELDS: [string, string][] = [
   ["link", "Link do rejestracji"],
@@ -76,7 +79,13 @@ export function PromoModal() {
     return () => clearInterval(i);
   }, [open]);
 
-  const list = useMemo(() => (agents ?? []).filter((a) => a.referral_url).sort((a, b) => Number(!/esgobuy/i.test(a.name)) - Number(!/esgobuy/i.test(b.name))), [agents]);
+  const list = useMemo(
+    () =>
+      (agents ?? [])
+        .filter((a) => a.referral_url)
+        .sort((a, b) => Number(!/esgobuy/i.test(a.name)) - Number(!/esgobuy/i.test(b.name))),
+    [agents],
+  );
   const main = list.find((a) => promoSlug(a.name) === "esgobuy") ?? list[0] ?? null;
   const agent = list.find((a) => a.id === agentId) ?? main;
 
@@ -138,15 +147,14 @@ export function PromoModal() {
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground">
-          {t("promo.kicker")}{agent ? ` ${agent.name}` : ""}.
+          {t("promo.kicker")}
+          {agent ? ` ${agent.name}` : ""}.
         </p>
         <h2 className="mt-1 text-2xl font-black leading-tight">
           {cfg("title") || t("promo.title1")}{" "}
           <span className="text-gradient-brand">{cfg("amount") || t("promo.title2")}</span>
         </h2>
-        <p className="mt-2 text-[13px] text-muted-foreground">
-          {cfg("desc") || t("promo.desc")}
-        </p>
+        <p className="mt-2 text-[13px] text-muted-foreground">{cfg("desc") || t("promo.desc")}</p>
 
         <div className="mt-4 space-y-2">
           <Row icon="🏷" label={t("promo.row1")} value={cfg("row1") || "+3 500 PLN"} />

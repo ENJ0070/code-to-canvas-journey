@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { createPortal } from 'react-dom';
+import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 
 import { PriceTags, QualityBadges, VerifiedBadge } from "@/components/PriceTags";
@@ -14,7 +14,7 @@ import { formatKg, productWeightKg } from "@/lib/weight";
 import { finderQcByProduct } from "@/lib/finderqc.functions";
 import { StableImage } from "@/components/StableImage";
 import { productAgentLink } from "@/lib/linkConverter";
-import { QC_SETS_PER_PAGE } from '@/lib/qc-pagination';
+import { QC_SETS_PER_PAGE } from "@/lib/qc-pagination";
 
 /** Interactive shopping modal: pick colorway + size, then buy through an agent. */
 export function ProductModal({
@@ -26,17 +26,20 @@ export function ProductModal({
   agents: Agent[];
   onClose: () => void;
 }) {
-  const gallery = [product.image_url, ...(product.images ?? [])].filter(
-    (u): u is string => Boolean(u),
+  const gallery = [product.image_url, ...(product.images ?? [])].filter((u): u is string =>
+    Boolean(u),
   );
   const { t } = useLang();
   const [active, setActive] = useState(0);
   const [size, setSize] = useState(product.sizes?.[0] ?? "");
   const fetchQc = useServerFn(finderQcByProduct);
   // Zdjęcia QC zapisane przy produkcie pokazują się od razu, bez klikania.
-  const storedQc = (product.qc_images ?? []).filter((u) => /^(https?:\/\/|\/api\/public\/product-image\?)/i.test(u));
+  const storedQc = (product.qc_images ?? []).filter((u) =>
+    /^(https?:\/\/|\/api\/public\/product-image\?)/i.test(u),
+  );
   const loadQcPage = useCallback(
-    (page: number) => fetchQc({ data: { productId: product.id, page, pageSize: QC_SETS_PER_PAGE } }),
+    (page: number) =>
+      fetchQc({ data: { productId: product.id, page, pageSize: QC_SETS_PER_PAGE } }),
     [fetchQc, product.id],
   );
 
@@ -54,7 +57,7 @@ export function ProductModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  if (typeof document === 'undefined') return null;
+  if (typeof document === "undefined") return null;
   return createPortal(
     <div
       className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-surface-deep/80 p-4 backdrop-blur-sm"
@@ -103,7 +106,12 @@ export function ProductModal({
                     aria-label={`Kolorystyka ${i + 1}`}
                     className={`h-12 w-12 overflow-hidden rounded-lg border ${i === active ? "border-primary glow-ring" : "border-border"}`}
                   >
-                    <StableImage src={u} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    <StableImage
+                      src={u}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -116,7 +124,8 @@ export function ProductModal({
 
             <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-deep px-3 py-1.5 text-xs font-bold text-muted-foreground">
               <span>⚖️</span>
-              Waga (szacowana): <span className="text-primary">{formatKg(productWeightKg(product))}</span>
+              Waga (szacowana):{" "}
+              <span className="text-primary">{formatKg(productWeightKg(product))}</span>
             </div>
 
             {product.sizes?.length ? (
@@ -152,25 +161,28 @@ export function ProductModal({
               {[...agents]
                 .sort((x, y) => Number(!/esgobuy/i.test(x.name)) - Number(!/esgobuy/i.test(y.name)))
                 .map((a) => {
-                const href = productAgentLink(product, a.name) || a.referral_url;
-                return (
-                  <a
-                    key={a.id}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-lg gradient-brand px-3 py-2.5 text-xs font-extrabold uppercase tracking-wide text-surface-deep transition-all hover:brightness-110"
-                  >
-                    {a.avatar_url ? (
-                      <img src={a.avatar_url} alt="" className="h-5 w-5 rounded-md object-cover" />
-                    ) : null}
-                    Kup przez {a.name}
-                    {size ? ` · ${size}` : ""}
-                  </a>
-                );
-              })}
+                  const href = productAgentLink(product, a.name) || a.referral_url;
+                  return (
+                    <a
+                      key={a.id}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-center gap-2 rounded-lg gradient-brand px-3 py-2.5 text-xs font-extrabold uppercase tracking-wide text-surface-deep transition-all hover:brightness-110"
+                    >
+                      {a.avatar_url ? (
+                        <img
+                          src={a.avatar_url}
+                          alt=""
+                          className="h-5 w-5 rounded-md object-cover"
+                        />
+                      ) : null}
+                      Kup przez {a.name}
+                      {size ? ` · ${size}` : ""}
+                    </a>
+                  );
+                })}
             </div>
-
 
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -193,8 +205,6 @@ export function ProductModal({
               </Link>
             </div>
 
-
-
             {product.qc_url ? (
               <a
                 href={product.qc_url}
@@ -208,6 +218,7 @@ export function ProductModal({
           </div>
         </div>
       </div>
-    </div>, document.body
+    </div>,
+    document.body,
   );
 }

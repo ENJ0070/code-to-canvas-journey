@@ -9,7 +9,10 @@ type WeightInput = {
 };
 
 const RULES: Array<{ re: RegExp; kg: number }> = [
-  { re: /(buty|sneaker|shoe|jordan|dunk|yeezy|air\s?max|new\s?balance|samba|boots?|trampki)/i, kg: 1.5 },
+  {
+    re: /(buty|sneaker|shoe|jordan|dunk|yeezy|air\s?max|new\s?balance|samba|boots?|trampki)/i,
+    kg: 1.5,
+  },
   { re: /(kurtk|jacket|puffer|parka|płaszcz|plaszcz|coat|down)/i, kg: 1.4 },
   { re: /(bluza|hoodie|sweatshirt|crewneck|sweter|knit)/i, kg: 0.9 },
   { re: /(spodnie|pants|jeans|denim|cargo|dres|joggers|sweatpants)/i, kg: 0.8 },
@@ -18,7 +21,10 @@ const RULES: Array<{ re: RegExp; kg: number }> = [
   { re: /(szort|shorts|spodenki|skirt|spódnic|spodnic)/i, kg: 0.4 },
   { re: /(czapka|cap|beanie|hat|kapelusz)/i, kg: 0.25 },
   { re: /(skarpet|socks|pasek|belt|rękawic|rekawic|gloves|szalik|scarf)/i, kg: 0.25 },
-  { re: /(zegarek|watch|okular|glasses|biżuter|bizuter|jewel|naszyjnik|bransolet|portfel|wallet)/i, kg: 0.3 },
+  {
+    re: /(zegarek|watch|okular|glasses|biżuter|bizuter|jewel|naszyjnik|bransolet|portfel|wallet)/i,
+    kg: 0.3,
+  },
 ];
 
 /** Czy produkt to buty (mają pudełko). */

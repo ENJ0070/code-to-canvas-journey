@@ -40,7 +40,8 @@ function CartPage() {
     setAgentState(name);
     safeStorage.set(AGENT_KEY, name);
     const signup = agents.find((a) => a.name === name)?.referral_url;
-    if (signup && /^https?:\/\//i.test(signup)) window.open(signup, "_blank", "noopener,noreferrer");
+    if (signup && /^https?:\/\//i.test(signup))
+      window.open(signup, "_blank", "noopener,noreferrer");
   };
   // Domyślnie pierwszy agent z listy (Litbuy), dopóki użytkownik nie wybierze innego.
   const activeAgent = agent ?? agents[0]?.name ?? null;
@@ -48,7 +49,7 @@ function CartPage() {
   const total = items.reduce((s, i) => s + i.price, 0);
 
   const shippingLines = LOCAL_SHIPPING_RATES.filter((r) => r.agent_name && r.line_name).sort(
-    (a, b) => a.sort_order - b.sort_order
+    (a, b) => a.sort_order - b.sort_order,
   );
 
   const selectedRate = shippingLines.find((r) => r.id === selectedLine);
@@ -85,7 +86,8 @@ function CartPage() {
               {t("cart.title", "Koszyk")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {items.length} {t("cart.itemsLabel", "przedmiotów")} · {t("cart.shippingHint", "oblicz koszt wysyłki z Chin")}
+              {items.length} {t("cart.itemsLabel", "przedmiotów")} ·{" "}
+              {t("cart.shippingHint", "oblicz koszt wysyłki z Chin")}
             </p>
           </div>
         </div>
@@ -110,9 +112,14 @@ function CartPage() {
           {items.length === 0 ? (
             <div className="py-12 text-center">
               <div className="mb-3 text-4xl">🛒</div>
-              <p className="text-lg font-semibold text-foreground">{t("cart.emptyTitle", "Koszyk jest pusty")}</p>
+              <p className="text-lg font-semibold text-foreground">
+                {t("cart.emptyTitle", "Koszyk jest pusty")}
+              </p>
               <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-                {t("cart.emptyDesc", "Dodaj produkty z katalogu, aby zobaczyć je tutaj i wyliczyć wysyłkę.")}
+                {t(
+                  "cart.emptyDesc",
+                  "Dodaj produkty z katalogu, aby zobaczyć je tutaj i wyliczyć wysyłkę.",
+                )}
               </p>
               <Link
                 to="/"
@@ -123,81 +130,87 @@ function CartPage() {
             </div>
           ) : (
             <>
-            {agents.length > 0 && (
-              <div className="mb-4">
-                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  {t("cart.agent", "Agent (linki zakupowe)")}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {agents.map((a) => {
-                    const active = activeAgent === a.name;
-                    return (
-                      <button
-                        key={a.id}
-                        onClick={() => setAgent(a.name)}
-                        title={a.referral_url ? `Zarejestruj się w ${a.name}` : a.name}
-                        className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-all ${
-                          active
-                            ? "border-primary bg-primary/10 text-primary glow-ring"
-                            : "border-border bg-surface-deep text-muted-foreground hover:border-primary/40"
-                        }`}
-                      >
-                        {a.avatar_url ? (
-                          <img src={a.avatar_url} alt="" className="h-5 w-5 rounded-full object-cover" />
-                        ) : null}
-                        {a.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            <ul className="space-y-3">
-              {items.map((item) => {
-                const link = cartItemLink(item, activeAgent);
-                return (
-                <li
-                  key={item.id}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-surface-deep p-3 transition-colors hover:border-primary/40"
-                >
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-16 w-16 flex-shrink-0 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="grid h-16 w-16 flex-shrink-0 place-items-center rounded-xl bg-secondary text-xl">
-                      ?
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-foreground">{item.title}</p>
-                    <p className="text-xs font-medium text-primary">{formatPrice(item.price, currency)}</p>
-                    {link ? (
-                      <a
-                        href={link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-block text-xs font-semibold text-brand-cyan underline hover:text-brand-sky"
-                      >
-                        {activeAgent
-                          ? `${t("cart.openOn", "Otwórz w")} ${activeAgent} →`
-                          : t("cart.openLink", "Otwórz link →")}
-                      </a>
-                    ) : null}
+              {agents.length > 0 && (
+                <div className="mb-4">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    {t("cart.agent", "Agent (linki zakupowe)")}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {agents.map((a) => {
+                      const active = activeAgent === a.name;
+                      return (
+                        <button
+                          key={a.id}
+                          onClick={() => setAgent(a.name)}
+                          title={a.referral_url ? `Zarejestruj się w ${a.name}` : a.name}
+                          className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-all ${
+                            active
+                              ? "border-primary bg-primary/10 text-primary glow-ring"
+                              : "border-border bg-surface-deep text-muted-foreground hover:border-primary/40"
+                          }`}
+                        >
+                          {a.avatar_url ? (
+                            <img
+                              src={a.avatar_url}
+                              alt=""
+                              className="h-5 w-5 rounded-full object-cover"
+                            />
+                          ) : null}
+                          {a.name}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <button
-                    onClick={() => remove(item.id)}
-                    aria-label={t("cart.remove", "Usuń z koszyka")}
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                  >
-                    ✕
-                  </button>
-                </li>
-                );
-              })}
-            </ul>
+                </div>
+              )}
+              <ul className="space-y-3">
+                {items.map((item) => {
+                  const link = cartItemLink(item, activeAgent);
+                  return (
+                    <li
+                      key={item.id}
+                      className="flex items-center gap-3 rounded-2xl border border-border bg-surface-deep p-3 transition-colors hover:border-primary/40"
+                    >
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="h-16 w-16 flex-shrink-0 rounded-xl object-cover"
+                        />
+                      ) : (
+                        <div className="grid h-16 w-16 flex-shrink-0 place-items-center rounded-xl bg-secondary text-xl">
+                          ?
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-foreground">{item.title}</p>
+                        <p className="text-xs font-medium text-primary">
+                          {formatPrice(item.price, currency)}
+                        </p>
+                        {link ? (
+                          <a
+                            href={link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-block text-xs font-semibold text-brand-cyan underline hover:text-brand-sky"
+                          >
+                            {activeAgent
+                              ? `${t("cart.openOn", "Otwórz w")} ${activeAgent} →`
+                              : t("cart.openLink", "Otwórz link →")}
+                          </a>
+                        ) : null}
+                      </div>
+                      <button
+                        onClick={() => remove(item.id)}
+                        aria-label={t("cart.remove", "Usuń z koszyka")}
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </>
           )}
 
@@ -205,11 +218,15 @@ function CartPage() {
             <div className="mt-4 space-y-2 border-t border-border pt-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Szacowana waga paczki</span>
-                <span className="text-sm font-bold text-foreground">⚖️ {formatKg(estimateWeightKg)}</span>
+                <span className="text-sm font-bold text-foreground">
+                  ⚖️ {formatKg(estimateWeightKg)}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{t("cart.total", "Łącznie")}</span>
-                <span className="font-display text-xl font-bold text-primary">{formatPrice(total, currency)}</span>
+                <span className="font-display text-xl font-bold text-primary">
+                  {formatPrice(total, currency)}
+                </span>
               </div>
             </div>
           )}
@@ -258,7 +275,9 @@ function CartPage() {
               >
                 <span className="mr-1">🎒</span>
                 {t("cart.withoutBox", "Bez pudełka")}
-                <span className="ml-1 block text-[10px] font-normal opacity-80">{t("cart.lighter")}</span>
+                <span className="ml-1 block text-[10px] font-normal opacity-80">
+                  {t("cart.lighter")}
+                </span>
               </button>
             </div>
 
@@ -267,7 +286,9 @@ function CartPage() {
                 {t("cart.shippingLine", "Linia wysyłkowa")}
               </p>
               {shippingLines.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("cart.noShipping", "Brak dostępnych linii wysyłkowych.")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("cart.noShipping", "Brak dostępnych linii wysyłkowych.")}
+                </p>
               ) : (
                 shippingLines.map((rate) => {
                   const estimate = finalPrice(rate);
@@ -283,14 +304,20 @@ function CartPage() {
                       }`}
                     >
                       <div>
-                        <p className={`text-sm font-semibold ${active ? "text-primary" : "text-foreground"}`}>
+                        <p
+                          className={`text-sm font-semibold ${active ? "text-primary" : "text-foreground"}`}
+                        >
                           {rate.agent_name} — {rate.line_name}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {rate.coupon_code ? `${t("cart.code", "kod")}: ${rate.coupon_code}` : t("cart.noCoupon", "bez kuponu")}
+                          {rate.coupon_code
+                            ? `${t("cart.code", "kod")}: ${rate.coupon_code}`
+                            : t("cart.noCoupon", "bez kuponu")}
                         </p>
                       </div>
-                      <span className="text-sm font-bold text-primary">{formatPrice(estimate, currency)}</span>
+                      <span className="text-sm font-bold text-primary">
+                        {formatPrice(estimate, currency)}
+                      </span>
                     </button>
                   );
                 })
@@ -313,7 +340,9 @@ function CartPage() {
 
             {!withBox && selectedRate ? (
               <p className="mt-3 text-center text-xs font-semibold text-primary">
-                Bez pudełek: −4,5% wysyłki{shoeCount ? ` i −${shoeCount * 20} zł za pudełka od butów` : ""} (oszczędzasz {formatPrice(boxDiscount, currency)})
+                Bez pudełek: −4,5% wysyłki
+                {shoeCount ? ` i −${shoeCount * 20} zł za pudełka od butów` : ""} (oszczędzasz{" "}
+                {formatPrice(boxDiscount, currency)})
               </p>
             ) : null}
             <p className="mt-3 text-center text-xs text-muted-foreground">

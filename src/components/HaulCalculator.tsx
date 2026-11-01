@@ -16,7 +16,10 @@ const MIN_KG = 0.5;
 const MAX_KG = 25;
 
 const agentKey = (name: string) => {
-  const key = name.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  const key = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
   return key === "kakobuy" ? "kakaobuy" : key;
 };
 
@@ -34,8 +37,7 @@ export function HaulCalculator() {
   /** Link rejestracyjny agenta — z linii wysyłkowej, a w razie braku z profilu agenta. */
   const signupOf = (rate: ShippingRate) =>
     rate.signup_url ||
-    (agents ?? []).find((a) => agentKey(a.name) === agentKey(rate.agent_name))
-      ?.referral_url ||
+    (agents ?? []).find((a) => agentKey(a.name) === agentKey(rate.agent_name))?.referral_url ||
     "";
 
   const results = useMemo(() => {
@@ -62,12 +64,11 @@ export function HaulCalculator() {
             {t("calc.kicker")}
           </p>
           <h2 className="mt-1 text-xl font-black">{t("calc.title")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t("calc.range")}
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("calc.range")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="chip"
+          <Button
+            variant="chip"
             aria-label={t("calc.less")}
             onClick={() => setKg((v) => clamp(v - 0.5))}
             className="h-10 w-10 rounded-xl border border-border text-lg font-bold text-muted-foreground transition-all hover:border-primary hover:text-primary"
@@ -80,7 +81,8 @@ export function HaulCalculator() {
               {t("calc.kilograms")}
             </p>
           </div>
-          <Button variant="chip"
+          <Button
+            variant="chip"
             aria-label={t("calc.more")}
             onClick={() => setKg((v) => clamp(v + 0.5))}
             className="h-10 w-10 rounded-xl border border-border text-lg font-bold text-muted-foreground transition-all hover:border-primary hover:text-primary"
@@ -109,7 +111,8 @@ export function HaulCalculator() {
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {[0.5, 1, 1.5, 2, 3, 5, 7.5, 10, 15, 20, 25].map((v) => (
-            <Button variant="chip"
+            <Button
+              variant="chip"
               key={v}
               onClick={() => setKg(v)}
               className={`rounded-lg border px-2.5 py-1 text-[11px] font-bold transition-all ${
@@ -124,7 +127,6 @@ export function HaulCalculator() {
         </div>
       </div>
 
-
       <div className="mt-5 flex flex-wrap items-center gap-2">
         <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
           {t("calc.prices")}
@@ -133,7 +135,8 @@ export function HaulCalculator() {
           { on: true, label: t("calc.withCoupons") },
           { on: false, label: t("calc.withoutCoupons") },
         ].map((opt) => (
-          <Button variant="chip"
+          <Button
+            variant="chip"
             key={String(opt.on)}
             onClick={() => setWithCoupons(opt.on)}
             className={`rounded-lg border px-3 py-1.5 text-[11px] font-bold transition-all ${
@@ -196,7 +199,9 @@ export function HaulCalculator() {
                   ) : null}
                   <p className="text-[11px] text-muted-foreground">≈ ${money(usdFromPln(cost))}</p>
                   {withCoupons && rate.coupon_code ? (
-                    <p className="text-[11px] font-bold text-primary">{t("calc.code")} {rate.coupon_code}</p>
+                    <p className="text-[11px] font-bold text-primary">
+                      {t("calc.code")} {rate.coupon_code}
+                    </p>
                   ) : null}
                 </div>
               </Tile>

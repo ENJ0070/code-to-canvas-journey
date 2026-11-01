@@ -31,7 +31,10 @@ function OutfitPage() {
   const { data: agents } = useAgents();
   const [detail, setDetail] = useState<Product | null>(null);
 
-  const all = useMemo(() => (products ?? []).filter((p) => !p.seller_id || p.show_on_home), [products]);
+  const all = useMemo(
+    () => (products ?? []).filter((p) => !p.seller_id || p.show_on_home),
+    [products],
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">

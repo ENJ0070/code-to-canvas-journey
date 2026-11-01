@@ -1,7 +1,7 @@
 import { SheetAiImport } from "@/components/SheetAiImport";
 import { Button } from "@/components/ui/button";
 import { changeAdminCredentials } from "@/lib/secure.functions";
-import { ProfileEditor } from '@/components/profile/ProfileEditor';
+import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { hasMissingMainImage, hasMissingQc, sortAdminProducts } from "@/lib/admin-product-order";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,13 @@ import { ImageUploader } from "@/components/ImageUploader";
 import { scrapeProduct } from "@/lib/scrape.functions";
 import { syncProductMedia } from "@/lib/media.functions";
 import { DICT, DICT_KEYS, i18nSettingKey } from "@/lib/i18n";
-import { DEFAULT_SHIRT_SIZES, isShirt, parseDelimited, rowsToProducts, type ImportedRow } from "@/lib/csvImport";
+import {
+  DEFAULT_SHIRT_SIZES,
+  isShirt,
+  parseDelimited,
+  rowsToProducts,
+  type ImportedRow,
+} from "@/lib/csvImport";
 import { fetchSheetCsv } from "@/lib/sheet.functions";
 import { translateToEnglish } from "@/lib/translate.functions";
 import {
@@ -50,8 +56,6 @@ import {
   useSocialLinks,
   type Product,
 } from "@/lib/store";
-
-
 
 export const Route = createFileRoute("/enj")({
   head: () => ({
@@ -86,7 +90,6 @@ function AdminPage() {
     | "profile"
     | "promos"
     | "agents"
-
     | "categories"
     | "products"
     | "tiktok"
@@ -96,19 +99,24 @@ function AdminPage() {
     | "guide"
     | "lang"
     | "security"
-
   >("branding");
   const { data: settings } = useSettings();
 
   useEffect(() => {
-    void getPanelSession({ data: { token: getPanelToken() } }).then(session => setAuthed(session?.role === "admin")).catch(() => setAuthed(false));
+    void getPanelSession({ data: { token: getPanelToken() } })
+      .then((session) => setAuthed(session?.role === "admin"))
+      .catch(() => setAuthed(false));
   }, []);
 
   const login = async () => {
     setErr("");
-    const res = await adminLogin({data:{login:user.trim(),password:pass}}).catch(()=>({ok:false as const,error:"Nie udało się połączyć z panelem. Odśwież stronę (Ctrl+F5) i spróbuj ponownie."}));
+    const res = await adminLogin({ data: { login: user.trim(), password: pass } }).catch(() => ({
+      ok: false as const,
+      error: "Nie udało się połączyć z panelem. Odśwież stronę (Ctrl+F5) i spróbuj ponownie.",
+    }));
     if (!res.ok || !("token" in res)) {
-      setErr("error" in res ? res.error : "Nieprawidłowy login lub hasło."); return;
+      setErr("error" in res ? res.error : "Nieprawidłowy login lub hasło.");
+      return;
     }
     setPanelToken(res.token);
     safeStorage.set("pkmr_admin", "1");
@@ -256,11 +264,9 @@ function AdminPage() {
       {tab === "guide" && <GuideTab />}
       {tab === "lang" && <LangTab />}
       {tab === "security" && <SecurityTab />}
-
     </div>
   );
 }
-
 
 function PromoAlertTab() {
   const { data: settings } = useSettings();
@@ -287,13 +293,18 @@ function PromoAlertTab() {
     <section className="mt-6 rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-black/20">
       <h2 className="mb-1 text-lg font-bold">Okienko bonusów (popup)</h2>
       <p className="mb-4 text-xs text-muted-foreground">
-        Ustaw osobno dla każdego agenta: kod zniżkowy, link rejestracji i teksty. Puste pole = tekst domyślny. ESGobuy otwiera się jako pierwszy.
+        Ustaw osobno dla każdego agenta: kod zniżkowy, link rejestracji i teksty. Puste pole = tekst
+        domyślny. ESGobuy otwiera się jako pierwszy.
       </p>
       <div className="mb-4 flex flex-wrap gap-2">
         {list.map((a) => {
           const slug = promoSlug(a.name);
           return (
-            <button key={a.id} className={slug === sel ? btn : btnGhost} onClick={() => setSel(slug)}>
+            <button
+              key={a.id}
+              className={slug === sel ? btn : btnGhost}
+              onClick={() => setSel(slug)}
+            >
               {a.name}
             </button>
           );
@@ -624,7 +635,6 @@ function PromosTab() {
           </ul>
         </div>
       </div>
-
     </section>
   );
 }
@@ -647,7 +657,6 @@ function ShippingTab() {
     signup_url: "",
   };
   const [form, setForm] = useState<typeof empty & { id?: string }>(empty);
-
 
   const save = async () => {
     if (!form.agent_name.trim()) return;
@@ -908,7 +917,6 @@ function AgentsTab() {
     await refresh("settings");
   };
 
-
   return (
     <section className="grid gap-6 lg:grid-cols-2">
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-black/20">
@@ -1014,7 +1022,6 @@ function AgentsTab() {
                   });
                   setTemplate(settings?.[`converter_${a.name.trim().toLowerCase()}`] ?? "");
                 }}
-
               >
                 Edytuj
               </button>
@@ -1072,7 +1079,7 @@ function CategoriesTab() {
             key={c.id}
             className="flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-2 text-xs"
           >
-            <CategoryIcon name={c.name}/>
+            <CategoryIcon name={c.name} />
             <span className="font-semibold">{c.name}</span>
             <button
               className="text-primary"
@@ -1147,7 +1154,9 @@ function ToggleChip({
         </svg>
       </span>
       <span className="min-w-0">
-        <span className={`block text-[11px] font-bold ${checked ? "text-primary" : "text-foreground"}`}>
+        <span
+          className={`block text-[11px] font-bold ${checked ? "text-primary" : "text-foreground"}`}
+        >
           {icon} {label}
         </span>
         {hint ? <span className="block text-[10px] text-muted-foreground">{hint}</span> : null}
@@ -1210,7 +1219,6 @@ function MediaSync() {
 }
 
 function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
-
   const { data: products } = useProducts();
   const { data: categories } = useCategories();
   const { data: agents } = useAgents();
@@ -1268,20 +1276,20 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
   const noQc = hasMissingQc;
   /** Produkt bez jakiegokolwiek linku (agenci / sklep). */
   const noLink = (p: Product) =>
-    !Object.values(p.agent_links ?? {}).some((v) => (v ?? "").trim()) && !(p.store_url ?? "").trim();
+    !Object.values(p.agent_links ?? {}).some((v) => (v ?? "").trim()) &&
+    !(p.store_url ?? "").trim();
   const matched = useMemo(() => {
     const list = ordered.filter((p) =>
       tiktokOnly && !(p.tiktok_url ?? "").trim()
         ? false
         : q
-        ? [p.title, p.category, p.batch, p.store_name].some((v) =>
-            (v ?? "").toLowerCase().includes(q),
-          )
-        : true,
+          ? [p.title, p.category, p.batch, p.store_name].some((v) =>
+              (v ?? "").toLowerCase().includes(q),
+            )
+          : true,
     );
     return sortAdminProducts(list);
   }, [ordered, q, tiktokOnly]);
-
 
   useEffect(() => {
     setLimit(ADMIN_PAGE_SIZE);
@@ -1289,9 +1297,6 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
 
   const visible = matched.slice(0, limit);
   const remaining = matched.length - visible.length;
-
-
-
 
   /** Zbuduj komplet linków agentów z dowolnego linku źródłowego / agenta. */
   const buildAgentLinks = (
@@ -1378,7 +1383,10 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
       qc_url: form.qc_url,
       quality: form.quality,
       batch: form.batch,
-      sizes: enteredSizes.length || !isShirt(form.title, form.category) ? enteredSizes : DEFAULT_SHIRT_SIZES,
+      sizes:
+        enteredSizes.length || !isShirt(form.title, form.category)
+          ? enteredSizes
+          : DEFAULT_SHIRT_SIZES,
       images: parseList(form.images),
       qc_images: parseList(form.qc_images),
       seller_id: form.seller_id || null,
@@ -1431,9 +1439,7 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
     <section className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-black/20">
-          <h2 className="mb-4 text-lg font-bold">
-            {form.id ? "Edytuj produkt" : "Dodaj produkt"}
-          </h2>
+          <h2 className="mb-4 text-lg font-bold">{form.id ? "Edytuj produkt" : "Dodaj produkt"}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <input
               className={input}
@@ -1494,7 +1500,8 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
                   setCny(v);
                   setForm({
                     ...form,
-                    price: v === "" ? "" : String(Math.round(plnFromCny(Number(v) || 0) * 100) / 100),
+                    price:
+                      v === "" ? "" : String(Math.round(plnFromCny(Number(v) || 0) * 100) / 100),
                   });
                 }}
               />
@@ -1502,7 +1509,11 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
 
             <input
               className={input}
-              placeholder={tiktokOnly ? "Link do filmu TikTok (wymagany)" : "Link do filmu TikTok (opcjonalnie)"}
+              placeholder={
+                tiktokOnly
+                  ? "Link do filmu TikTok (wymagany)"
+                  : "Link do filmu TikTok (opcjonalnie)"
+              }
               value={form.tiktok_url}
               onChange={(e) => setForm({ ...form, tiktok_url: e.target.value })}
             />
@@ -1657,8 +1668,6 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
             </label>
           </div>
 
-
-
           <h3 className="mt-5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Linki produktu u agentów
           </h3>
@@ -1731,7 +1740,6 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
         </p>
         <ul className="space-y-2">
           {visible.map((p) => (
-
             <li
               key={p.id}
               draggable
@@ -1866,7 +1874,6 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
           </button>
         ) : null}
       </div>
-
     </section>
   );
 }
@@ -1897,12 +1904,18 @@ function SellersTab() {
 
   const save = async () => {
     if (!form.name.trim()) return setMsg("Podaj nazwę sklepu.");
-    if (!/^[a-zA-Z0-9._@+-]{3,80}$/.test(form.username.trim())) return setMsg("Podaj login sprzedawcy (min. 3 znaki, bez spacji).");
-    if (!form.id && form.password.length < 8) return setMsg("Ustaw hasło sprzedawcy (min. 8 znaków).");
-    if (form.password && form.password.length < 8) return setMsg("Hasło musi mieć minimum 8 znaków.");
+    if (!/^[a-zA-Z0-9._@+-]{3,80}$/.test(form.username.trim()))
+      return setMsg("Podaj login sprzedawcy (min. 3 znaki, bez spacji).");
+    if (!form.id && form.password.length < 8)
+      return setMsg("Ustaw hasło sprzedawcy (min. 8 znaków).");
+    if (form.password && form.password.length < 8)
+      return setMsg("Hasło musi mieć minimum 8 znaków.");
     setMsg("");
-    const slug =
-      (form.slug || form.name).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const slug = (form.slug || form.name)
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
     const base = {
       name: form.name.trim(),
       slug,
@@ -1954,7 +1967,11 @@ function SellersTab() {
             className={input}
             type="text"
             autoComplete="new-password"
-            placeholder={form.id ? "Nowe hasło (zostaw puste, by nie zmieniać)" : "Hasło sprzedawcy (min. 8 znaków)"}
+            placeholder={
+              form.id
+                ? "Nowe hasło (zostaw puste, by nie zmieniać)"
+                : "Hasło sprzedawcy (min. 8 znaków)"
+            }
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
@@ -2053,9 +2070,9 @@ function SellersTab() {
                 className={btnGhost}
                 onClick={async () => {
                   if (!confirm(`Usunąć sprzedawcę „${s.name}” razem z jego produktami?`)) return;
-                  const res = await adminDeleteSeller({ data: { token: getPanelToken(), id: s.id } }).catch(
-                    () => ({ error: "Operation failed" }),
-                  );
+                  const res = await adminDeleteSeller({
+                    data: { token: getPanelToken(), id: s.id },
+                  }).catch(() => ({ error: "Operation failed" }));
                   if (res.error) toast.error("Nie udało się usunąć sprzedawcy.");
                   else toast.success("Sprzedawca usunięty.");
                   await refresh("sellers");
@@ -2188,14 +2205,25 @@ function SecurityTab() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
 
-
   const submit = async () => {
-    setMsg(""); setErr("");
-    if (!next || next.length < 12 || next !== confirm) { setErr("Nowe hasła muszą być identyczne i mieć minimum 12 znaków."); return; }
-    const {error}=await changeAdminCredentials({data:{token:getPanelToken(),current,login:username,password:next}});
-    if(error){setErr(error);return;}
+    setMsg("");
+    setErr("");
+    if (!next || next.length < 12 || next !== confirm) {
+      setErr("Nowe hasła muszą być identyczne i mieć minimum 12 znaków.");
+      return;
+    }
+    const { error } = await changeAdminCredentials({
+      data: { token: getPanelToken(), current, login: username, password: next },
+    });
+    if (error) {
+      setErr(error);
+      return;
+    }
     clearPanelToken();
-    setCurrent(""); setNext(""); setConfirm(""); setMsg("Hasło zostało zmienione.");
+    setCurrent("");
+    setNext("");
+    setConfirm("");
+    setMsg("Hasło zostało zmienione.");
   };
 
   return (
@@ -2246,7 +2274,9 @@ function SecurityTab() {
           />
         </label>
         {err ? <p className="text-xs text-destructive">{err}</p> : null}
-          <Link to="/auth" className="block text-xs text-primary">Pierwsze logowanie / odzyskaj hasło</Link>
+        <Link to="/auth" className="block text-xs text-primary">
+          Pierwsze logowanie / odzyskaj hasło
+        </Link>
         {msg ? <p className="text-xs text-brand-cyan">{msg}</p> : null}
         <button className={btn} onClick={() => void submit()}>
           Zapisz dane logowania
@@ -2353,9 +2383,28 @@ function LangTab() {
 /** Zamienia listę produktów na plik CSV do pobrania. */
 function productsToCsv(products: Product[]): string {
   const cols = [
-    "id","title","category","price","price_cny","image_url","images","qc_url","store_url",
-    "store_name","quality","batch","sizes","tiktok_url","views","promoted","for_women",
-    "verified","show_on_home","seller_id","display_order","agent_links",
+    "id",
+    "title",
+    "category",
+    "price",
+    "price_cny",
+    "image_url",
+    "images",
+    "qc_url",
+    "store_url",
+    "store_name",
+    "quality",
+    "batch",
+    "sizes",
+    "tiktok_url",
+    "views",
+    "promoted",
+    "for_women",
+    "verified",
+    "show_on_home",
+    "seller_id",
+    "display_order",
+    "agent_links",
   ] as const;
   const cell = (v: unknown) => {
     const s = Array.isArray(v)
@@ -2401,13 +2450,18 @@ function ImportTab() {
   const [msg, setMsg] = useState("");
 
   const [aiRows, setAiRows] = useState<{ text: string; rows: ImportedRow[] } | null>(null);
-  const preview = useMemo(() => aiRows?.text === text ? aiRows.rows : rowsToProducts(parseDelimited(text)), [text, aiRows]);
+  const preview = useMemo(
+    () => (aiRows?.text === text ? aiRows.rows : rowsToProducts(parseDelimited(text))),
+    [text, aiRows],
+  );
 
   const loadSheet = async () => {
     setBusy(true);
     setMsg("Pobieram arkusz...");
     try {
-      const { csv } = await fetchSheetCsv({ data: { url: sheetUrl.trim(), token: getPanelToken() } });
+      const { csv } = await fetchSheetCsv({
+        data: { url: sheetUrl.trim(), token: getPanelToken() },
+      });
       setText(csv);
       setMsg("Arkusz wczytany — sprawdź podgląd poniżej.");
     } catch (e) {
@@ -2424,11 +2478,17 @@ function ImportTab() {
     try {
       const rows = preview.map((p, i) => {
         const links: Record<string, string> = { ...p.agent_links };
-        const src = [p.store_url, ...Object.values(p.agent_links)].map(extractSourceLink).find(Boolean);
+        const src = [p.store_url, ...Object.values(p.agent_links)]
+          .map(extractSourceLink)
+          .find(Boolean);
         if (src) {
           links["ESGobuy"] = convertLink(src.url, "ESGobuy");
           for (const a of agents ?? []) {
-            const url = convertLink(src.url, a.name, settings?.[`converter_${a.name.trim().toLowerCase()}`]);
+            const url = convertLink(
+              src.url,
+              a.name,
+              settings?.[`converter_${a.name.trim().toLowerCase()}`],
+            );
             if (url && url !== src.url) links[a.name] = url;
           }
         }
@@ -2446,13 +2506,25 @@ function ImportTab() {
       for (let i = 0; i < capped.length; i += 50) {
         const chunk = capped.slice(i, i + 50);
         let res = await secureMutate({
-          data: { token: getPanelToken(), table: "products", op: "insert", values: chunk, id: null },
+          data: {
+            token: getPanelToken(),
+            table: "products",
+            op: "insert",
+            values: chunk,
+            id: null,
+          },
         }).catch(() => ({ error: "fail" as string | null }));
         if (res.error) {
           // Ponów pojedynczo, żeby jeden zły wiersz nie blokował całej paczki.
           for (const row of chunk) {
             res = await secureMutate({
-              data: { token: getPanelToken(), table: "products", op: "insert", values: row, id: null },
+              data: {
+                token: getPanelToken(),
+                table: "products",
+                op: "insert",
+                values: row,
+                id: null,
+              },
             }).catch(() => ({ error: "fail" }));
             if (res.error) failed++;
             else done++;
@@ -2478,9 +2550,13 @@ function ImportTab() {
     <section className="rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-black/20">
       <h2 className="mb-1 text-lg font-bold">Szybki import produktów</h2>
       <p className="mb-4 text-xs text-muted-foreground">
-        Kolumny (nagłówek pierwszego wiersza): <b>title, category, price, price_cny, image_url,
-        images, qc_url, store_url, store_name, quality, batch, sizes, tiktok_url, agent_links</b>. Kilka zdjęć /
-        rozmiarów oddziel przecinkiem. Działa też po polsku (nazwa, kategoria, cena, zdjecia...).
+        Kolumny (nagłówek pierwszego wiersza):{" "}
+        <b>
+          title, category, price, price_cny, image_url, images, qc_url, store_url, store_name,
+          quality, batch, sizes, tiktok_url, agent_links
+        </b>
+        . Kilka zdjęć / rozmiarów oddziel przecinkiem. Działa też po polsku (nazwa, kategoria, cena,
+        zdjecia...).
       </p>
 
       <div className="mb-4 grid gap-3 rounded-xl border border-dashed border-primary/40 bg-secondary/40 p-3 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:items-end">
@@ -2542,7 +2618,9 @@ function ImportTab() {
         }}
       >
         <span className="text-2xl">📄</span>
-        <span className="text-sm font-bold text-primary">Wgraj plik CSV z komputera / telefonu</span>
+        <span className="text-sm font-bold text-primary">
+          Wgraj plik CSV z komputera / telefonu
+        </span>
         <span className="text-[11px] text-muted-foreground">
           Kliknij, aby wybrać plik, albo przeciągnij go tutaj (.csv, .tsv, .txt)
         </span>
@@ -2570,9 +2648,6 @@ function ImportTab() {
         </Button>
       </div>
 
-
-
-
       <textarea
         className={`${input} mt-4 min-h-40 font-mono text-xs`}
         placeholder="...albo wklej dane skopiowane z Excela / Google Sheets"
@@ -2580,7 +2655,12 @@ function ImportTab() {
         onChange={(e) => setText(e.target.value)}
       />
 
-      <SheetAiImport text={text} disabled={busy} onBusy={setBusy} onResult={(rows) => setAiRows({ text, rows })} />
+      <SheetAiImport
+        text={text}
+        disabled={busy}
+        onBusy={setBusy}
+        onResult={(rows) => setAiRows({ text, rows })}
+      />
 
       {preview.length ? (
         <div className="mt-4 overflow-x-auto rounded-xl border border-border">
@@ -2598,8 +2678,22 @@ function ImportTab() {
                 <tr key={`${p.title}-${i}`} className="border-t border-border">
                   <td className="p-2">{p.title}</td>
                   <td className="p-2">{p.category}</td>
-                  <td className="p-2">{p.price.toFixed(2)} zł / ${(p.price * 0.25).toFixed(2)} / ¥{p.price_cny.toFixed(2)}</td>
-                  <td className="p-2">{p.image_url ? <img src={p.image_url} alt={p.title} className="h-16 w-16 object-contain" loading="lazy" /> : "—"}</td>
+                  <td className="p-2">
+                    {p.price.toFixed(2)} zł / ${(p.price * 0.25).toFixed(2)} / ¥
+                    {p.price_cny.toFixed(2)}
+                  </td>
+                  <td className="p-2">
+                    {p.image_url ? (
+                      <img
+                        src={p.image_url}
+                        alt={p.title}
+                        className="h-16 w-16 object-contain"
+                        loading="lazy"
+                      />
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

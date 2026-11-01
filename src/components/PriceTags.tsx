@@ -9,9 +9,7 @@ export function PriceTags({ pln, size = "md" }: { pln: number; size?: "sm" | "md
 
   return (
     <div>
-      <p className={`font-display ${main} font-bold leading-tight`}>
-        {formatPrice(pln, currency)}
-      </p>
+      <p className={`font-display ${main} font-bold leading-tight`}>{formatPrice(pln, currency)}</p>
       <p className="text-[11px] text-muted-foreground">
         {currency === "PLN" ? `≈ ${formatPrice(pln, "USD")}` : `≈ ${money(pln)} zł`} · ¥
         {money(cnyFromPln(pln))}

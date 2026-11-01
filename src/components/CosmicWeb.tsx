@@ -30,12 +30,15 @@ export function CosmicWeb({ dense = false }: { dense?: boolean }) {
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const spacing = dense ? (w < 700 ? 90 : 110) : (w < 700 ? 135 : 170);
+      const spacing = dense ? (w < 700 ? 90 : 110) : w < 700 ? 135 : 170;
       points = [];
       for (let y = -spacing; y < h + spacing; y += spacing) {
         for (let x = -spacing; x < w + spacing; x += spacing) {
           const seed = Math.sin(x * 0.017 + y * 0.031);
-          points.push({ x: x + seed * 28 + (Math.floor(y / spacing) % 2) * spacing / 2, y: y + Math.cos(x * 0.023 + y * 0.012) * 28 });
+          points.push({
+            x: x + seed * 28 + ((Math.floor(y / spacing) % 2) * spacing) / 2,
+            y: y + Math.cos(x * 0.023 + y * 0.012) * 28,
+          });
         }
       }
       paint();
@@ -45,23 +48,37 @@ export function CosmicWeb({ dense = false }: { dense?: boolean }) {
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
         if (!p) continue;
-        for (let j = i + 1; j < Math.min(points.length,i + Math.ceil(w/90)*3); j++) {
+        for (let j = i + 1; j < Math.min(points.length, i + Math.ceil(w / 90) * 3); j++) {
           const q = points[j];
           if (!q) continue;
           const dist = Math.hypot(p.x - q.x, p.y - q.y);
           if (dist > (dense ? 145 : 185)) continue;
-          const proximity = Math.max(0, 1 - Math.min(Math.hypot((p.x + q.x) / 2 - focus.x, (p.y + q.y) / 2 - focus.y) / 300, 1));
+          const proximity = Math.max(
+            0,
+            1 - Math.min(Math.hypot((p.x + q.x) / 2 - focus.x, (p.y + q.y) / 2 - focus.y) / 300, 1),
+          );
           ctx.strokeStyle = lineColor;
           ctx.globalAlpha = 0.09 + proximity * 0.3;
           ctx.lineWidth = proximity > 0.2 ? 1.2 : 0.8;
           ctx.beginPath();
-          ctx.moveTo(p.x + (focus.x - p.x) * proximity * 0.045, p.y + (focus.y - p.y) * proximity * 0.045);
-          ctx.lineTo(q.x + (focus.x - q.x) * proximity * 0.045, q.y + (focus.y - q.y) * proximity * 0.045);
+          ctx.moveTo(
+            p.x + (focus.x - p.x) * proximity * 0.045,
+            p.y + (focus.y - p.y) * proximity * 0.045,
+          );
+          ctx.lineTo(
+            q.x + (focus.x - q.x) * proximity * 0.045,
+            q.y + (focus.y - q.y) * proximity * 0.045,
+          );
           ctx.stroke();
         }
       }
       if (fine.matches && focus.x >= 0 && focus.y >= 0) {
-        const nearby = points.filter((p) => Math.hypot(p.x - focus.x, p.y - focus.y) < 190).sort((a, b) => Math.atan2(a.y - focus.y, a.x - focus.x) - Math.atan2(b.y - focus.y, b.x - focus.x));
+        const nearby = points
+          .filter((p) => Math.hypot(p.x - focus.x, p.y - focus.y) < 190)
+          .sort(
+            (a, b) =>
+              Math.atan2(a.y - focus.y, a.x - focus.x) - Math.atan2(b.y - focus.y, b.x - focus.x),
+          );
         nearby.forEach((p, i) => {
           const next = nearby[(i + 1) % nearby.length];
           ctx.strokeStyle = focusColor;
@@ -76,19 +93,31 @@ export function CosmicWeb({ dense = false }: { dense?: boolean }) {
       }
     };
     const tick = () => {
-      if (document.hidden) { frame = 0; return; }
+      if (document.hidden) {
+        frame = 0;
+        return;
+      }
       focus.x += (cursor.x - focus.x) * 0.13;
       focus.y += (cursor.y - focus.y) * 0.13;
       paint();
-      if (Math.abs(cursor.x-focus.x)+Math.abs(cursor.y-focus.y)>0.4) frame = requestAnimationFrame(tick);
+      if (Math.abs(cursor.x - focus.x) + Math.abs(cursor.y - focus.y) > 0.4)
+        frame = requestAnimationFrame(tick);
       else frame = 0;
     };
-    const move = (e: PointerEvent) => { cursor = { x: e.clientX, y: e.clientY }; if (!frame && !reduced.matches && fine.matches) frame = requestAnimationFrame(tick); };
-    const leave = () => { cursor = { x: -1000, y: -1000 }; };
+    const move = (e: PointerEvent) => {
+      cursor = { x: e.clientX, y: e.clientY };
+      if (!frame && !reduced.matches && fine.matches) frame = requestAnimationFrame(tick);
+    };
+    const leave = () => {
+      cursor = { x: -1000, y: -1000 };
+    };
     const motion = () => {
       cancelAnimationFrame(frame);
       if (!reduced.matches && fine.matches) frame = requestAnimationFrame(tick);
-      else { focus = { x: -1000, y: -1000 }; paint(); }
+      else {
+        focus = { x: -1000, y: -1000 };
+        paint();
+      }
     };
     resize();
     motion();

@@ -53,26 +53,36 @@ function SellerPage() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    void getPanelSession({ data: { token: getPanelToken() } }).then(session => setSellerId(session?.role === "seller" ? session.sellerId ?? null : null)).catch(() => setSellerId(null));
+    void getPanelSession({ data: { token: getPanelToken() } })
+      .then((session) =>
+        setSellerId(session?.role === "seller" ? (session.sellerId ?? null) : null),
+      )
+      .catch(() => setSellerId(null));
   }, []);
 
   const seller = (sellers ?? []).find((s) => s.id === sellerId) ?? null;
 
   const login = async () => {
     setErr("");
-    const { data: auth, error } = await supabase.auth.signInWithPassword({ email: sellerLoginEmail(user), password: pass });
-    if (error || !auth.session) { setErr("Nieprawidłowy login lub hasło."); return; }
+    const { data: auth, error } = await supabase.auth.signInWithPassword({
+      email: sellerLoginEmail(user),
+      password: pass,
+    });
+    if (error || !auth.session) {
+      setErr("Nieprawidłowy login lub hasło.");
+      return;
+    }
     const res = await sellerLogin({
       data: { token: auth.session.access_token },
     }).catch(() => ({ ok: false as const }));
     if (!res.ok || !("sellerId" in res)) {
-      setErr("To konto nie ma uprawnień sprzedawcy."); return;
+      setErr("To konto nie ma uprawnień sprzedawcy.");
+      return;
     }
     if ("token" in res) setPanelToken(res.token);
     safeStorage.set("pkmr_seller", res.sellerId);
     setSellerId(res.sellerId);
   };
-
 
   if (!seller) {
     return (
@@ -112,19 +122,19 @@ function SellerPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-black text-gradient-brand">Sklep: {seller.name}</h1>
         <div className="flex gap-2">
-        <Link to="/" className={btnGhost}>
-          ← Powrót do strony
-        </Link>
-        <button
-          className={btnGhost}
-          onClick={() => {
-            clearPanelToken();
-            safeStorage.remove("pkmr_seller");
-            setSellerId(null);
-          }}
-        >
-          Wyloguj
-        </button>
+          <Link to="/" className={btnGhost}>
+            ← Powrót do strony
+          </Link>
+          <button
+            className={btnGhost}
+            onClick={() => {
+              clearPanelToken();
+              safeStorage.remove("pkmr_seller");
+              setSellerId(null);
+            }}
+          >
+            Wyloguj
+          </button>
         </div>
       </div>
       <div className="mt-6 space-y-6">
@@ -273,7 +283,10 @@ function SellerProducts({ seller }: { seller: Seller }) {
       quality: form.quality,
       batch: form.batch,
       display_order: Number(form.display_order) || 0,
-      sizes: enteredSizes.length || !isShirt(form.title, form.category) ? enteredSizes : DEFAULT_SHIRT_SIZES,
+      sizes:
+        enteredSizes.length || !isShirt(form.title, form.category)
+          ? enteredSizes
+          : DEFAULT_SHIRT_SIZES,
       images: galleryUrls,
       agent_links: form.agent_links,
       store_url: form.store_url,

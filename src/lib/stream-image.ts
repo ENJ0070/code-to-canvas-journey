@@ -27,12 +27,21 @@ export async function streamImage(
       body = JSON.stringify(payload);
       requestHeaders.set("Content-Type", "application/json");
     }
-    return fetch(endpoint, { method: "POST", headers: requestHeaders, body, signal: signal ?? null });
+    return fetch(endpoint, {
+      method: "POST",
+      headers: requestHeaders,
+      body,
+      signal: signal ?? null,
+    });
   };
   const res = await send(true);
   if (!res.ok || !res.body) {
     const payload = await res.json().catch(() => null);
-    throw new Error(payload?.error?.message ?? payload?.message ?? `Usuwanie tła nie powiodło się (${res.status}).`);
+    throw new Error(
+      payload?.error?.message ??
+        payload?.message ??
+        `Usuwanie tła nie powiodło się (${res.status}).`,
+    );
   }
 
   let sawCompleted = false;
@@ -78,7 +87,12 @@ export async function streamImage(
       try {
         chunk = await reader.read();
       } catch (error) {
-        if (signal?.aborted || sawAnyEvent || (error instanceof Error && error.name === "AbortError")) throw error;
+        if (
+          signal?.aborted ||
+          sawAnyEvent ||
+          (error instanceof Error && error.name === "AbortError")
+        )
+          throw error;
         break;
       }
       if (chunk.done) break;
@@ -92,7 +106,9 @@ export async function streamImage(
   if (!sawAnyEvent) {
     const replay = await send(false);
     if (!replay.ok) {
-      throw new Error(`Image generation failed: ${replay.status} ${await replay.text().catch(() => "")}`);
+      throw new Error(
+        `Image generation failed: ${replay.status} ${await replay.text().catch(() => "")}`,
+      );
     }
     const json = (await replay.json()) as { data?: { b64_json?: string }[] };
     const b64 = json.data?.[0]?.b64_json;

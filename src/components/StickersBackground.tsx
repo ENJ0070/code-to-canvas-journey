@@ -35,7 +35,7 @@ function rand(seed: number) {
  * Tło z rozproszonych naklejek zbudowanych z grafik wgranych w panelu admina.
  * Brak powtórzeń sąsiadujących: lista jest unikalna i przetasowana deterministycznie.
  */
-export function StickersBackground({customOnly=false}:{customOnly?:boolean}) {
+export function StickersBackground({ customOnly = false }: { customOnly?: boolean }) {
   const { data: agents } = useAgents();
   const { data: settings } = useSettings();
   const [broken, setBroken] = useState<string[]>([]);
@@ -44,8 +44,8 @@ export function StickersBackground({customOnly=false}:{customOnly?:boolean}) {
     const custom = (settings?.["bg_stickers"] ?? "").split("\n");
     const raw = [
       ...custom,
-      ...(customOnly?[]:AGENT_STICKERS),
-      ...(customOnly?[]:agents ?? []).map((a) => a.avatar_url),
+      ...(customOnly ? [] : AGENT_STICKERS),
+      ...(customOnly ? [] : (agents ?? [])).map((a) => a.avatar_url),
     ].filter((u): u is string => Boolean(u && u.trim()));
 
     const unique = Array.from(new Set(raw)).filter((u) => !broken.includes(u));

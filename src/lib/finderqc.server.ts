@@ -31,7 +31,10 @@ const HEADERS = {
 /** Use the upstream JSON contract; do not bypass denied requests with a proxy. */
 async function getJson(url: string): Promise<any> {
   const res = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(12000) });
-  if (!res.ok) { console.warn('FinderQC unavailable', res.status); throw new Error('Źródło QC jest chwilowo niedostępne.'); }
+  if (!res.ok) {
+    console.warn("FinderQC unavailable", res.status);
+    throw new Error("Źródło QC jest chwilowo niedostępne.");
+  }
   return await res.json();
 }
 
@@ -69,7 +72,7 @@ export async function fetchFinderQcById(
       source: `https://finderqc.com/product/${spu.mallType || "Weidian"}/${itemId}`,
     };
   } catch {
-    throw new Error('Nie udało się pobrać zdjęć ze źródła QC.');
+    throw new Error("Nie udało się pobrać zdjęć ze źródła QC.");
   }
 }
 

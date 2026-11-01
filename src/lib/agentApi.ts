@@ -55,7 +55,11 @@ export async function fetchAgentDetails(rawUrl: string): Promise<AgentDetails | 
   return usfans;
 }
 
-const LITBUY_CHANNEL: Record<SourcePlatform, string> = { "1688": "1688", taobao: "taobao", weidian: "weidian" };
+const LITBUY_CHANNEL: Record<SourcePlatform, string> = {
+  "1688": "1688",
+  taobao: "taobao",
+  weidian: "weidian",
+};
 
 function litbuyUrl(p: { id: string | number; platform: SourcePlatform }) {
   return `https://www.litbuy.com/products/details?id=${p.id}&channel=${LITBUY_CHANNEL[p.platform]}`;

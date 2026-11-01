@@ -60,7 +60,10 @@ export function ImageUploader({
       {urls.length ? (
         <div className="mt-3 flex flex-wrap gap-2">
           {urls.map((u, i) => (
-            <div key={`${u}-${i}`} className="relative h-16 w-16 overflow-hidden rounded-lg border border-border">
+            <div
+              key={`${u}-${i}`}
+              className="relative h-16 w-16 overflow-hidden rounded-lg border border-border"
+            >
               <img src={u} alt="" className="h-full w-full object-cover" />
               <button
                 type="button"

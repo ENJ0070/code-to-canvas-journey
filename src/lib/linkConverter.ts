@@ -109,12 +109,19 @@ export function extractSourceLink(raw: string): ParsedLink | null {
 
   // 2) Agenci ze wzorcem /product/{platforma}/{id} lub ?shop_type=&id=
   const host = parsed.hostname.toLowerCase();
-  const map = (host.includes("usfans") ? CODE_MAPS["usfans"] : host.includes("litbuy") ? CODE_MAPS["litbuy"] : CODE_MAPS["generic"]) ?? {};
+  const map =
+    (host.includes("usfans")
+      ? CODE_MAPS["usfans"]
+      : host.includes("litbuy")
+        ? CODE_MAPS["litbuy"]
+        : CODE_MAPS["generic"]) ?? {};
   if (host === "esgobuy.com" || host.endsWith(".esgobuy.com")) {
     const type = parsed.searchParams.get("type") ?? parsed.searchParams.get("platform");
     const id = parsed.searchParams.get("id");
-    const platform = type === "3" ? "1688" : type === "5" ? "weidian" : type === "1" ? "taobao" : null;
-    if (platform && id && /^\d+$/.test(id)) return { platform, id, url: buildSourceUrl(platform, id) };
+    const platform =
+      type === "3" ? "1688" : type === "5" ? "weidian" : type === "1" ? "taobao" : null;
+    if (platform && id && /^\d+$/.test(id))
+      return { platform, id, url: buildSourceUrl(platform, id) };
     return null;
   }
 
@@ -138,7 +145,6 @@ export function extractSourceLink(raw: string): ParsedLink | null {
 
   return null;
 }
-
 
 /** Kod polecający Kakobuy — używany we wszystkich generowanych linkach. */
 export const KAKOBUY_REF = "six7n";
@@ -168,7 +174,9 @@ export function withMyRef(rawUrl: string): string {
   }
   if (host === "lovegobuy.com" || host.endsWith(".lovegobuy.com")) {
     const source = extractSourceLink(input);
-    return source ? esgobuyUrl(source.platform, source.id) : `https://www.esgobuy.com/?affcode=${ESGOBUY_REF}`;
+    return source
+      ? esgobuyUrl(source.platform, source.id)
+      : `https://www.esgobuy.com/?affcode=${ESGOBUY_REF}`;
   }
   if (host === "esgobuy.com" || host.endsWith(".esgobuy.com")) {
     u.searchParams.set("affcode", ESGOBUY_REF);
@@ -198,7 +206,6 @@ export function convertLink(rawUrl: string, agentName: string, template?: string
   const original = (rawUrl ?? "").trim();
   const parsed = extractSourceLink(original);
   if (!parsed) return original;
-
 
   const agent = normalizeAgent(agentName ?? "");
 
@@ -238,7 +245,11 @@ export function agentKey(name: string): string {
  * Zwraca "" gdy nie da się zbudować linku produktowego (wtedy dopiero link rejestracji).
  */
 export function productAgentLink(
-  p: { agent_links?: Record<string, string> | null; store_url?: string | null; qc_url?: string | null },
+  p: {
+    agent_links?: Record<string, string> | null;
+    store_url?: string | null;
+    qc_url?: string | null;
+  },
   agentName: string,
 ): string {
   const links = p.agent_links ?? {};

@@ -7,11 +7,11 @@ import { useLang } from "@/lib/i18n";
 import { QcGrid } from "@/components/QcViewer";
 import { QcPhotos } from "@/components/QcPhotos";
 import { QcSearchForm } from "@/components/QcSearchForm";
-import { QC_SETS_PER_PAGE } from '@/lib/qc-pagination';
+import { QC_SETS_PER_PAGE } from "@/lib/qc-pagination";
 
 export const Route = createFileRoute("/qc")({
   validateSearch: (search: Record<string, unknown>) => ({
-    product: typeof search['product'] === "string" ? search['product'] : undefined,
+    product: typeof search["product"] === "string" ? search["product"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -39,7 +39,8 @@ function QcPage() {
   const runProduct = useServerFn(finderQcByProduct);
   const { product: productId } = Route.useSearch();
   const loadProductPage = useCallback(
-    (page: number) => runProduct({ data: { productId: productId ?? "", page, pageSize: QC_SETS_PER_PAGE } }),
+    (page: number) =>
+      runProduct({ data: { productId: productId ?? "", page, pageSize: QC_SETS_PER_PAGE } }),
     [runProduct, productId],
   );
 
@@ -53,7 +54,9 @@ function QcPage() {
       <h1 className="mb-1 text-2xl font-extrabold sm:text-3xl">{t("qc.title")}</h1>
       <p className="mb-6 text-sm text-muted-foreground">{t("qc.desc")}</p>
 
-      <div className="mb-8 border-b border-border pb-6"><QcSearchForm/></div>
+      <div className="mb-8 border-b border-border pb-6">
+        <QcSearchForm />
+      </div>
 
       {productId ? (
         <section className="mb-10 rounded-2xl border border-border bg-surface p-4">
@@ -90,4 +93,3 @@ function QcPage() {
     </div>
   );
 }
-

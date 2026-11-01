@@ -4,7 +4,10 @@ import { createServerFn } from "@tanstack/react-start";
 export const translateToEnglish = createServerFn({ method: "POST" })
   .inputValidator((data: { items: { key: string; text: string }[] }) => {
     const items = (data?.items ?? [])
-      .map((i) => ({ key: String(i?.key ?? "").slice(0, 120), text: String(i?.text ?? "").slice(0, 500) }))
+      .map((i) => ({
+        key: String(i?.key ?? "").slice(0, 120),
+        text: String(i?.text ?? "").slice(0, 500),
+      }))
       .filter((i) => i.key && i.text.trim())
       .slice(0, 300);
     if (!items.length) throw new Error("Nothing to translate");
@@ -18,7 +21,7 @@ export const translateToEnglish = createServerFn({ method: "POST" })
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
         messages: [
           {
             role: "system",
@@ -50,7 +53,13 @@ export const translateToEnglish = createServerFn({ method: "POST" })
   });
 
 const LANG_NAMES: Record<string, string> = {
-  en: "English", de: "German", fr: "French", es: "Spanish", it: "Italian", zh: "Simplified Chinese", pt: "Portuguese",
+  en: "English",
+  de: "German",
+  fr: "French",
+  es: "Spanish",
+  it: "Italian",
+  zh: "Simplified Chinese",
+  pt: "Portuguese",
 };
 
 /** Tłumaczy dowolne teksty strony (PL → wybrany język). Zwraca tablicę w tej samej kolejności. */
@@ -63,28 +72,41 @@ export const translateTexts = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey || !data.texts.length) return { out: data.texts };
+    // `null` = brak tłumaczenia; klient nie zapisuje go w pamięci i spróbuje ponownie później.
+    const empty = { out: data.texts.map(() => null as string | null) };
+    if (!apiKey || !data.texts.length) return empty;
+
+    const input: Record<string, string> = {};
+    data.texts.forEach((t, i) => (input[String(i)] = t));
+
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: "google/gemini-3.8-flash",
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
-            content: `Translate UI strings of a reps shopping website into ${LANG_NAMES[data.lang]}. Strings may be Polish or already English. Keep brand names, product names, emojis, numbers, prices, codes and punctuation unchanged. Reply ONLY with a JSON array of strings, same length and order as the input.`,
+            content: `Translate UI strings of a reps shopping website from Polish into ${LANG_NAMES[data.lang]}. Translate every Polish word. Keep brand names, product model names, emojis, numbers, prices, codes and punctuation unchanged. Reply ONLY with a JSON object with exactly the same keys as the input, each value being the translation.`,
           },
-          { role: "user", content: JSON.stringify(data.texts) },
+          { role: "user", content: JSON.stringify(input) },
         ],
       }),
     });
-    if (!res.ok) return { out: data.texts };
+    if (!res.ok) return empty;
+
     const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
     try {
-      const arr = JSON.parse((json.choices?.[0]?.message?.content ?? "").replace(/```json|```/g, "").trim());
-      if (Array.isArray(arr) && arr.length === data.texts.length) return { out: arr.map(String) };
+      const raw = (json.choices?.[0]?.message?.content ?? "").replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      return {
+        out: data.texts.map((_, i) => {
+          const v = parsed[String(i)];
+          return typeof v === "string" && v.trim() ? v : null;
+        }),
+      };
     } catch {
-      /* ignore */
+      return empty;
     }
-    return { out: data.texts };
   });

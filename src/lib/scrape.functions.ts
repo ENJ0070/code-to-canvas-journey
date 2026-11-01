@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { extractSourceLink } from "@/lib/linkConverter";
 import { fetchAgentDetails } from "@/lib/agentApi";
 
-
 /** Fetch a product page and best-effort parse title, images and price. */
 export const scrapeProduct = createServerFn({ method: "POST" })
   .inputValidator((data: { url: string }) => {
@@ -86,7 +85,9 @@ export const scrapeProduct = createServerFn({ method: "POST" })
             ),
           ).map((m) => m[1] as string),
           ...Array.from(
-            html.matchAll(/["'](https?:\/\/[^"']*?(?:img|image|pic|cdn)[^"']*?\.(?:jpe?g|png|webp))["']/gi),
+            html.matchAll(
+              /["'](https?:\/\/[^"']*?(?:img|image|pic|cdn)[^"']*?\.(?:jpe?g|png|webp))["']/gi,
+            ),
           ).map((m) => m[1] as string),
         ]
           .filter(Boolean)
@@ -98,7 +99,9 @@ export const scrapeProduct = createServerFn({ method: "POST" })
     const priceRaw =
       meta("og:price:amount") ||
       meta("product:price:amount") ||
-      html.match(/["'](?:price|salePrice|minPrice|price_min)["']\s*:\s*["']?([0-9]+(?:\.[0-9]+)?)/i)?.[1] ||
+      html.match(
+        /["'](?:price|salePrice|minPrice|price_min)["']\s*:\s*["']?([0-9]+(?:\.[0-9]+)?)/i,
+      )?.[1] ||
       "";
     const priceCny = ldPrice || Number(priceRaw) || 0;
 
@@ -124,4 +127,3 @@ export const scrapeProduct = createServerFn({ method: "POST" })
       qcImages: [] as string[],
     };
   });
-

@@ -62,7 +62,9 @@ function ProductCardBase({
 
         <div className="flex flex-wrap gap-1.5">
           <span className="rounded-md border border-border bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">
-            {product.category ? t(`cat.${product.category}`, product.category) : t("cat.other", "Inne")}
+            {product.category
+              ? t(`cat.${product.category}`, product.category)
+              : t("cat.other", "Inne")}
           </span>
         </div>
         <QualityBadges quality={product.quality} batch={product.batch} />

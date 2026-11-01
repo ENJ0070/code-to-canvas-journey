@@ -16,7 +16,11 @@ const ALL_SLOTS: Slot[] = [
     label: "Kurtka",
     match: ["kurtk", "jacket", "coat", "puffer", "parka", "płaszcz", "plaszcz"],
   },
-  { key: "acc", label: "Czapka / Akcesoria", match: ["czap", "akces", "head", "cap", "hat", "zegar", "accessor"] },
+  {
+    key: "acc",
+    label: "Czapka / Akcesoria",
+    match: ["czap", "akces", "head", "cap", "hat", "zegar", "accessor"],
+  },
 ];
 
 const RAIN_MATCH = ["przeciwdeszcz", "rain"];
@@ -62,10 +66,7 @@ export function OutfitGenerator({
       }),
     [products, womenOnly, maxPrice],
   );
-  const slots = useMemo(
-    () => ALL_SLOTS.filter((s) => s.key !== "jacket" || jacketOn),
-    [jacketOn],
-  );
+  const slots = useMemo(() => ALL_SLOTS.filter((s) => s.key !== "jacket" || jacketOn), [jacketOn]);
   const jacketPool = pools.find((p) => p.slot.key === "jacket")?.items ?? [];
 
   const [outfit, setOutfit] = useState<Partial<Record<SlotKey, Product | null>>>({});
@@ -107,7 +108,6 @@ export function OutfitGenerator({
     setJacketOn(true);
   };
 
-
   const removeJacket = () => {
     setJacketOn(false);
     setOutfit((o) => ({ ...o, jacket: null }));
@@ -135,12 +135,9 @@ export function OutfitGenerator({
             {t("outfit.kicker")}
           </p>
           <h2 className="mt-1 text-2xl font-black">
-            {t("outfit.title1")}{" "}
-            <span className="text-gradient-brand">{t("outfit.title2")}</span>
+            {t("outfit.title1")} <span className="text-gradient-brand">{t("outfit.title2")}</span>
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t("outfit.desc")}
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("outfit.desc")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -180,13 +177,14 @@ export function OutfitGenerator({
           </button>
         </div>
       </div>
-      <div className={`mt-6 grid gap-4 grid-cols-2 ${jacketOn ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
+      <div
+        className={`mt-6 grid gap-4 grid-cols-2 ${jacketOn ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}
+      >
         {ALL_SLOTS.map((slot) => {
           if (slot.key === "jacket" && !jacketOn) return null;
           const item = outfit[slot.key] ?? null;
           const empty = pools.find((p) => p.slot.key === slot.key)?.items.length === 0;
           return (
-
             <div
               key={slot.key}
               className={`overflow-hidden rounded-2xl border bg-secondary/40 transition-all ${spinning ? "border-primary/60 opacity-80" : "border-border"}`}

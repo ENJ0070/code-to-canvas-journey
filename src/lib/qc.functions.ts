@@ -24,15 +24,31 @@ export const qcForProduct = createServerFn({ method: "POST" })
 
     if (!row) return { ok: false as const, title: "", images: [] as string[] };
     if (row.seller_id) {
-      const { data: seller } = await supabaseAdmin.from("sellers").select("active").eq("id", row.seller_id).maybeSingle();
-      if (!seller?.active) return { ok: false as const, title: "", images: [] as string[], totalPhotos: 0, hasMore: false, source: "" };
+      const { data: seller } = await supabaseAdmin
+        .from("sellers")
+        .select("active")
+        .eq("id", row.seller_id)
+        .maybeSingle();
+      if (!seller?.active)
+        return {
+          ok: false as const,
+          title: "",
+          images: [] as string[],
+          totalPhotos: 0,
+          hasMore: false,
+          source: "",
+        };
     }
 
     const stored = ((row as any).qc_images ?? []).filter((u: string) =>
       /^(https?:\/\/|\/api\/public\/product-image\?)/i.test(u),
     ) as string[];
     if (stored.length) {
-      return { ok: true as const, title: (row as any).title as string, images: stored.slice(0, 10) };
+      return {
+        ok: true as const,
+        title: (row as any).title as string,
+        images: stored.slice(0, 10),
+      };
     }
 
     const src = productSourceUrl(row as any);
@@ -40,9 +56,14 @@ export const qcForProduct = createServerFn({ method: "POST" })
 
     const details = await fetchUsfansDetails(src).catch(() => null);
     const { archiveProductImages } = await import("@/lib/image-storage.server");
-    const { fetchFinderQcByUrl } = await import('@/lib/finderqc.server');
+    const { fetchFinderQcByUrl } = await import("@/lib/finderqc.server");
     const fallback = details?.qcImages.length ? null : await fetchFinderQcByUrl(src, 1, 4);
-    const saved = await archiveProductImages({ qc_images: (details?.qcImages.length ? details.qcImages : fallback?.images ?? []).slice(0, 10) });
+    const saved = await archiveProductImages({
+      qc_images: (details?.qcImages.length ? details.qcImages : (fallback?.images ?? [])).slice(
+        0,
+        10,
+      ),
+    });
     const images = saved.qc_images;
     if (images.length) {
       await supabaseAdmin.from("products").update({ qc_images: images }).eq("id", data.productId);
