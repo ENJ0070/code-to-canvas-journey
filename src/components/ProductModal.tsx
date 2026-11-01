@@ -13,6 +13,7 @@ import { QcPhotos } from "@/components/QcPhotos";
 import { formatKg, productWeightKg } from "@/lib/weight";
 import { finderQcByProduct } from "@/lib/finderqc.functions";
 import { StableImage } from "@/components/StableImage";
+import { Watermark } from "@/components/Watermark";
 import { productAgentLink } from "@/lib/linkConverter";
 import { QC_SETS_PER_PAGE } from "@/lib/qc-pagination";
 
@@ -83,7 +84,8 @@ export function ProductModal({
 
         <div className="grid gap-6 p-5 sm:grid-cols-2">
           <div>
-            <div className="aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
+            <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
+              <Watermark />
               {gallery[active] ? (
                 <StableImage
                   src={gallery[active]}

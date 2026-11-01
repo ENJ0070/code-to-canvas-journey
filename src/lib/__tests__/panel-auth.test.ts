@@ -42,12 +42,23 @@ beforeEach(() => {
 });
 
 async function signIn() {
-  const result = await loginPanel("test-admin", "fixture-password-only");
+  const result = await loginPanel("test-admin", "fixture-password-only", "Tygrys", "formula");
   if (!result.ok || !("token" in result)) throw new Error("fixture login failed");
   return result.token;
 }
 
 describe("signed panel security", () => {
+  it("requires the animal and sport answers in addition to login and password", async () => {
+    expect((await loginPanel("test-admin", "fixture-password-only", "lew", "formula")).ok).toBe(
+      false,
+    );
+    expect((await loginPanel("test-admin", "fixture-password-only", "tygrys", "piłka")).ok).toBe(
+      false,
+    );
+    expect((await loginPanel("test-admin", "fixture-password-only", "tygrys", "formula")).ok).toBe(
+      true,
+    );
+  });
   it("accepts a real signed session but rejects appended token segments and forged expiry", async () => {
     const token = await signIn();
     expect((await verifyPanelSession(token))?.role).toBe("admin");
@@ -63,13 +74,17 @@ describe("signed panel security", () => {
   it("locks after ten failed attempts, including concurrent requests", async () => {
     await Promise.all(Array.from({ length: 10 }, () => loginPanel("test-admin", "wrong-password")));
     expect(JSON.parse(db.rows["secret_panel_attempts"] ?? "{}").count).toBe(10);
-    expect((await loginPanel("test-admin", "fixture-password-only")).ok).toBe(false);
+    expect((await loginPanel("test-admin", "fixture-password-only", "Tygrys", "formula")).ok).toBe(
+      false,
+    );
   });
   it("fails closed when credential storage cannot be read", async () => {
     const token = await signIn();
     db.fail = true;
     expect(await verifyPanelSession(token)).toBeNull();
-    await expect(loginPanel("test-admin", "fixture-password-only")).rejects.toThrow();
+    await expect(
+      loginPanel("test-admin", "fixture-password-only", "Tygrys", "formula"),
+    ).rejects.toThrow();
   });
   it("stores only a password hash and invalidates existing sessions after credential changes", async () => {
     const token = await signIn();
@@ -84,6 +99,8 @@ describe("signed panel security", () => {
     expect(db.rows["secret_panel_password"]).not.toBe("new-fixture-password");
     expect(db.rows["secret_panel_password"]).toMatch(/^[^:]+:[a-f0-9]{64}$/);
     expect(await verifyPanelSession(token)).toBeNull();
-    expect((await loginPanel("new-admin", "new-fixture-password")).ok).toBe(true);
+    expect((await loginPanel("new-admin", "new-fixture-password", "tygrys", "Formuła")).ok).toBe(
+      true,
+    );
   });
 });
