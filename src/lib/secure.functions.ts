@@ -27,7 +27,9 @@ export const getPanelSession = createServerFn({ method: "POST" })
   });
 
 export const adminLogin = createServerFn({ method: "POST" })
-  .inputValidator((data: { login: string; password: string }) => ({
+  .inputValidator((data: { login: string; password: string; animal?: string; sport?: string }) => ({
+    animal: String(data?.animal ?? "").slice(0, 100),
+    sport: String(data?.sport ?? "").slice(0, 100),
     login: String(data?.login ?? "")
       .trim()
       .slice(0, 120),
@@ -46,7 +48,7 @@ export const adminLogin = createServerFn({ method: "POST" })
       };
     try {
       const { loginPanel } = await import("./panel-auth.server");
-      return await loginPanel(data.login, data.password);
+      return await loginPanel(data.login, data.password, data.animal, data.sport);
     } catch (e) {
       console.error("adminLogin failed", e instanceof Error ? e.message : e);
       return { ok: false as const, error: "Błąd serwera podczas logowania. Spróbuj ponownie." };

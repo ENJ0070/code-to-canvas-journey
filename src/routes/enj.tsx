@@ -110,7 +110,7 @@ function AdminPage() {
 
   const login = async () => {
     setErr("");
-    const res = await adminLogin({ data: { login: user.trim(), password: pass } }).catch(() => ({
+    const res = await adminLogin({ data: { login: user.trim(), password: pass, animal, sport } }).catch(() => ({
       ok: false as const,
       error: "Nie udało się połączyć z panelem. Odśwież stronę (Ctrl+F5) i spróbuj ponownie.",
     }));
@@ -159,13 +159,47 @@ function AdminPage() {
             <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
               Hasło
             </span>
+            <span className="relative block">
+              <input
+                className={`${input} pr-20`}
+                type={showPass ? "text" : "password"}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass((v) => !v)}
+                aria-label={showPass ? "Ukryj hasło" : "Pokaż hasło"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-[11px] font-bold text-muted-foreground hover:text-primary"
+              >
+                {showPass ? "Ukryj" : "Pokaż"}
+              </button>
+            </span>
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Zwierzę
+            </span>
             <input
               className={input}
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
+              type={showPass ? "text" : "password"}
+              autoComplete="off"
+              value={animal}
+              onChange={(e) => setAnimal(e.target.value)}
+            />
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Sport
+            </span>
+            <input
+              className={input}
+              type={showPass ? "text" : "password"}
+              autoComplete="off"
+              value={sport}
+              onChange={(e) => setSport(e.target.value)}
             />
           </label>
           {err ? (
