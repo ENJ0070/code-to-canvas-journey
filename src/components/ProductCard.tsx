@@ -4,6 +4,7 @@ import type { Product } from "@/lib/store";
 import { useCart } from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
 import { StableImage } from "@/components/StableImage";
+import { Watermark } from "@/components/Watermark";
 
 /**
  * Lightweight grid card: single image + views, title, category, badges,
@@ -33,6 +34,9 @@ function ProductCardBase({
             onClick={() => onDetails?.(product)}
             className="h-full w-full cursor-pointer object-cover transition-transform duration-500 group-hover:scale-105"
           />
+        ) : null}
+        {product.image_url ? (
+          <Watermark />
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
             {t("product.noImage")}
