@@ -5,7 +5,12 @@ export type ImageConfig = {
   format: "openai" | "gemini-chat" | "generate-content" | "cloudflare-input";
 };
 
-export function generateImage(config: ImageConfig, prompt: string, stream = true, signal?: AbortSignal) {
+export function generateImage(
+  config: ImageConfig,
+  prompt: string,
+  stream = true,
+  signal?: AbortSignal,
+) {
   let input: Record<string, unknown>;
   switch (config.format) {
     case "openai":
@@ -80,7 +85,10 @@ export async function editImage(config: ImageConfig, form: FormData, signal?: Ab
         contents: [
           {
             role: "user",
-            parts: [{ text: prompt }, ...encoded.map(({ mimeType, data }) => ({ inlineData: { mimeType, data } }))],
+            parts: [
+              { text: prompt },
+              ...encoded.map(({ mimeType, data }) => ({ inlineData: { mimeType, data } })),
+            ],
           },
         ],
         generationConfig: { responseModalities: ["TEXT", "IMAGE"] },

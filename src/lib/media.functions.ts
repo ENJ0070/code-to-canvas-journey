@@ -3,20 +3,31 @@ import { createServerFn } from "@tanstack/react-start";
 /** Publiczne wyszukiwanie zdjęć QC po linku Weidian / Taobao / 1688 / agenta. */
 export const lookupQc = createServerFn({ method: "POST" })
   .inputValidator((data: { url: string }) => {
-    const url = String(data?.url ?? "").trim().slice(0, 2000);
+    const url = String(data?.url ?? "")
+      .trim()
+      .slice(0, 2000);
     if (!/^https?:\/\//i.test(url)) throw new Error("Nieprawidłowy link.");
     return { url };
   })
   .handler(async ({ data }) => {
-    const { fetchWarehouseQc } = await import('@/lib/warehouse-qc.server');
-    const { fetchFinderQcByUrl } = await import('@/lib/finderqc.server');
-    const [warehouse, finder] = await Promise.allSettled([fetchWarehouseQc(data.url), fetchFinderQcByUrl(data.url, 1, 4)]);
-    const qcImages = Array.from(new Set([...(warehouse.status === 'fulfilled' ? warehouse.value : []), ...(finder.status === 'fulfilled' ? finder.value.images : [])]));
-    if (!qcImages.length && (warehouse.status === 'rejected' || finder.status === 'rejected')) throw new Error('Źródło QC jest chwilowo niedostępne.');
+    const { fetchWarehouseQc } = await import("@/lib/warehouse-qc.server");
+    const { fetchFinderQcByUrl } = await import("@/lib/finderqc.server");
+    const [warehouse, finder] = await Promise.allSettled([
+      fetchWarehouseQc(data.url),
+      fetchFinderQcByUrl(data.url, 1, 4),
+    ]);
+    const qcImages = Array.from(
+      new Set([
+        ...(warehouse.status === "fulfilled" ? warehouse.value : []),
+        ...(finder.status === "fulfilled" ? finder.value.images : []),
+      ]),
+    );
+    if (!qcImages.length && (warehouse.status === "rejected" || finder.status === "rejected"))
+      throw new Error("Źródło QC jest chwilowo niedostępne.");
     if (!qcImages.length) return { ok: false as const, error: "not-found" };
     return {
       ok: true as const,
-      title: finder.status === 'fulfilled' ? finder.value.title : '',
+      title: finder.status === "fulfilled" ? finder.value.title : "",
       priceCny: 0,
       images: [] as string[],
       colorImages: [] as string[],
@@ -30,12 +41,14 @@ export const lookupQc = createServerFn({ method: "POST" })
  * Wywoływane z panelu admina — wymaga podpisanego tokenu sesji.
  */
 export const syncProductMedia = createServerFn({ method: "POST" })
-  .inputValidator((data: { token: string; limit?: number; onlyMissing?: boolean; cursor?: string }) => ({
-    token: String(data?.token ?? "").slice(0, 4000),
-    limit: Math.min(100, Math.max(1, Number(data?.limit) || 40)),
-    onlyMissing: data?.onlyMissing !== false,
-    cursor: String(data?.cursor ?? "").slice(0, 100),
-  }))
+  .inputValidator(
+    (data: { token: string; limit?: number; onlyMissing?: boolean; cursor?: string }) => ({
+      token: String(data?.token ?? "").slice(0, 4000),
+      limit: Math.min(100, Math.max(1, Number(data?.limit) || 40)),
+      onlyMissing: data?.onlyMissing !== false,
+      cursor: String(data?.cursor ?? "").slice(0, 100),
+    }),
+  )
   .handler(async ({ data }) => {
     const { verifyToken } = await import("@/lib/session.server");
     const session = await verifyToken(data.token);
@@ -66,9 +79,19 @@ export const syncProductMedia = createServerFn({ method: "POST" })
           const mainOk = Boolean(p.image_url && external(p.image_url));
           const currentImages = (p.images ?? []).filter(external);
           const currentQc = (p.qc_images ?? []).filter(external);
-          const archived = await archiveProductImages({ image_url: p.image_url, images: currentImages, qc_images: currentQc });
-          if (JSON.stringify(archived) !== JSON.stringify({ image_url: p.image_url, images: currentImages, qc_images: currentQc })) {
-            const { error: archiveError } = await supabaseAdmin.from("products").update(archived).eq("id", p.id);
+          const archived = await archiveProductImages({
+            image_url: p.image_url,
+            images: currentImages,
+            qc_images: currentQc,
+          });
+          if (
+            JSON.stringify(archived) !==
+            JSON.stringify({ image_url: p.image_url, images: currentImages, qc_images: currentQc })
+          ) {
+            const { error: archiveError } = await supabaseAdmin
+              .from("products")
+              .update(archived)
+              .eq("id", p.id);
             if (archiveError) throw new Error("Nie udało się zapisać kopii zdjęć.");
             p.image_url = archived.image_url;
             currentImages.splice(0, currentImages.length, ...archived.images);
@@ -85,13 +108,18 @@ export const syncProductMedia = createServerFn({ method: "POST" })
             import("@/lib/finderqc.server"),
             fetchAgentDetails(src).catch(() => null),
           ]);
-          const finder = data.onlyMissing && currentQc.length
-            ? null
-            : await fetchFinderQcByUrl(src, 1, 4).catch(() => null);
+          const finder =
+            data.onlyMissing && currentQc.length
+              ? null
+              : await fetchFinderQcByUrl(src, 1, 4).catch(() => null);
           if (!details && !finder?.images.length) return void skipped++;
 
           const images = Array.from(
-            new Set([...currentImages, ...(details?.colorImages ?? []), ...(details?.images ?? [])]),
+            new Set([
+              ...currentImages,
+              ...(details?.colorImages ?? []),
+              ...(details?.images ?? []),
+            ]),
           ).slice(0, 24);
           const qc = Array.from(
             new Set([...currentQc, ...(finder?.images ?? []), ...(details?.qcImages ?? [])]),
@@ -99,11 +127,14 @@ export const syncProductMedia = createServerFn({ method: "POST" })
           const patch: { images?: string[]; qc_images?: string[]; image_url?: string } = {};
           if ((!data.onlyMissing || !currentImages.length) && images.length) patch.images = images;
           if ((!data.onlyMissing || !currentQc.length) && qc.length) patch.qc_images = qc;
-           if (!mainOk && images[0]) patch.image_url = images[0];
+          if (!mainOk && images[0]) patch.image_url = images[0];
           if (!Object.keys(patch).length) return void skipped++;
 
           const savedPatch = await archiveProductImages(patch);
-          const { error: upErr } = await supabaseAdmin.from("products").update(savedPatch).eq("id", p.id);
+          const { error: upErr } = await supabaseAdmin
+            .from("products")
+            .update(savedPatch)
+            .eq("id", p.id);
           if (upErr) skipped++;
           else updated++;
         }),

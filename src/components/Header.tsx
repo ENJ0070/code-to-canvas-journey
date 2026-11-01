@@ -31,14 +31,13 @@ function HeaderActions() {
         ) : null}
       </Link>
 
-      <Button variant="outline"
+      <Button
+        variant="outline"
         onClick={() => setSettingsOpen((p) => !p)}
         aria-label={t("ui.settingsAria")}
         title={`Ustawienia · ${current.label}`}
         className={`flex h-9 items-center justify-center gap-1.5 rounded-lg border px-2 text-sm transition-all hover:border-primary hover:glow-ring-strong ${
-          settingsOpen
-            ? "border-primary bg-secondary glow-ring"
-            : "border-border bg-surface"
+          settingsOpen ? "border-primary bg-secondary glow-ring" : "border-border bg-surface"
         }`}
       >
         <LanguageFlag country={current.country} label={current.label} />

@@ -24,9 +24,6 @@ import { CurrencyProvider } from "@/lib/currency";
 import { CartProvider } from "@/lib/cart";
 import { Toaster } from "@/components/ui/sonner";
 
-
-
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -141,33 +138,31 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isPanel = pathname === "/enj" || pathname.startsWith("/enj/") || pathname.startsWith("/seller");
-  const isProfile = pathname === '/profil';
-  const isQcResults = pathname === '/qc/wyniki';
+  const isPanel =
+    pathname === "/enj" || pathname.startsWith("/enj/") || pathname.startsWith("/seller");
+  const isProfile = pathname === "/profil";
+  const isQcResults = pathname === "/qc/wyniki";
 
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <CurrencyProvider>
-        <CartProvider>
-        <div className="relative isolate min-h-screen">
-          {!isPanel && !isProfile && !isQcResults && <CosmicWeb dense={pathname === "/"} />}
-          {!isPanel && !isProfile && <Header />}
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          {!isPanel && !isProfile && !isQcResults && <FloatingIsland />}
-          {!isPanel && !isProfile && !isQcResults && <PromoModal />}
+          <CartProvider>
+            <div className="relative isolate min-h-screen">
+              {!isPanel && !isProfile && !isQcResults && <CosmicWeb dense={pathname === "/"} />}
+              {!isPanel && !isProfile && <Header />}
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <Outlet />
+              {!isPanel && !isProfile && !isQcResults && <FloatingIsland />}
+              {!isPanel && !isProfile && !isQcResults && <PromoModal />}
 
-          {!isPanel && !isQcResults && <AutoTranslate />}
-          <ScrollToTop />
-          <Toaster richColors position="top-center" />
-
-        </div>
-        </CartProvider>
+              {!isPanel && !isQcResults && <AutoTranslate />}
+              <ScrollToTop />
+              <Toaster richColors position="top-center" />
+            </div>
+          </CartProvider>
         </CurrencyProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );
 }
-
-

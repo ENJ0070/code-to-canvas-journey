@@ -24,7 +24,6 @@ export function productLink(p: Product): string {
   return p.store_url || agent || p.qc_url || "";
 }
 
-
 /** Link dla pozycji koszyka u wybranego agenta (null = domyślny link). */
 export function cartItemLink(item: CartItem, agentName: string | null): string {
   if (!agentName) return item.url;

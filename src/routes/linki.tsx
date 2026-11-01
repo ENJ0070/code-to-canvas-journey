@@ -14,7 +14,8 @@ export const Route = createFileRoute("/linki")({
       { title: "Linki z TikToka — PKMREPS" },
       {
         name: "description",
-        content: "Wszystkie linki do produktów z naszych filmów na TikToku, w podziale na kategorie.",
+        content:
+          "Wszystkie linki do produktów z naszych filmów na TikToku, w podziale na kategorie.",
       },
       { property: "og:title", content: "Linki z TikToka — PKMREPS" },
       {
@@ -38,7 +39,8 @@ function LinkiPage() {
   const filtered = useMemo(
     () =>
       (products ?? []).filter(
-        (p) => (!p.seller_id || p.show_on_home) && p.tiktok_url && (cat === "" || p.category === cat),
+        (p) =>
+          (!p.seller_id || p.show_on_home) && p.tiktok_url && (cat === "" || p.category === cat),
       ),
     [products, cat],
   );

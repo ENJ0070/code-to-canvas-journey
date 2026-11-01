@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
-import { QC_SETS_PER_PAGE, qcPageImages } from './qc-pagination';
+import { QC_SETS_PER_PAGE, qcPageImages } from "./qc-pagination";
 
 /** Zdjęcia QC z FinderQC po wklejonym linku. */
 export const finderQcByLink = createServerFn({ method: "POST" })
   .inputValidator((data: { url: string; page?: number; pageSize?: number }) => {
-    const url = String(data?.url ?? "").trim().slice(0, 2000);
+    const url = String(data?.url ?? "")
+      .trim()
+      .slice(0, 2000);
     if (!/^https?:\/\//i.test(url)) throw new Error("Nieprawidłowy link.");
     return {
       url,
@@ -15,20 +17,30 @@ export const finderQcByLink = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { fetchFinderQcByUrl } = await import("@/lib/finderqc.server");
 
-    const { fetchWarehouseQc } = await import('@/lib/warehouse-qc.server');
+    const { fetchWarehouseQc } = await import("@/lib/warehouse-qc.server");
     const [agent, finder] = await Promise.allSettled([
       data.page === 1 ? fetchWarehouseQc(data.url) : Promise.resolve([]),
       fetchFinderQcByUrl(data.url, data.page, data.pageSize),
     ]);
-    const warehouse = agent.status === 'fulfilled' ? agent.value : [];
-    const found = finder.status === 'fulfilled' ? finder.value : null;
+    const warehouse = agent.status === "fulfilled" ? agent.value : [];
+    const found = finder.status === "fulfilled" ? finder.value : null;
     const images = qcPageImages(warehouse, found?.images ?? []);
-    if (!images.length && finder.status === 'rejected') throw new Error('Źródło QC jest chwilowo niedostępne.');
+    if (!images.length && finder.status === "rejected")
+      throw new Error("Źródło QC jest chwilowo niedostępne.");
     // Transient search does not archive every image before returning. Downloads persist original bytes on demand.
-    return { ok: Boolean(images.length || found?.ok), title: found?.title || '', images, totalPhotos: Math.max(images.length, found?.totalPhotos || 0), hasMore: found?.hasMore || false, source: found?.source || (warehouse.length ? 'USFans · magazyn QC' : ''), warning: finder.status === 'rejected' ? 'FinderQC jest obecnie niedostępne — pokazano dostępne zdjęcia magazynowe.' : '' };
-
+    return {
+      ok: Boolean(images.length || found?.ok),
+      title: found?.title || "",
+      images,
+      totalPhotos: Math.max(images.length, found?.totalPhotos || 0),
+      hasMore: found?.hasMore || false,
+      source: found?.source || (warehouse.length ? "USFans · magazyn QC" : ""),
+      warning:
+        finder.status === "rejected"
+          ? "FinderQC jest obecnie niedostępne — pokazano dostępne zdjęcia magazynowe."
+          : "",
+    };
   });
-
 
 /** Zdjęcia QC z FinderQC dla produktu z katalogu. */
 export const finderQcByProduct = createServerFn({ method: "POST" })
@@ -62,8 +74,20 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
     };
     if (!row) return empty;
     if (row.seller_id) {
-      const { data: seller } = await supabaseAdmin.from("sellers").select("active").eq("id", row.seller_id).maybeSingle();
-      if (!seller?.active) return { ok: false as const, title: "", images: [] as string[], totalPhotos: 0, hasMore: false, source: "" };
+      const { data: seller } = await supabaseAdmin
+        .from("sellers")
+        .select("active")
+        .eq("id", row.seller_id)
+        .maybeSingle();
+      if (!seller?.active)
+        return {
+          ok: false as const,
+          title: "",
+          images: [] as string[],
+          totalPhotos: 0,
+          hasMore: false,
+          source: "",
+        };
     }
 
     const src = productSourceUrl(row as any);
@@ -97,7 +121,9 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
       const details = await fetchUsfansDetails(src).catch(() => null);
       const { archiveProductImages } = await import("@/lib/image-storage.server");
       const saved = await archiveProductImages({ qc_images: details?.qcImages ?? [] });
-      const usfans = saved.qc_images.filter((u) => /^(https?:\/\/|\/api\/public\/product-image\?)/i.test(u));
+      const usfans = saved.qc_images.filter((u) =>
+        /^(https?:\/\/|\/api\/public\/product-image\?)/i.test(u),
+      );
       if (usfans.length) {
         await supabaseAdmin
           .from("products")
@@ -116,9 +142,13 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
 
     if (src) {
       const finder = await fetchFinderQcByUrl(src, 1, data.pageSize);
-      const { archiveProductImages } = await import('@/lib/image-storage.server');
+      const { archiveProductImages } = await import("@/lib/image-storage.server");
       const saved = await archiveProductImages({ qc_images: finder.images });
-      if (saved.qc_images.length) await supabaseAdmin.from('products').update({ qc_images: saved.qc_images }).eq('id', data.productId);
+      if (saved.qc_images.length)
+        await supabaseAdmin
+          .from("products")
+          .update({ qc_images: saved.qc_images })
+          .eq("id", data.productId);
       return { ...finder, title: title || finder.title, images: saved.qc_images };
     }
 

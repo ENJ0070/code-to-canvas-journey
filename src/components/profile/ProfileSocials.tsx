@@ -1,5 +1,5 @@
-import { Globe } from 'lucide-react';
-import type { ProfileConfig } from '@/lib/profile';
+import { Globe } from "lucide-react";
+import type { ProfileConfig } from "@/lib/profile";
 
 export function DiscordIcon({ size = 16 }: { size?: number }) {
   return (
@@ -18,12 +18,16 @@ function TikTokIcon({ size = 16 }: { size?: number }) {
 }
 
 const SOCIALS = [
-  { key: 'discord', label: 'Discord', Icon: DiscordIcon },
-  { key: 'tiktok', label: 'TikTok', Icon: TikTokIcon },
-  { key: 'website', label: 'Strona', Icon: ({ size = 16 }: { size?: number }) => <Globe size={size} />, },
+  { key: "discord", label: "Discord", Icon: DiscordIcon },
+  { key: "tiktok", label: "TikTok", Icon: TikTokIcon },
+  {
+    key: "website",
+    label: "Strona",
+    Icon: ({ size = 16 }: { size?: number }) => <Globe size={size} />,
+  },
 ] as const;
 
-export function ProfileSocials({ socials }: { socials: ProfileConfig['socials'] }) {
+export function ProfileSocials({ socials }: { socials: ProfileConfig["socials"] }) {
   const items = SOCIALS.filter(({ key }) => socials[key]);
   if (!items.length) return null;
   return (
@@ -32,7 +36,7 @@ export function ProfileSocials({ socials }: { socials: ProfileConfig['socials'] 
         <a
           key={key}
           href={socials[key]}
-          target={socials[key].startsWith('/') ? undefined : '_blank'}
+          target={socials[key].startsWith("/") ? undefined : "_blank"}
           rel="noopener noreferrer"
           title={label}
           aria-label={label}

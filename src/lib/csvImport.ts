@@ -108,12 +108,23 @@ export type ImportedRow = {
 };
 
 const num = (v: string) => {
-  const n = Number(String(v).replace(/[^\d.,-]/g, "").replace(",", "."));
+  const n = Number(
+    String(v)
+      .replace(/[^\d.,-]/g, "")
+      .replace(",", "."),
+  );
   return Number.isFinite(n) ? n : 0;
 };
 
 const list = (v: string) =>
-  Array.from(new Set(v.split(/[,;|\n]/).map((s) => s.trim()).filter(Boolean)));
+  Array.from(
+    new Set(
+      v
+        .split(/[,;|\n]/)
+        .map((s) => s.trim())
+        .filter(Boolean),
+    ),
+  );
 
 export const DEFAULT_SHIRT_SIZES = ["S", "M", "L", "XL"];
 
@@ -132,7 +143,10 @@ function links(value: string): Record<string, string> {
         .map(([agent, url]): [string, string] => {
           const u = String(url).trim();
           // Litbuy i LoveGoBuy zastępujemy ESGobuy (ten sam produkt 1688/Weidian).
-          if (/^(litbuy|lovegobuy|esgobuy)$/i.test(agent.trim()) || /(?:litbuy|lovegobuy|esgobuy)\.com/i.test(u)) {
+          if (
+            /^(litbuy|lovegobuy|esgobuy)$/i.test(agent.trim()) ||
+            /(?:litbuy|lovegobuy|esgobuy)\.com/i.test(u)
+          ) {
             return ["ESGobuy", convertLink(u, "ESGobuy")];
           }
           return [agent, u];

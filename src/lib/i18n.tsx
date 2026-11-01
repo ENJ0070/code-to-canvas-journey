@@ -25,13 +25,35 @@ export function flagUrl(country: string): string {
 /** Jedna, łamana flaga portugalska: Portugalia po lewej, Brazylia po prawej. */
 export function LanguageFlag({ country, label = "" }: { country: string; label?: string }) {
   if (country !== "pt-br") {
-    return <img src={flagUrl(country)} alt={label} width={22} height={16} className="h-4 w-[22px] rounded-[3px] object-cover shadow-sm" />;
+    return (
+      <img
+        src={flagUrl(country)}
+        alt={label}
+        width={22}
+        height={16}
+        className="h-4 w-[22px] rounded-[3px] object-cover shadow-sm"
+      />
+    );
   }
 
   return (
-    <span role="img" aria-label={label} className="relative block h-4 w-[22px] overflow-hidden rounded-[3px] shadow-sm">
-      <img src={flagUrl("pt")} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover [clip-path:polygon(0_0,62%_0,38%_100%,0_100%)]" />
-      <img src={flagUrl("br")} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover [clip-path:polygon(62%_0,100%_0,100%_100%,38%_100%)]" />
+    <span
+      role="img"
+      aria-label={label}
+      className="relative block h-4 w-[22px] overflow-hidden rounded-[3px] shadow-sm"
+    >
+      <img
+        src={flagUrl("pt")}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover [clip-path:polygon(0_0,62%_0,38%_100%,0_100%)]"
+      />
+      <img
+        src={flagUrl("br")}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover [clip-path:polygon(62%_0,100%_0,100%_100%,38%_100%)]"
+      />
     </span>
   );
 }
@@ -41,7 +63,16 @@ const LANG_CODES = LANGS.map((l) => l.code);
 /** Domyślne teksty. Admin może nadpisać każdy z nich w zakładce „Języki”. */
 export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; en: string }> = {
   "nav.finder": { pl: "Product Finder", en: "Product Finder" },
-  "nav.profile": { pl: "Profil", en: "Profile", de: "Profil", fr: "Profil", es: "Perfil", it: "Profilo", zh: "个人主页", pt: "Perfil" },
+  "nav.profile": {
+    pl: "Profil",
+    en: "Profile",
+    de: "Profil",
+    fr: "Profil",
+    es: "Perfil",
+    it: "Profilo",
+    zh: "个人主页",
+    pt: "Perfil",
+  },
   "nav.outfits": { pl: "Losowanie outfitów", en: "Outfit roll" },
   "nav.sellers": { pl: "Sprzedawcy", en: "Stores" },
   "nav.agents": { pl: "Agenci", en: "Agents" },
@@ -54,11 +85,17 @@ export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; 
     pl: "Wklej link z Weidian, 1688, Taobao lub agenta (USFans / Kakobuy / Litbuy), aby zobaczyć zdjęcia QC z magazynu. Poniżej znajdziesz też QC produktów z katalogu.",
     en: "Paste a Weidian, 1688, Taobao or agent link (USFans / Kakobuy / Litbuy) to see warehouse QC photos. Catalog QC photos are listed below.",
   },
-  "qc.placeholder": { pl: "https://weidian.com/item.html?itemID=...", en: "https://weidian.com/item.html?itemID=..." },
+  "qc.placeholder": {
+    pl: "https://weidian.com/item.html?itemID=...",
+    en: "https://weidian.com/item.html?itemID=...",
+  },
   "qc.search": { pl: "Pokaż QC", en: "Show QC" },
   "qc.loading": { pl: "Szukam...", en: "Searching..." },
   "qc.badLink": { pl: "Podaj poprawny link do produktu.", en: "Enter a valid product link." },
-  "qc.notFound": { pl: "Nie znaleziono zdjęć QC dla tego linku.", en: "No QC photos found for this link." },
+  "qc.notFound": {
+    pl: "Nie znaleziono zdjęć QC dla tego linku.",
+    en: "No QC photos found for this link.",
+  },
   "qc.noPhotos": { pl: "Brak zdjęć QC", en: "No QC photos" },
   "qc.result": { pl: "Wynik", en: "Result" },
   "qc.colors": { pl: "Kolorystyki produktu", en: "Product colorways" },
@@ -148,7 +185,10 @@ export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; 
   "guide.trackEta": { pl: "Przewidywany czas dostawy", en: "Estimated delivery time" },
   "guide.trackArrival": { pl: "Orientacyjna data", en: "Approximate date" },
   "guide.trackLoading": { pl: "Sprawdzam…", en: "Checking…" },
-  "guide.trackShort": { pl: "Podaj poprawny numer przesyłki.", en: "Enter a valid tracking number." },
+  "guide.trackShort": {
+    pl: "Podaj poprawny numer przesyłki.",
+    en: "Enter a valid tracking number.",
+  },
   "guide.trackNotFound": {
     pl: "Nie znaleziono danych dla tego numeru. Spróbuj ponownie za kilka godzin.",
     en: "No data found for this number. Try again in a few hours.",
@@ -265,8 +305,24 @@ export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; 
   },
   "cart.browse": { pl: "Przeglądaj produkty →", en: "Browse products →" },
   "cart.openLink": { pl: "Otwórz link →", en: "Open link →" },
-  "cart.openOn": { pl: "Otwórz w", en: "Open on", de: "Öffnen bei", fr: "Ouvrir sur", es: "Abrir en", it: "Apri su", zh: "打开" },
-  "cart.agent": { pl: "Agent (linki zakupowe)", en: "Agent (purchase links)", de: "Agent (Kauflinks)", fr: "Agent (liens d'achat)", es: "Agente (enlaces de compra)", it: "Agente (link d'acquisto)", zh: "代理（购买链接）" },
+  "cart.openOn": {
+    pl: "Otwórz w",
+    en: "Open on",
+    de: "Öffnen bei",
+    fr: "Ouvrir sur",
+    es: "Abrir en",
+    it: "Apri su",
+    zh: "打开",
+  },
+  "cart.agent": {
+    pl: "Agent (linki zakupowe)",
+    en: "Agent (purchase links)",
+    de: "Agent (Kauflinks)",
+    fr: "Agent (liens d'achat)",
+    es: "Agente (enlaces de compra)",
+    it: "Agente (link d'acquisto)",
+    zh: "代理（购买链接）",
+  },
   "cart.remove": { pl: "Usuń z koszyka", en: "Remove from cart" },
   "cart.total": { pl: "Łącznie", en: "Total" },
   "cart.shippingTitle": { pl: "Kraj docelowy wysyłki", en: "Shipping destination" },
@@ -274,7 +330,10 @@ export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; 
   "cart.withBox": { pl: "Z pudełkiem", en: "With box" },
   "cart.withoutBox": { pl: "Bez pudełka", en: "Without box" },
   "cart.shippingLine": { pl: "Linia wysyłkowa", en: "Shipping line" },
-  "cart.noShipping": { pl: "Brak dostępnych linii wysyłkowych.", en: "No shipping lines available." },
+  "cart.noShipping": {
+    pl: "Brak dostępnych linii wysyłkowych.",
+    en: "No shipping lines available.",
+  },
   "cart.code": { pl: "kod", en: "code" },
   "cart.noCoupon": { pl: "bez kuponu", en: "no coupon" },
   "cart.calculate": { pl: "Wylicz wysyłkę", en: "Calculate shipping" },
@@ -335,7 +394,10 @@ export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; 
     en: "No TikTok products in this category.",
   },
   "store.external": { pl: "Zewnętrzny sklep / Yupoo →", en: "External store / Yupoo →" },
-  "store.noProducts": { pl: "Ten sklep nie ma jeszcze produktów.", en: "This store has no products yet." },
+  "store.noProducts": {
+    pl: "Ten sklep nie ma jeszcze produktów.",
+    en: "This store has no products yet.",
+  },
   "promo.kicker": {
     pl: "Limitowane czasowo bonusy na zakupy u agenta",
     en: "Limited-time bonuses for shopping with the agent",
@@ -352,8 +414,14 @@ export const DICT: Record<string, Partial<Record<Lang, string>> & { pl: string; 
   "promo.hours": { pl: "Godz", en: "Hrs" },
   "promo.minutes": { pl: "Min", en: "Min" },
   "promo.seconds": { pl: "Sek", en: "Sec" },
-  "promo.cta": { pl: "⚡ Zarejestruj się i odbierz bonusy →", en: "⚡ Sign up and claim bonuses →" },
-  "promo.decline": { pl: "Nie, rezygnuję z darmowych bonusów", en: "No thanks, skip the free bonuses" },
+  "promo.cta": {
+    pl: "⚡ Zarejestruj się i odbierz bonusy →",
+    en: "⚡ Sign up and claim bonuses →",
+  },
+  "promo.decline": {
+    pl: "Nie, rezygnuję z darmowych bonusów",
+    en: "No thanks, skip the free bonuses",
+  },
 };
 
 /** Tłumaczenia najważniejszych tekstów na pozostałe języki (reszta = angielski). */
@@ -376,8 +444,7 @@ const EXTRA: Partial<Record<Lang, Record<string, string>>> = {
     "finder.loadMore": "Mehr laden",
     "home.title1": "Finde deine",
     "home.title2": "besten Finds",
-    "home.subtitle":
-      "Geprüfte Produkte, QC-Fotos und direkte Kauflinks über deinen Agenten.",
+    "home.subtitle": "Geprüfte Produkte, QC-Fotos und direkte Kauflinks über deinen Agenten.",
     "home.cats": "Produktkategorien",
     "home.outfitCta": "Outfit rollen →",
   },
@@ -399,8 +466,7 @@ const EXTRA: Partial<Record<Lang, Record<string, string>>> = {
     "finder.loadMore": "Charger plus",
     "home.title1": "Trouve tes",
     "home.title2": "meilleurs finds",
-    "home.subtitle":
-      "Produits vérifiés, photos QC et liens d'achat directs via ton agent.",
+    "home.subtitle": "Produits vérifiés, photos QC et liens d'achat directs via ton agent.",
     "home.cats": "Catégories de produits",
     "home.outfitCta": "Tirer un outfit →",
   },
@@ -422,8 +488,7 @@ const EXTRA: Partial<Record<Lang, Record<string, string>>> = {
     "finder.loadMore": "Cargar más",
     "home.title1": "Encuentra tus",
     "home.title2": "mejores finds",
-    "home.subtitle":
-      "Productos verificados, fotos QC y enlaces de compra directos con tu agente.",
+    "home.subtitle": "Productos verificados, fotos QC y enlaces de compra directos con tu agente.",
     "home.cats": "Categorías de productos",
     "home.outfitCta": "Sortear outfit →",
   },

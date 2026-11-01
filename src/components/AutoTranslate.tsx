@@ -9,7 +9,7 @@ const hasLetters = (s: string) => /\p{L}{2,}/u.test(s) && !/^https?:\/\//.test(s
 
 function cacheGet(lang: string): Record<string, string> {
   try {
-    return JSON.parse(localStorage.getItem(`pkmr_tr_${lang}`) || "{}");
+    return JSON.parse(localStorage.getItem(`pkmr_tr_v2_${lang}`) || "{}");
   } catch {
     return {};
   }
@@ -24,7 +24,8 @@ export function AutoTranslate() {
       const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
         acceptNode: (n) => {
           const p = n.parentElement;
-          if (!p || p.closest("[data-no-translate],[translate=no]")) return NodeFilter.FILTER_REJECT;
+          if (!p || p.closest("[data-no-translate],[translate=no]"))
+            return NodeFilter.FILTER_REJECT;
           if (SKIP.has(p.tagName.toUpperCase())) return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         },
@@ -47,6 +48,8 @@ export function AutoTranslate() {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const applied = new WeakMap<Node, string>();
+    // Teksty, których nie udało się przetłumaczyć w tej sesji — bez zapętlania zapytań.
+    const failed = new Set<string>();
 
     const apply = () => {
       for (const n of nodes()) {
@@ -61,7 +64,7 @@ export function AutoTranslate() {
           const v = src.replace(key, tr);
           applied.set(n, v);
           if (n.data !== v) n.data = v;
-        } else pending.add(key);
+        } else if (!failed.has(key)) pending.add(key);
       }
       void flush();
     };
@@ -73,10 +76,14 @@ export function AutoTranslate() {
       batch.forEach((b) => pending.delete(b));
       try {
         const { out } = await translateTexts({ data: { lang, texts: batch } });
-        batch.forEach((b, i) => (cache[b] = out[i] || b));
-        localStorage.setItem(`pkmr_tr_${lang}`, JSON.stringify(cache));
+        batch.forEach((text, i) => {
+          const translated = out[i];
+          if (translated) cache[text] = translated;
+          else failed.add(text);
+        });
+        localStorage.setItem(`pkmr_tr_v2_${lang}`, JSON.stringify(cache));
       } catch {
-        batch.forEach((b) => (cache[b] = b));
+        batch.forEach((text) => failed.add(text));
       }
       busy = false;
       if (!stopped) apply();

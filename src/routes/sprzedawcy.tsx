@@ -35,8 +35,6 @@ function SprzedawcyPage() {
         {t("stores.title1")} <span className="text-gradient-brand">{t("stores.title2")}</span>
       </h1>
 
-
-
       {active.length === 0 ? (
         <p className="mt-8 rounded-2xl border border-border bg-surface p-10 text-center text-sm text-muted-foreground">
           {t("stores.empty")}
@@ -73,7 +71,9 @@ function SprzedawcyPage() {
                     <p className="line-clamp-2 text-xs text-muted-foreground">{s.description}</p>
                   ) : null}
                   <div className="flex items-center justify-between border-t border-border pt-3">
-                    <span className="text-xs text-muted-foreground">{count} {t("stores.products")}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {count} {t("stores.products")}
+                    </span>
                     <Link
                       to="/sklep/$slug"
                       params={{ slug: s.slug }}

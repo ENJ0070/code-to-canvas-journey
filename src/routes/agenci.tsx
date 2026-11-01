@@ -42,9 +42,7 @@ function AgenciPage() {
       <h1 className="text-3xl font-black">
         {t("agents.title1")} <span className="text-gradient-brand">{t("agents.title2")}</span>
       </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {t("agents.subtitle")}
-      </p>
+      <p className="mt-2 text-sm text-muted-foreground">{t("agents.subtitle")}</p>
 
       {discord ? (
         <a
