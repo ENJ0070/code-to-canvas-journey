@@ -137,7 +137,12 @@ async function recordFailure(state: { count: number; until: number }) {
 const EXTRA_ANIMAL = "4a1b0447d14e7f86fc8c3fde88f5fbb88f9193e1163dd02db2ec19830a4bff40";
 const EXTRA_SPORT = "98917f89cc2eb4223c080ee667158b0897a5984a414122d1b6f15ab21f36443d";
 function normalizeAnswer(v: string) {
-  return v.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+  return v
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
 }
 async function answerMatches(kind: "animal" | "sport", value: string, expected: string) {
   const digest = await crypto.subtle.digest(

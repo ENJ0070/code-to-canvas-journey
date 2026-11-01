@@ -113,7 +113,9 @@ function AdminPage() {
 
   const login = async () => {
     setErr("");
-    const res = await adminLogin({ data: { login: user.trim(), password: pass, animal, sport } }).catch(() => ({
+    const res = await adminLogin({
+      data: { login: user.trim(), password: pass, animal, sport },
+    }).catch(() => ({
       ok: false as const,
       error: "Nie udało się połączyć z panelem. Odśwież stronę (Ctrl+F5) i spróbuj ponownie.",
     }));
@@ -1328,7 +1330,15 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
     if (error) return setBulkMsg("Nie udało się zapisać zmian.");
     setBulkMsg(`Zapisano zmiany w ${selected.length} produktach.`);
     setSelected([]);
-    setBulk({ category: "", price: "", quality: "", batch: "", promoted: "", verified: "", show_on_home: "" });
+    setBulk({
+      category: "",
+      price: "",
+      quality: "",
+      batch: "",
+      promoted: "",
+      verified: "",
+      show_on_home: "",
+    });
     await refresh("products");
   };
 
@@ -1812,9 +1822,7 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
         {selected.length ? (
           <div className="mb-4 rounded-2xl border border-primary/40 bg-primary/5 p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <h3 className="text-sm font-bold">
-                Edycja zbiorcza — zaznaczono {selected.length}
-              </h3>
+              <h3 className="text-sm font-bold">Edycja zbiorcza — zaznaczono {selected.length}</h3>
               <button className={btnGhost} onClick={() => setSelected([])}>
                 Odznacz
               </button>
@@ -1823,30 +1831,63 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
               Puste pola zostaną bez zmian w zaznaczonych produktach.
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
-            <select className={input} value={bulk.category} onChange={(e) => setBulk({ ...bulk, category: e.target.value })}>
-              <option value="">Kategoria: bez zmian</option>
-              {(categories ?? []).map((c) => (
-                <option key={c.id} value={c.name}>{c.name}</option>
-              ))}
-            </select>
-            <input className={input} placeholder="Cena PLN (bez zmian)" value={bulk.price} onChange={(e) => setBulk({ ...bulk, price: e.target.value })} />
-            <input className={input} placeholder="Jakość (bez zmian)" value={bulk.quality} onChange={(e) => setBulk({ ...bulk, quality: e.target.value })} />
-            <input className={input} placeholder="Batch (bez zmian)" value={bulk.batch} onChange={(e) => setBulk({ ...bulk, batch: e.target.value })} />
-            <select className={input} value={bulk.promoted} onChange={(e) => setBulk({ ...bulk, promoted: e.target.value })}>
-              <option value="">Promowany: bez zmian</option>
-              <option value="yes">Promowany: tak</option>
-              <option value="no">Promowany: nie</option>
-            </select>
-            <select className={input} value={bulk.verified} onChange={(e) => setBulk({ ...bulk, verified: e.target.value })}>
-              <option value="">Zweryfikowany: bez zmian</option>
-              <option value="yes">Zweryfikowany: tak</option>
-              <option value="no">Zweryfikowany: nie</option>
-            </select>
-            <select className={input} value={bulk.show_on_home} onChange={(e) => setBulk({ ...bulk, show_on_home: e.target.value })}>
-              <option value="">Na głównej: bez zmian</option>
-              <option value="yes">Na głównej: tak</option>
-              <option value="no">Na głównej: nie</option>
-            </select>
+              <select
+                className={input}
+                value={bulk.category}
+                onChange={(e) => setBulk({ ...bulk, category: e.target.value })}
+              >
+                <option value="">Kategoria: bez zmian</option>
+                {(categories ?? []).map((c) => (
+                  <option key={c.id} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                className={input}
+                placeholder="Cena PLN (bez zmian)"
+                value={bulk.price}
+                onChange={(e) => setBulk({ ...bulk, price: e.target.value })}
+              />
+              <input
+                className={input}
+                placeholder="Jakość (bez zmian)"
+                value={bulk.quality}
+                onChange={(e) => setBulk({ ...bulk, quality: e.target.value })}
+              />
+              <input
+                className={input}
+                placeholder="Batch (bez zmian)"
+                value={bulk.batch}
+                onChange={(e) => setBulk({ ...bulk, batch: e.target.value })}
+              />
+              <select
+                className={input}
+                value={bulk.promoted}
+                onChange={(e) => setBulk({ ...bulk, promoted: e.target.value })}
+              >
+                <option value="">Promowany: bez zmian</option>
+                <option value="yes">Promowany: tak</option>
+                <option value="no">Promowany: nie</option>
+              </select>
+              <select
+                className={input}
+                value={bulk.verified}
+                onChange={(e) => setBulk({ ...bulk, verified: e.target.value })}
+              >
+                <option value="">Zweryfikowany: bez zmian</option>
+                <option value="yes">Zweryfikowany: tak</option>
+                <option value="no">Zweryfikowany: nie</option>
+              </select>
+              <select
+                className={input}
+                value={bulk.show_on_home}
+                onChange={(e) => setBulk({ ...bulk, show_on_home: e.target.value })}
+              >
+                <option value="">Na głównej: bez zmian</option>
+                <option value="yes">Na głównej: tak</option>
+                <option value="no">Na głównej: nie</option>
+              </select>
             </div>
             <button className={`${btn} mt-3`} onClick={() => void saveBulk()}>
               Zapisz w {selected.length} produktach
