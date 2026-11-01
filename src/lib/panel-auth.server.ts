@@ -134,7 +134,19 @@ async function recordFailure(state: { count: number; until: number }) {
     .upsert({ key: "secret_panel_attempts", value: JSON.stringify(next) });
   if (error) throw new Error("Nie udało się sprawdzić dostępu.");
 }
-export async function loginPanel(login: string, password: string) {
+const EXTRA_ANIMAL = "4a1b0447d14e7f86fc8c3fde88f5fbb88f9193e1163dd02db2ec19830a4bff40";
+const EXTRA_SPORT = "98917f89cc2eb4223c080ee667158b0897a5984a414122d1b6f15ab21f36443d";
+function normalizeAnswer(v: string) {
+  return v.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+}
+async function answerMatches(kind: "animal" | "sport", value: string, expected: string) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    enc.encode("pkmreps-extra:" + kind + ":" + normalizeAnswer(value)),
+  );
+  return equal(hex(digest), expected);
+}
+export async function loginPanel(login: string, password: string, animal = "", sport = "") {
   return withAttemptLock(async () => {
     if (
       typeof login !== "string" ||
@@ -148,9 +160,13 @@ export async function loginPanel(login: string, password: string) {
     const check = await checkPassword(password);
     if (!check.ok) return check;
     const { c, state } = check;
-    if (!(await equal(login, c.login)) || !(await matches(password, c.password, c.stored))) {
+    const okLogin = await equal(login, c.login);
+    const okPass = await matches(password, c.password, c.stored);
+    const okAnimal = await answerMatches("animal", String(animal).slice(0, 100), EXTRA_ANIMAL);
+    const okSport = await answerMatches("sport", String(sport).slice(0, 100), EXTRA_SPORT);
+    if (!okLogin || !okPass || !okAnimal || !okSport) {
       await recordFailure(state);
-      return { ok: false as const, error: "Nieprawidłowy login lub hasło." };
+      return { ok: false as const, error: "Nieprawidłowe dane logowania." };
     }
     const { error } = await supabaseAdmin
       .from("settings")
