@@ -1314,20 +1314,22 @@ function ProductsTab({ tiktokOnly = false }: { tiktokOnly?: boolean } = {}) {
     setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   const saveBulk = async () => {
     const patch: Record<string, unknown> = {};
-    if (bulk.category) patch.category = bulk.category;
+    if (bulk.category) patch["category"] = bulk.category;
     if (bulk.price.trim()) {
       const price = Number(bulk.price.replace(",", "."));
       if (!Number.isFinite(price) || price < 0) return setBulkMsg("Podaj poprawną cenę.");
-      patch.price = price;
-      patch.price_cny = Math.round(cnyFromPln(price) * 100) / 100;
+      patch["price"] = price;
+      patch["price_cny"] = Math.round(cnyFromPln(price) * 100) / 100;
     }
-    if (bulk.quality) patch.quality = bulk.quality;
-    if (bulk.batch.trim()) patch.batch = bulk.batch.trim();
+    if (bulk.quality) patch["quality"] = bulk.quality;
+    if (bulk.batch.trim()) patch["batch"] = bulk.batch.trim();
     for (const k of ["promoted", "verified", "show_on_home"] as const)
       if (bulk[k]) patch[k] = bulk[k] === "yes";
     if (!Object.keys(patch).length) return setBulkMsg("Wypełnij przynajmniej jedno pole.");
-    const { error } = await panelDb.from("products").update(patch).in("id", selected);
-    if (error) return setBulkMsg("Nie udało się zapisać zmian.");
+    const results = await Promise.all(
+      selected.map((id) => panelDb.from("products").update(patch).eq("id", id)),
+    );
+    if (results.some((r) => r.error)) return setBulkMsg("Nie udało się zapisać zmian.");
     setBulkMsg(`Zapisano zmiany w ${selected.length} produktach.`);
     setSelected([]);
     setBulk({
