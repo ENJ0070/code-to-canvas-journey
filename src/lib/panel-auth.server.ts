@@ -9,13 +9,20 @@ async function credentials() {
   const { data, error } = await supabaseAdmin
     .from("settings")
     .select("key,value")
-    .in("key", ["secret_panel_login", "secret_panel_password"]);
+    .in("key", [
+      "secret_panel_login",
+      "secret_panel_password",
+      "secret_panel_extra_animal",
+      "secret_panel_extra_sport",
+    ]);
   if (error) throw new Error("Nie udało się sprawdzić dostępu.");
   const settings = Object.fromEntries((data ?? []).map((r) => [r.key, r.value]));
   return {
     login: settings["secret_panel_login"] || process.env["PANEL_ADMIN_LOGIN"] || "",
     password: settings["secret_panel_password"] || process.env["PANEL_ADMIN_PASSWORD"] || "",
     stored: Boolean(settings["secret_panel_password"]),
+    animal: settings["secret_panel_extra_animal"] || EXTRA_ANIMAL,
+    sport: settings["secret_panel_extra_sport"] || EXTRA_SPORT,
   };
 }
 async function equal(a: string, b: string) {
@@ -142,6 +149,7 @@ function normalizeAnswer(v: string) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ł/g, "l")
     .replace(/\s+/g, " ");
 }
 async function answerMatches(kind: "animal" | "sport", value: string, expected: string) {
@@ -168,7 +176,7 @@ export async function loginPanel(login: string, password: string, animal = "", s
     const okLogin = await equal(login, c.login);
     const okPass = await matches(password, c.password, c.stored);
     const okAnimal = await answerMatches("animal", String(animal).slice(0, 100), EXTRA_ANIMAL);
-    const okSport = await answerMatches("sport", String(sport).slice(0, 100), EXTRA_SPORT);
+    const okSport = await answerMatches("sport", String(sport).slice(0, 100), c.sport);
     if (!okLogin || !okPass || !okAnimal || !okSport) {
       await recordFailure(state);
       return { ok: false as const, error: "Nieprawidłowe dane logowania." };
