@@ -175,7 +175,7 @@ export async function loginPanel(login: string, password: string, animal = "", s
     const { c, state } = check;
     const okLogin = await equal(login, c.login);
     const okPass = await matches(password, c.password, c.stored);
-    const okAnimal = await answerMatches("animal", String(animal).slice(0, 100), EXTRA_ANIMAL);
+    const okAnimal = await answerMatches("animal", String(animal).slice(0, 100), c.animal);
     const okSport = await answerMatches("sport", String(sport).slice(0, 100), c.sport);
     if (!okLogin || !okPass || !okAnimal || !okSport) {
       await recordFailure(state);
